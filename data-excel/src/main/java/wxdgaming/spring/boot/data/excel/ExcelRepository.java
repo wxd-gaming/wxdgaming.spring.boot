@@ -1,11 +1,11 @@
 package wxdgaming.spring.boot.data.excel;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.Throw;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.lang.ConvertUtil;
@@ -19,22 +19,33 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * excel 仓储
+ *
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2021-10-14 11:20
  **/
 @Slf4j
-public class Excel implements Serializable {
+@Getter
+@Service
+public class ExcelRepository implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    protected String[] splitStrs = {"[,，]", "[:：]"};
+    private static final String[] String_Split = {"[,，]", "[:：]"};
 
-    protected final Workbook builderWorkbook(File file) {
+    private final Map<String, TableInfo> tableInfoMap = new ConcurrentHashMap<>();
+
+    public ExcelRepository() {
+        System.out.println("\n" + this.getClass().getName() + "\n");
+    }
+
+    public final void builderWorkbook(File file) {
         if (file == null || StringsUtil.emptyOrNull(file.getName()) || file.getName().contains("@") || file.getName().contains("$")) {
             log.info("Excel文件不能解析：{}", file);
-            return null;
+            return;
         }
         try {
             String fileName = file.getName().toLowerCase();
@@ -46,19 +57,101 @@ public class Excel implements Serializable {
                 workbook = new XSSFWorkbook(is);
             } else {
                 log.info("无法识别的文件：{}", file.getPath());
-                return null;
+                return;
             }
             if (workbook.getNumberOfSheets() < 1) {
                 log.info("文件空的：{}", file.getPath());
-                return null;
+                return;
             }
-            return workbook;
+            /*多少页签*/
+            for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+                Sheet sheet = workbook.getSheetAt(i);
+                String sheetName = sheet.getSheetName().trim().toLowerCase();
+
+                if (StringsUtil.emptyOrNull(sheetName)
+                        || sheetName.startsWith("sheet")
+                        || sheetName.contains("@")
+                        || sheetName.contains("$")
+                        || !sheetName.startsWith("q_")) {
+                    log.debug("Excel文件不能解析：{}, sheetName={} - 需要是 q_ 开头 sheet name 才能解析", file, sheetName);
+                    continue;
+                }
+
+                Cell tableCommentCall = sheet.getRow(0).getCell(0);
+                String tableComment = readCellString(tableCommentCall, true);
+
+                TableInfo tableInfo = new TableInfo(file.getPath(), file.getName(), sheet.getSheetName(), sheetName, tableComment);
+
+                Row fieldBelongRow = sheet.getRow(1);/*归属*/
+                Row fieldNameRow = sheet.getRow(2);/*字段名字*/
+                Row fieldTypeRow = sheet.getRow(3);/*字段类型*/
+                Row fieldCommentRow = sheet.getRow(4);/*字段含义*/
+
+                TreeMap<Integer, CellInfo> cellInfoMap = new TreeMap<>();
+
+                short lastCellNum = fieldNameRow.getLastCellNum();
+                for (int cellIndex = 0; cellIndex < lastCellNum; cellIndex++) {
+                    String fieldBelongCell = readCellString(fieldBelongRow.getCell(cellIndex), true);
+                    String fieldNameCell = readCellString(fieldNameRow.getCell(cellIndex), true);/*字段名字*/
+                    String fieldTypeCell = readCellString(fieldTypeRow.getCell(cellIndex), true);/*字段类型*/
+                    String fieldCommentCell = readCellString(fieldCommentRow.getCell(cellIndex), true);/*字段含义*/
+                    CellInfo cellInfo = new CellInfo()
+                            .setCellIndex(cellIndex)
+                            .setFieldBelong(fieldBelongCell)
+                            .setFieldName(fieldNameCell)
+                            .setCellType(fieldTypeCell)
+                            .setFieldComment(fieldCommentCell);
+
+                    buildFieldType(cellInfo, fieldTypeCell);
+
+                    if (StringsUtil.emptyOrNull(fieldBelongCell)
+                            && StringsUtil.emptyOrNull(fieldNameCell)
+                            && StringsUtil.emptyOrNull(fieldTypeCell)) {
+                        break;
+                    }
+
+                    if (StringsUtil.emptyOrNull(fieldNameCell))
+                        continue;
+
+                    if (cellInfoMap.put(cellIndex, cellInfo) != null) {
+                        throw new RuntimeException("Excel文件不能解析：" + file + ", sheetName=" + sheetName + " 存在重复的字段：" + cellInfo.getFieldName());
+                    }
+                }
+
+                tableInfo.cellInfo4IndexMap = Map.copyOf(cellInfoMap);
+
+                final Map<Object, RowInfo> rows = new LinkedHashMap<>();
+                int lastRowNum = sheet.getLastRowNum();
+                for (int rowIndex = 5; rowIndex < lastRowNum; rowIndex++) {
+                    Row row = sheet.getRow(rowIndex);
+                    RowInfo rowData = new RowInfo(true);
+                    for (int cellIndex = 0; cellIndex < lastCellNum; cellIndex++) {
+                        CellInfo cellInfo = tableInfo.getCellInfo4IndexMap().get(cellIndex);
+                        if (cellInfo == null) continue;
+                        Cell cell = row.getCell(cellIndex);
+                        Object object = readCellValue(tableInfo, cellIndex, cellInfo, cell);
+                        rowData.put(cellInfo.getFieldName(), object);
+                    }
+                    if (rowData.values().stream().allMatch(v -> v == null || (v instanceof String && StringsUtil.emptyOrNull(String.valueOf(v))))) {
+                        continue;
+                    }
+                    Object object = rowData.getOrDefault("q_id", rowData.get("id"));
+                    if (object == null) {
+                        throw new RuntimeException("Excel文件不能解析：" + file + ", sheetName=" + sheetName + " 字段内容异常：" + rowIndex);
+                    }
+                    rows.put(object, rowData);
+                }
+
+                tableInfo.rows = Map.copyOf(rows);
+
+                tableInfoMap.put(tableInfo.getTableName(), tableInfo);
+            }
         } catch (Throwable throwable) {
             throw Throw.of(file.getPath(), throwable);
         }
     }
 
-    protected Object getCellValue(TableInfo entityTable, int rowNumber, CellInfo entityField, Cell cellData) {
+    private Object readCellValue(TableInfo entityTable, int rowNumber, CellInfo entityField, Cell cellData) {
         /*空白的话，根据传入的类型返回默认值*/
         String trim = "";
         try {
@@ -103,7 +196,7 @@ public class Excel implements Serializable {
                             if (trim.startsWith("[") && trim.endsWith("]")) {
                                 arrays = FastJsonUtil.parse(trim.replace('|', ','), byte[].class);
                             } else {
-                                String[] split = trim.split(splitStrs[1]);
+                                String[] split = trim.split(String_Split[1]);
                                 arrays = new byte[split.length];
                                 for (int i = 0; i < split.length; i++) {
                                     arrays[i] = Double.valueOf(split[i]).byteValue();
@@ -120,10 +213,10 @@ public class Excel implements Serializable {
                             if (trim.startsWith("[") && trim.endsWith("]")) {
                                 arrays = FastJsonUtil.parse(trim.replace('|', ','), byte[][].class);
                             } else {
-                                String[] split0 = trim.split(splitStrs[0]);
+                                String[] split0 = trim.split(String_Split[0]);
                                 arrays = new byte[split0.length][];
                                 for (int i0 = 0; i0 < split0.length; i0++) {
-                                    String[] split1 = split0[i0].split(splitStrs[1]);
+                                    String[] split1 = split0[i0].split(String_Split[1]);
                                     byte[] integers = new byte[split1.length];
                                     for (int i1 = 0; i1 < split1.length; i1++) {
                                         integers[i1] = Double.valueOf(split1[i1]).byteValue();
@@ -142,7 +235,7 @@ public class Excel implements Serializable {
                             if (trim.startsWith("[") && trim.endsWith("]")) {
                                 arrays = FastJsonUtil.parse(trim.replace('|', ','), int[].class);
                             } else {
-                                String[] split = trim.split(splitStrs[1]);
+                                String[] split = trim.split(String_Split[1]);
                                 arrays = new int[split.length];
                                 for (int i = 0; i < split.length; i++) {
                                     arrays[i] = Double.valueOf(split[i]).intValue();
@@ -159,10 +252,10 @@ public class Excel implements Serializable {
                             if (trim.startsWith("[") && trim.endsWith("]")) {
                                 arrays = FastJsonUtil.parse(trim.replace('|', ','), int[][].class);
                             } else {
-                                String[] split0 = trim.split(splitStrs[0]);
+                                String[] split0 = trim.split(String_Split[0]);
                                 arrays = new int[split0.length][];
                                 for (int i0 = 0; i0 < split0.length; i0++) {
-                                    String[] split1 = split0[i0].split(splitStrs[1]);
+                                    String[] split1 = split0[i0].split(String_Split[1]);
                                     int[] integers = new int[split1.length];
                                     for (int i1 = 0; i1 < split1.length; i1++) {
                                         integers[i1] = Double.valueOf(split1[i1]).intValue();
@@ -181,7 +274,7 @@ public class Excel implements Serializable {
                             if (trim.startsWith("[") && trim.endsWith("]")) {
                                 arrays = FastJsonUtil.parse(trim.replace('|', ','), long[].class);
                             } else {
-                                String[] split = trim.split(splitStrs[1]);
+                                String[] split = trim.split(String_Split[1]);
                                 arrays = new long[split.length];
                                 for (int i = 0; i < split.length; i++) {
                                     arrays[i] = Double.valueOf(split[i]).longValue();
@@ -198,10 +291,10 @@ public class Excel implements Serializable {
                             if (trim.startsWith("[") && trim.endsWith("]")) {
                                 arrays = FastJsonUtil.parse(trim.replace('|', ','), long[][].class);
                             } else {
-                                String[] split0 = trim.split(splitStrs[0]);
+                                String[] split0 = trim.split(String_Split[0]);
                                 arrays = new long[split0.length][];
                                 for (int i0 = 0; i0 < split0.length; i0++) {
-                                    String[] split1 = split0[i0].split(splitStrs[1]);
+                                    String[] split1 = split0[i0].split(String_Split[1]);
                                     long[] vs1 = new long[split1.length];
                                     for (int i1 = 0; i1 < split1.length; i1++) {
                                         vs1[i1] = Double.valueOf(split1[i1]).longValue();
@@ -220,7 +313,7 @@ public class Excel implements Serializable {
                             if (trim.startsWith("[") && trim.endsWith("]")) {
                                 arrays = FastJsonUtil.parse(trim.replace('|', ','), float[].class);
                             } else {
-                                String[] split = trim.split(splitStrs[1]);
+                                String[] split = trim.split(String_Split[1]);
                                 arrays = new float[split.length];
                                 for (int i = 0; i < split.length; i++) {
                                     arrays[i] = Double.valueOf(split[i]).floatValue();
@@ -237,10 +330,10 @@ public class Excel implements Serializable {
                             if (trim.startsWith("[") && trim.endsWith("]")) {
                                 arrays = FastJsonUtil.parse(trim.replace('|', ','), float[][].class);
                             } else {
-                                String[] split0 = trim.split(splitStrs[0]);
+                                String[] split0 = trim.split(String_Split[0]);
                                 arrays = new float[split0.length][];
                                 for (int i0 = 0; i0 < split0.length; i0++) {
-                                    String[] split1 = split0[i0].split(splitStrs[1]);
+                                    String[] split1 = split0[i0].split(String_Split[1]);
                                     float[] vs1 = new float[split1.length];
                                     for (int i = 0; i < split1.length; i++) {
                                         vs1[i] = Double.valueOf(split1[i]).floatValue();
@@ -259,7 +352,7 @@ public class Excel implements Serializable {
                             if (trim.startsWith("[") && trim.endsWith("]")) {
                                 arrays = FastJsonUtil.parse(trim.replace('|', ','), String[].class);
                             } else {
-                                arrays = trim.split(splitStrs[1]);
+                                arrays = trim.split(String_Split[1]);
                             }
                         } else {
                             arrays = new String[0];
@@ -272,10 +365,10 @@ public class Excel implements Serializable {
                             if (trim.startsWith("[") && trim.endsWith("]")) {
                                 arrays = FastJsonUtil.parse(trim.replace('|', ','), String[][].class);
                             } else {
-                                String[] split0 = trim.split(splitStrs[0]);
+                                String[] split0 = trim.split(String_Split[0]);
                                 arrays = new String[split0.length][];
                                 for (int i = 0; i < split0.length; i++) {
-                                    arrays[i] = split0[i].split(splitStrs[1]);
+                                    arrays[i] = split0[i].split(String_Split[1]);
                                 }
                             }
                         } else {
@@ -396,7 +489,7 @@ public class Excel implements Serializable {
         }
     }
 
-    boolean notNullOrEmpty(String source) {
+    private boolean notNullOrEmpty(String source) {
         if (StringsUtil.notEmptyOrNull(source)) {
             return !"#null".equalsIgnoreCase(source);
         }
@@ -410,7 +503,7 @@ public class Excel implements Serializable {
      * @param isColumnName 如果是列名，需要转化首字母小写
      * @return
      */
-    protected String getCellString(Cell data, boolean isColumnName) {
+    private String readCellString(Cell data, boolean isColumnName) {
         String trim = "";
         if (data != null) {
             /*空白的话，根据传入的类型返回默认值*/
@@ -434,7 +527,7 @@ public class Excel implements Serializable {
         return trim.trim();
     }
 
-    public void buildColumnType(CellInfo entityField, String fieldTypeName, boolean client) {
+    private void buildFieldType(CellInfo entityField, String fieldTypeName) {
         final String typeString = typeString(fieldTypeName);
         switch (typeString.toLowerCase()) {
             case "bool":
@@ -682,7 +775,7 @@ public class Excel implements Serializable {
      * @param source
      * @return
      */
-    public static String typeString(String source) {
+    private static String typeString(String source) {
         if (source.startsWith("[[L")) {
             source = source.substring(2, source.length() - 1) + "[][]";
         } else if (source.startsWith("[L")) {

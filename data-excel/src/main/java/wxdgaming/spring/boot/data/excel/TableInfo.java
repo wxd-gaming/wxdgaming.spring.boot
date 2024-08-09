@@ -1,10 +1,13 @@
 package wxdgaming.spring.boot.data.excel;
 
 import com.alibaba.fastjson.JSONObject;
-import lombok.*;
+import com.alibaba.fastjson.annotation.JSONField;
+import lombok.Getter;
 import lombok.experimental.Accessors;
+import wxdgaming.spring.boot.core.json.FastJsonUtil;
+import wxdgaming.spring.boot.core.lang.ConvertUtil;
 
-import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 表信息
@@ -13,19 +16,183 @@ import java.util.LinkedHashMap;
  * @version: 2024-08-08 20:49
  **/
 @Getter
-@Setter
 @Accessors(chain = true)
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
 public class TableInfo {
 
-    private String filePath;
-    private String fileName;
-    private String sheetName;
-    private String tableName;
-    private String tableComment;
-    private LinkedHashMap<String, CellInfo> cellInfoMap = new LinkedHashMap<>();
-    private LinkedHashMap<Object, JSONObject> rows = new LinkedHashMap<>();
+    private final String filePath;
+    private final String fileName;
+    private final String sheetName;
+    private final String tableName;
+    private final String tableComment;
+    Map<Integer, CellInfo> cellInfo4IndexMap;
+    Map<Object, RowInfo> rows;
 
+    public TableInfo(String filePath, String fileName,
+                     String sheetName, String tableName, String tableComment) {
+        this.filePath = filePath;
+        this.fileName = fileName;
+        this.sheetName = sheetName;
+        this.tableName = tableName;
+        this.tableComment = tableComment;
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public String getString(Object key, String field) {
+        RowInfo rowInfo = rows.get(key);
+        if (rowInfo == null) {
+            return null;
+        }
+        return rowInfo.getString(field);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public boolean getBooleanValue(Object key, String field) {
+        RowInfo rowInfo = rows.get(key);
+        if (rowInfo == null) {
+            return false;
+        }
+        return rowInfo.getBooleanValue(field);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public Boolean getBoolean(Object key, String field) {
+        RowInfo rowInfo = rows.get(key);
+        if (rowInfo == null) {
+            return null;
+        }
+        return rowInfo.getBoolean(field);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public int getIntValue(Object key, String field) {
+        RowInfo rowInfo = rows.get(key);
+        if (rowInfo == null) {
+            return 0;
+        }
+        return rowInfo.getIntValue(field);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public Integer getInteger(Object key, String field) {
+        RowInfo rowInfo = rows.get(key);
+        if (rowInfo == null) {
+            return null;
+        }
+        return rowInfo.getInteger(field);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public long getLongValue(Object key, String field) {
+        RowInfo jsonObject = rows.get(key);
+        if (jsonObject == null) {
+            return 0;
+        }
+        return jsonObject.getLongValue(field);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public Long getLong(Object key, String field) {
+        RowInfo jsonObject = rows.get(key);
+        if (jsonObject == null) {
+            return null;
+        }
+        return jsonObject.getLong(field);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public float getFloatValue(Object key, String field) {
+        RowInfo jsonObject = rows.get(key);
+        if (jsonObject == null) {
+            return 0.0f;
+        }
+        return jsonObject.getFloatValue(field);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public Float getFloat(Object key, String field) {
+        RowInfo jsonObject = rows.get(key);
+        if (jsonObject == null) {
+            return null;
+        }
+        return jsonObject.getFloat(field);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public <R> R getT(Object key, String field, Class<R> clazz) {
+        RowInfo jsonObject = rows.get(key);
+        if (jsonObject == null) {
+            return null;
+        }
+        return jsonObject.getObject(field, clazz);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public Object getObject(Object key, String field) {
+        RowInfo jsonObject = rows.get(key);
+        if (jsonObject == null) {
+            return null;
+        }
+        return jsonObject.get(field);
+    }
+
+    public String showData() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(this.getTableName()).append("\n");
+        stringBuilder.append(this.getTableComment()).append("\n");
+        String format = "";
+        for (int i = 0; i < cellInfo4IndexMap.size(); i++) {
+            format += "|%-40s\t";
+        }
+        {
+            Object[] array = cellInfo4IndexMap.values().stream().map(v -> v.getFieldBelong()).toArray();
+            String formatted = String.format(format, array);
+            stringBuilder.append(formatted).append("\n");
+        }
+        {
+            Object[] array = cellInfo4IndexMap.values().stream().map(v -> v.getFieldName()).toArray();
+            String formatted = String.format(format, array);
+            stringBuilder.append(formatted).append("\n");
+        }
+        {
+            Object[] array = cellInfo4IndexMap.values().stream().map(v -> v.getFieldType().getSimpleName()).toArray();
+            String formatted = String.format(format, array);
+            stringBuilder.append(formatted).append("\n");
+        }
+        {
+            Object[] array = cellInfo4IndexMap.values().stream().map(v -> v.getCellType()).toArray();
+            String formatted = String.format(format, array);
+            stringBuilder.append(formatted).append("\n");
+        }
+        {
+            Object[] array = cellInfo4IndexMap.values().stream().map(CellInfo::getFieldComment).toArray();
+            String formatted = String.format(format, array);
+            stringBuilder.append(formatted).append("\n");
+        }
+        {
+            for (JSONObject row : rows.values()) {
+                Object[] array = row.values().stream().map(value -> {
+                    if (value == null) {
+                        return "-";
+                    } else if (ConvertUtil.isBaseType(value.getClass())) {
+                        return String.valueOf(value);
+                    } else {
+                        return FastJsonUtil.toJson(value);
+                    }
+                }).toArray();
+                String formatted = String.format(format, array);
+                stringBuilder.append(formatted).append("\n");
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    @Override public String toString() {
+        return "TableInfo{" +
+                "tableComment='" + tableComment + '\'' +
+                ", tableName='" + tableName + '\'' +
+                ", sheetName='" + sheetName + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", filePath='" + filePath + '\'' +
+                '}';
+    }
 }

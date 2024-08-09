@@ -2,8 +2,11 @@ package wxdgaming.spring.boot.start;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import wxdgaming.spring.boot.data.excel.DataExcelScan;
 import wxdgaming.spring.boot.data.redis.DataRedisScan;
 
 /**
@@ -15,7 +18,14 @@ import wxdgaming.spring.boot.data.redis.DataRedisScan;
 @EnableAsync
 @EnableScheduling
 @SpringBootApplication(
-        scanBasePackageClasses = DataRedisScan.class
+        scanBasePackageClasses = {
+                DataRedisScan.class,
+                DataExcelScan.class
+        },
+        exclude = {
+                DataSourceAutoConfiguration.class,
+                MongoAutoConfiguration.class
+        }
 )
 public class ApplicationStart {
 

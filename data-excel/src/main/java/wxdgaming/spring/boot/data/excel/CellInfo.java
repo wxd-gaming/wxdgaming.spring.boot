@@ -19,6 +19,10 @@ public class CellInfo {
 
     /** 格子id */
     private int cellIndex;
+    /** 表格配置的类型 */
+    private String cellType;
+    /** 归属 */
+    private String fieldBelong;
     /** 名字 */
     private String fieldName;
     /** 类型 */

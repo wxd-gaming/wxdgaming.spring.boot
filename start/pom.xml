@@ -19,6 +19,16 @@
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>data-batis</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>data-excel</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
             <artifactId>data-redis</artifactId>
             <version>1.0.1</version>
         </dependency>

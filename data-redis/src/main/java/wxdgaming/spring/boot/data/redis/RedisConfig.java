@@ -29,9 +29,11 @@ public class RedisConfig implements CachingConfigurer {
     private String host;
     private int port;
     private String password;
+    /** redis index db0 db1 */
+    private int database = 0;
 
     public RedisConfig() {
-        System.out.println("\n\n" + this.getClass().getName() + "\n");
+        System.out.println("\n" + this.getClass().getName() + "\n");
     }
 
     @Bean
