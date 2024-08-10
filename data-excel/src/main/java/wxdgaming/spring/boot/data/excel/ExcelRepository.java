@@ -6,6 +6,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
+import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.Throw;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.lang.ConvertUtil;
@@ -30,17 +31,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Getter
 @Service
-public class ExcelRepository implements Serializable {
+public class ExcelRepository implements Serializable, InitPrint {
 
     private static final long serialVersionUID = 1L;
 
     private final String[] String_Split = {"[,，]", "[:：]"};
 
     private final Map<String, TableData> tableInfoMap = new ConcurrentHashMap<>();
-
-    public ExcelRepository() {
-        System.out.println("\n" + this.getClass().getName() + "\n");
-    }
 
     public final void readExcel(File file) {
         if (file == null || StringsUtil.emptyOrNull(file.getName()) || file.getName().contains("@") || file.getName().contains("$")) {

@@ -7,10 +7,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import wxdgaming.spring.boot.core.InitPrint;
+import wxdgaming.spring.boot.core.timer.MyClock;
+
+import javax.sound.midi.Soundbank;
 
 /**
  * redis配置
@@ -21,10 +27,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Getter
 @Setter
 @EnableCaching
-@Configuration
+@Service
 @ConditionalOnProperty("spring.redis.host")
 @ConfigurationProperties(prefix = "spring.redis")
-public class RedisConfig implements CachingConfigurer {
+public class RedisConfig implements CachingConfigurer, InitPrint {
 
     private String host;
     private int port;
@@ -32,11 +38,8 @@ public class RedisConfig implements CachingConfigurer {
     /** redis index db0 db1 */
     private int database = 0;
 
-    public RedisConfig() {
-        System.out.println("\n" + this.getClass().getName() + "\n");
-    }
-
     @Bean
+    @Primary
     public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
         // 默认的序列化器： new JdkSerializationRedisSerializer()
@@ -48,5 +51,6 @@ public class RedisConfig implements CachingConfigurer {
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         return redisTemplate;
     }
+
 
 }

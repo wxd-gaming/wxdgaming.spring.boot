@@ -1,6 +1,25 @@
 server:
   port: 18801
+  tomcat:
+    max-threads: 200
+    min-spare-threads: 10
+
 
 spring:
   profiles:
-    active: redis
+    active:
+  web:
+    resources:
+      chain:
+        cache: false
+      static-locations: classpath:/public/
+
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 100MB
+      enabled: true
+  task:
+    scheduling:
+      pool:
+        size: 2

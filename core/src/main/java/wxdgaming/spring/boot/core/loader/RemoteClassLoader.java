@@ -1,7 +1,7 @@
 package wxdgaming.spring.boot.core.loader;
 
 import lombok.Getter;
-import wxdgaming.spring.boot.core.system.ReflectContext;
+import wxdgaming.spring.boot.core.ReflectContext;
 
 import javax.tools.JavaFileObject;
 import java.io.InputStream;

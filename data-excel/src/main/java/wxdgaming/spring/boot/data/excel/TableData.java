@@ -135,6 +135,18 @@ public class TableData {
         return jsonObject.get(field);
     }
 
+    /**
+     * 把所有的数据，转化成json字符串
+     *
+     * @return
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2024-08-10 14:05
+     */
+    public String data2Json() {
+        Object array = rows.values().stream().toList();
+        return FastJsonUtil.toJsonFmt(array);
+    }
+
     public String showData() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(this.getTableName()).append("\n");

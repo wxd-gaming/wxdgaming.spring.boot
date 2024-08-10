@@ -14,6 +14,11 @@
     <dependencies>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
             <artifactId>data-batis</artifactId>
             <version>1.0.1</version>
         </dependency>
@@ -30,6 +35,11 @@
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
             <artifactId>data-redis</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>script-lua</artifactId>
             <version>1.0.1</version>
         </dependency>
     </dependencies>
