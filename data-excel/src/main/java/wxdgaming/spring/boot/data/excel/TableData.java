@@ -10,14 +10,14 @@ import wxdgaming.spring.boot.core.lang.ConvertUtil;
 import java.util.Map;
 
 /**
- * 表信息
+ * excel sheet 数据
  *
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-08 20:49
  **/
 @Getter
 @Accessors(chain = true)
-public class TableInfo {
+public class TableData {
 
     private final String filePath;
     private final String fileName;
@@ -25,9 +25,9 @@ public class TableInfo {
     private final String tableName;
     private final String tableComment;
     Map<Integer, CellInfo> cellInfo4IndexMap;
-    Map<Object, RowInfo> rows;
+    Map<Object, RowData> rows;
 
-    public TableInfo(String filePath, String fileName,
+    public TableData(String filePath, String fileName,
                      String sheetName, String tableName, String tableComment) {
         this.filePath = filePath;
         this.fileName = fileName;
@@ -38,52 +38,52 @@ public class TableInfo {
 
     @JSONField(serialize = false, deserialize = false)
     public String getString(Object key, String field) {
-        RowInfo rowInfo = rows.get(key);
-        if (rowInfo == null) {
+        RowData rowData = rows.get(key);
+        if (rowData == null) {
             return null;
         }
-        return rowInfo.getString(field);
+        return rowData.getString(field);
     }
 
     @JSONField(serialize = false, deserialize = false)
     public boolean getBooleanValue(Object key, String field) {
-        RowInfo rowInfo = rows.get(key);
-        if (rowInfo == null) {
+        RowData rowData = rows.get(key);
+        if (rowData == null) {
             return false;
         }
-        return rowInfo.getBooleanValue(field);
+        return rowData.getBooleanValue(field);
     }
 
     @JSONField(serialize = false, deserialize = false)
     public Boolean getBoolean(Object key, String field) {
-        RowInfo rowInfo = rows.get(key);
-        if (rowInfo == null) {
+        RowData rowData = rows.get(key);
+        if (rowData == null) {
             return null;
         }
-        return rowInfo.getBoolean(field);
+        return rowData.getBoolean(field);
     }
 
     @JSONField(serialize = false, deserialize = false)
     public int getIntValue(Object key, String field) {
-        RowInfo rowInfo = rows.get(key);
-        if (rowInfo == null) {
+        RowData rowData = rows.get(key);
+        if (rowData == null) {
             return 0;
         }
-        return rowInfo.getIntValue(field);
+        return rowData.getIntValue(field);
     }
 
     @JSONField(serialize = false, deserialize = false)
     public Integer getInteger(Object key, String field) {
-        RowInfo rowInfo = rows.get(key);
-        if (rowInfo == null) {
+        RowData rowData = rows.get(key);
+        if (rowData == null) {
             return null;
         }
-        return rowInfo.getInteger(field);
+        return rowData.getInteger(field);
     }
 
     @JSONField(serialize = false, deserialize = false)
     public long getLongValue(Object key, String field) {
-        RowInfo jsonObject = rows.get(key);
+        RowData jsonObject = rows.get(key);
         if (jsonObject == null) {
             return 0;
         }
@@ -92,7 +92,7 @@ public class TableInfo {
 
     @JSONField(serialize = false, deserialize = false)
     public Long getLong(Object key, String field) {
-        RowInfo jsonObject = rows.get(key);
+        RowData jsonObject = rows.get(key);
         if (jsonObject == null) {
             return null;
         }
@@ -101,7 +101,7 @@ public class TableInfo {
 
     @JSONField(serialize = false, deserialize = false)
     public float getFloatValue(Object key, String field) {
-        RowInfo jsonObject = rows.get(key);
+        RowData jsonObject = rows.get(key);
         if (jsonObject == null) {
             return 0.0f;
         }
@@ -110,7 +110,7 @@ public class TableInfo {
 
     @JSONField(serialize = false, deserialize = false)
     public Float getFloat(Object key, String field) {
-        RowInfo jsonObject = rows.get(key);
+        RowData jsonObject = rows.get(key);
         if (jsonObject == null) {
             return null;
         }
@@ -119,7 +119,7 @@ public class TableInfo {
 
     @JSONField(serialize = false, deserialize = false)
     public <R> R getT(Object key, String field, Class<R> clazz) {
-        RowInfo jsonObject = rows.get(key);
+        RowData jsonObject = rows.get(key);
         if (jsonObject == null) {
             return null;
         }
@@ -128,7 +128,7 @@ public class TableInfo {
 
     @JSONField(serialize = false, deserialize = false)
     public Object getObject(Object key, String field) {
-        RowInfo jsonObject = rows.get(key);
+        RowData jsonObject = rows.get(key);
         if (jsonObject == null) {
             return null;
         }

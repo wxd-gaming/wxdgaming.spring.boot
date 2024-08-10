@@ -5,18 +5,18 @@ import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.lang.ConvertUtil;
 
 /**
- * row info
+ * excel 一行数据
  *
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-09 20:17
  */
-public class RowInfo extends JSONObject {
+public class RowData extends JSONObject {
 
-    public RowInfo() {
+    public RowData() {
         this(true);
     }
 
-    public RowInfo(boolean ordered) {
+    public RowData(boolean ordered) {
         super(ordered);
     }
 

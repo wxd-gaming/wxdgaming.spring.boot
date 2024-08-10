@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.function.Consumer;
 
@@ -18,7 +19,7 @@ public class LocalShell implements Serializable {
 
     static boolean windowsOs;
     static String initProcess;
-    static Charset charset = Charset.forName("utf-8");
+    static Charset charset = StandardCharsets.UTF_8;
 
     static {
         String property = System.getProperty("os.name");
@@ -117,26 +118,17 @@ public class LocalShell implements Serializable {
     private Process process;//
     private PrintWriter outPut;
     /** 执行完成退出状态，判定执行是否成功 == 0 表示成功 */
-    @Getter
-    private Integer exitValue = null;
-    @Getter
-    @Setter
-    private boolean appendLine = true;
-    @Getter
-    @Setter
-    private boolean showOutPut = true;
-    @Getter
-    private LinkedList<String> lines = new LinkedList<>();
-    @Getter
-    private LinkedList<String> errorLines = new LinkedList<>();
-    @Getter
-    @Setter
-    private Consumer<String> outPutLine = null;
+    @Getter private Integer exitValue = null;
+    @Getter @Setter private boolean appendLine = true;
+    @Getter @Setter private boolean showOutPut = true;
+    @Getter private LinkedList<String> lines = new LinkedList<>();
+    @Getter private LinkedList<String> errorLines = new LinkedList<>();
+    @Getter @Setter private Consumer<String> outPutLine = null;
 
     public LocalShell(boolean showOutPut, File path) throws Exception {
         this.showOutPut = showOutPut;
         showCmd(initProcess);
-        //解决脚本没有执行权限; 需要获取一个执行容器
+        // 解决脚本没有执行权限; 需要获取一个执行容器
         process = Runtime.getRuntime().exec(initProcess, null, path);
         outPut = new PrintWriter(process.getOutputStream());
         processStream();
@@ -203,10 +195,9 @@ public class LocalShell implements Serializable {
     }
 
     /**
-     * @return
      * @throws Exception
      */
-    protected LocalShell processStream() {
+    protected void processStream() {
         BufferedReader infoReader = new BufferedReader(new InputStreamReader(process.getInputStream(), charset));
         BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream(), charset));
         final Thread readerThread = new Thread(() -> {
@@ -228,13 +219,12 @@ public class LocalShell implements Serializable {
         }, "local-shell");
         readerThread.setDaemon(true);
         readerThread.start();
-        return this;
     }
 
-    private LocalShell reader(boolean isError, BufferedReader bufferedReader) throws Exception {
+    private void reader(boolean isError, BufferedReader bufferedReader) throws Exception {
         if (bufferedReader.ready()) {
             String readLine = bufferedReader.readLine();
-            if (readLine != null && readLine.length() > 0) {
+            if (readLine != null && !readLine.isEmpty()) {
 
                 lines.add(readLine);
                 if (outPutLine != null) outPutLine.accept(readLine);
@@ -259,7 +249,6 @@ public class LocalShell implements Serializable {
                 }
             }
         }
-        return this;
     }
 
 }

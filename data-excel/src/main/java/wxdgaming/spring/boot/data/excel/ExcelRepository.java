@@ -34,15 +34,15 @@ public class ExcelRepository implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] String_Split = {"[,，]", "[:：]"};
+    private final String[] String_Split = {"[,，]", "[:：]"};
 
-    private final Map<String, TableInfo> tableInfoMap = new ConcurrentHashMap<>();
+    private final Map<String, TableData> tableInfoMap = new ConcurrentHashMap<>();
 
     public ExcelRepository() {
         System.out.println("\n" + this.getClass().getName() + "\n");
     }
 
-    public final void builderWorkbook(File file) {
+    public final void readExcel(File file) {
         if (file == null || StringsUtil.emptyOrNull(file.getName()) || file.getName().contains("@") || file.getName().contains("$")) {
             log.info("Excel文件不能解析：{}", file);
             return;
@@ -78,9 +78,9 @@ public class ExcelRepository implements Serializable {
                 }
 
                 Cell tableCommentCall = sheet.getRow(0).getCell(0);
-                String tableComment = readCellString(tableCommentCall, true);
+                String tableComment = readCellString(tableCommentCall, false);
 
-                TableInfo tableInfo = new TableInfo(file.getPath(), file.getName(), sheet.getSheetName(), sheetName, tableComment);
+                TableData tableData = new TableData(file.getPath(), file.getName(), sheet.getSheetName(), sheetName, tableComment);
 
                 Row fieldBelongRow = sheet.getRow(1);/*归属*/
                 Row fieldNameRow = sheet.getRow(2);/*字段名字*/
@@ -91,10 +91,10 @@ public class ExcelRepository implements Serializable {
 
                 short lastCellNum = fieldNameRow.getLastCellNum();
                 for (int cellIndex = 0; cellIndex < lastCellNum; cellIndex++) {
-                    String fieldBelongCell = readCellString(fieldBelongRow.getCell(cellIndex), true);
+                    String fieldBelongCell = readCellString(fieldBelongRow.getCell(cellIndex), false);
                     String fieldNameCell = readCellString(fieldNameRow.getCell(cellIndex), true);/*字段名字*/
-                    String fieldTypeCell = readCellString(fieldTypeRow.getCell(cellIndex), true);/*字段类型*/
-                    String fieldCommentCell = readCellString(fieldCommentRow.getCell(cellIndex), true);/*字段含义*/
+                    String fieldTypeCell = readCellString(fieldTypeRow.getCell(cellIndex), false);/*字段类型*/
+                    String fieldCommentCell = readCellString(fieldCommentRow.getCell(cellIndex), false);/*字段含义*/
                     CellInfo cellInfo = new CellInfo()
                             .setCellIndex(cellIndex)
                             .setFieldBelong(fieldBelongCell)
@@ -118,18 +118,18 @@ public class ExcelRepository implements Serializable {
                     }
                 }
 
-                tableInfo.cellInfo4IndexMap = Map.copyOf(cellInfoMap);
+                tableData.cellInfo4IndexMap = Map.copyOf(cellInfoMap);
 
-                final Map<Object, RowInfo> rows = new LinkedHashMap<>();
+                final Map<Object, RowData> rows = new LinkedHashMap<>();
                 int lastRowNum = sheet.getLastRowNum();
                 for (int rowIndex = 5; rowIndex < lastRowNum; rowIndex++) {
                     Row row = sheet.getRow(rowIndex);
-                    RowInfo rowData = new RowInfo(true);
+                    RowData rowData = new RowData(true);
                     for (int cellIndex = 0; cellIndex < lastCellNum; cellIndex++) {
-                        CellInfo cellInfo = tableInfo.getCellInfo4IndexMap().get(cellIndex);
+                        CellInfo cellInfo = tableData.getCellInfo4IndexMap().get(cellIndex);
                         if (cellInfo == null) continue;
                         Cell cell = row.getCell(cellIndex);
-                        Object object = readCellValue(tableInfo, cellIndex, cellInfo, cell);
+                        Object object = readCellValue(tableData, cellIndex, cellInfo, cell);
                         rowData.put(cellInfo.getFieldName(), object);
                     }
                     if (rowData.values().stream().allMatch(v -> v == null || (v instanceof String && StringsUtil.emptyOrNull(String.valueOf(v))))) {
@@ -142,16 +142,27 @@ public class ExcelRepository implements Serializable {
                     rows.put(object, rowData);
                 }
 
-                tableInfo.rows = Map.copyOf(rows);
+                tableData.rows = Map.copyOf(rows);
 
-                tableInfoMap.put(tableInfo.getTableName(), tableInfo);
+                tableInfoMap.put(tableData.getTableName(), tableData);
             }
         } catch (Throwable throwable) {
             throw Throw.of(file.getPath(), throwable);
         }
     }
 
-    private Object readCellValue(TableInfo entityTable, int rowNumber, CellInfo entityField, Cell cellData) {
+    /**
+     * 读取单元格
+     *
+     * @param tableData   表格信息
+     * @param rowNumber   所在行
+     * @param entityField 单元格
+     * @param cellData    单元格数据
+     * @return
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2024-08-10 10:02
+     */
+    private Object readCellValue(TableData tableData, int rowNumber, CellInfo entityField, Cell cellData) {
         /*空白的话，根据传入的类型返回默认值*/
         String trim = "";
         try {
@@ -478,8 +489,8 @@ public class ExcelRepository implements Serializable {
         } catch (Exception ex) {
             final RuntimeException runtimeException = new RuntimeException(
                     ex.getMessage()
-                            + "\n文件：" + entityTable.getTableComment()
-                            + ";\nsheet：" + entityTable.getTableName()
+                            + "\n文件：" + tableData.getTableComment()
+                            + ";\nsheet：" + tableData.getTableName()
                             + ";\n列：" + entityField.getFieldName()
                             + ";\n行：" + rowNumber
                             + ";\n数据类型：" + entityField.getFieldTypeString().toLowerCase()
@@ -499,9 +510,7 @@ public class ExcelRepository implements Serializable {
     /**
      * 获取一列的字符
      *
-     * @param data
-     * @param isColumnName 如果是列名，需要转化首字母小写
-     * @return
+     * @param data 单元格
      */
     private String readCellString(Cell data, boolean isColumnName) {
         String trim = "";
@@ -518,7 +527,8 @@ public class ExcelRepository implements Serializable {
             }
         }
         if (StringsUtil.notEmptyOrNull(trim)) {
-            trim = trim.replace("class", "clazz")
+            trim = trim
+                    .replace("class", "clazz")
                     .replace("-", "_");
             if (isColumnName) {
                 trim = StringsUtil.lowerFirst(trim);

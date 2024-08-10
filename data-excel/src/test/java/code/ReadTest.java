@@ -14,7 +14,7 @@ public class ReadTest {
 
     public static void main(String[] args) {
         ExcelRepository excelReader = new ExcelRepository();
-        excelReader.builderWorkbook(new File("data-excel/src/main/resources/范例.xlsx"));
+        excelReader.readExcel(new File("data-excel/src/main/resources/范例.xlsx"));
         excelReader.getTableInfoMap().values().forEach(tableInfo -> {
             System.out.println(tableInfo.showData());
             System.out.println(tableInfo.getString(2, "shop_item"));
