@@ -1,22 +1,16 @@
 package wxdgaming.spring.boot.core;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
@@ -26,7 +20,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -48,9 +41,8 @@ import java.util.stream.Stream;
  */
 @Slf4j
 @Getter
-@ComponentScan
 @Service
-public class SpringUtil implements InitPrint, ApplicationContextAware, WebApplicationInitializer, BeanDefinitionRegistryPostProcessor {
+public class SpringUtil implements InitPrint, ApplicationContextAware {
 
     public static final Comparator<Class<?>> CLASS_COMPARATOR = (o1, o2) -> {
         int o1Annotation = Optional.ofNullable(o1.getAnnotation(Order.class)).map(Order::value).orElse(999999);
@@ -111,9 +103,6 @@ public class SpringUtil implements InitPrint, ApplicationContextAware, WebApplic
 
     /** 上下文对象实例 */
     private ConfigurableApplicationContext applicationContext;
-    private ServletContext servletContext;
-    private BeanDefinitionRegistry beanDefinitionRegistry;
-    private ConfigurableListableBeanFactory configurableListableBeanFactory;
 
     /**
      * 通过name获取 Bean.
@@ -394,21 +383,6 @@ public class SpringUtil implements InitPrint, ApplicationContextAware, WebApplic
     @Override public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = (ConfigurableApplicationContext) applicationContext;
         log.info("register applicationContext");
-    }
-
-    @Override public void onStartup(ServletContext servletContext) throws ServletException {
-        this.servletContext = servletContext;
-        log.info("register servletContext");
-    }
-
-    @Override public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        this.beanDefinitionRegistry = (registry);
-        log.info("register beanDefinitionRegistry");
-    }
-
-    @Override public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        this.configurableListableBeanFactory = beanFactory;
-        log.info("register configurableListableBeanFactory");
     }
 
 }

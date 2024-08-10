@@ -1,8 +1,6 @@
 package wxdgaming.spring.boot.core;
 
 import jakarta.annotation.PostConstruct;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 
 /**
  * 初始化打印
@@ -13,8 +11,8 @@ import org.springframework.context.annotation.Primary;
 public interface InitPrint {
 
     @PostConstruct
-    default void init(){
-        System.out.println("\n" + this.getClass().getName() + "\n");
+    default void init() {
+        LogbackUtil.logger().debug("\n{}\n", this.getClass().getName());
     }
 
 }

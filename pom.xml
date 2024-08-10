@@ -23,6 +23,7 @@
         <module>start</module>
         <module>data-batis</module>
         <module>script-lua</module>
+        <module>web</module>
     </modules>
 
     <properties>
