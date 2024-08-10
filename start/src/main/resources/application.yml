@@ -1,5 +1,5 @@
 server:
-  port: 18801
+  port: 18801   #端口号
   tomcat:
     max-threads: 200
     min-spare-threads: 10

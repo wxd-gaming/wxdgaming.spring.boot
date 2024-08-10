@@ -15,15 +15,14 @@ import wxdgaming.spring.boot.core.InitPrint;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-10 17:15
  */
-@Order(2)
+@Order(3)
 @Controller
-public class FileController implements InitPrint {
+public class File2Controller implements InitPrint {
 
-    @GetMapping("index")
-    public String index(Model model) {
-        model.addAttribute("div", new JSONObject().fluentPut("name", "d"));
-        model.addAttribute("span", new JSONObject().fluentPut("name", new JSONObject().fluentPut("name", "d")));
-        return "index";
+    @GetMapping("index2")
+    public String index2(Model model) {
+        model.addAttribute("name", new JSONObject().fluentPut("k", "v"));
+        return "index2";
     }
 
 }
