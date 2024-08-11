@@ -9,6 +9,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistration
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import wxdgaming.spring.boot.core.LogbackUtil;
+import wxdgaming.spring.boot.core.SpringUtil;
 
 /**
  * 过滤器 , 在类使用 注解 {@link RequestMapping}
@@ -34,26 +35,6 @@ public interface BaseFilter extends WebMvcConfigurer, HandlerInterceptor {
 
     void filter(InterceptorRegistration registration);
 
-    default String getCurrentUrl(HttpServletRequest request) {
-        String scheme = request.getScheme();              // http
-        String serverName = request.getServerName();     // hostname.com
-        int serverPort = request.getServerPort();        // 80
-        String contextPath = request.getContextPath();   // /mywebapp
-        String servletPath = request.getServletPath();   // /servlet/MyServlet
-
-        // Reconstruct original requesting URL
-        StringBuilder url = new StringBuilder();
-        url.append(scheme).append("://").append(serverName);
-
-        // Include server port if it's not standard http/https port
-        if (!((scheme.equals("http") && serverPort == 80) || (scheme.equals("https") && serverPort == 443))) {
-            url.append(":").append(serverPort);
-        }
-
-        url.append(contextPath).append(servletPath);
-
-        return url.toString();
-    }
 
     @Override default boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         return HandlerInterceptor.super.preHandle(request, response, handler);
@@ -68,7 +49,7 @@ public interface BaseFilter extends WebMvcConfigurer, HandlerInterceptor {
             LogbackUtil.logger().info(
                     "\n{} {}\ndata={}\nhandler={}",
                     request.getMethod(),
-                    getCurrentUrl(request),
+                    SpringUtil.getCurrentUrl(request),
                     request.getQueryString(),
                     handler,
                     ex

@@ -11,7 +11,7 @@ import jakarta.annotation.PostConstruct;
 public interface InitPrint {
 
     @PostConstruct
-    default void init() {
+    default void _initPrint() {
         LogbackUtil.logger().debug("\n{}\n", this.getClass().getName());
     }
 

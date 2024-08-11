@@ -1,5 +1,6 @@
 package wxdgaming.spring.boot.core;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -23,6 +24,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import wxdgaming.spring.boot.core.util.StringsUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -103,6 +105,11 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
 
     /** 上下文对象实例 */
     private ConfigurableApplicationContext applicationContext;
+
+    @Override public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = (ConfigurableApplicationContext) applicationContext;
+        log.info("register applicationContext");
+    }
 
     /**
      * 通过name获取 Bean.
@@ -380,9 +387,39 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         );
     }
 
-    @Override public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = (ConfigurableApplicationContext) applicationContext;
-        log.info("register applicationContext");
+    public static String getCurrentUrl(HttpServletRequest request) {
+        String scheme = request.getScheme();              // http
+        String serverName = request.getServerName();     // hostname.com
+        int serverPort = request.getServerPort();        // 80
+        String contextPath = request.getContextPath();   // /mywebapp
+        String servletPath = request.getServletPath();   // /servlet/MyServlet
+
+        // Reconstruct original requesting URL
+        StringBuilder url = new StringBuilder();
+        url.append(scheme).append("://").append(serverName);
+
+        // Include server port if it's not standard http/https port
+        if (!((scheme.equals("http") && serverPort == 80) || (scheme.equals("https") && serverPort == 443))) {
+            url.append(":").append(serverPort);
+        }
+
+        url.append(contextPath).append(servletPath);
+
+        return url.toString();
+    }
+
+    public static void recordRequest(HttpServletRequest request) {
+        StringBuilder stringBuilder = new StringBuilder().append("\n\n");
+        stringBuilder.append(request.getMethod()).append(" ").append(getCurrentUrl(request)).append("\n");
+        stringBuilder.append("servlet path: ").append(request.getServletPath()).append("\n");
+        String header = request.getHeader("content-type");
+        if (header != null) {
+            stringBuilder.append("content-type: ").append(header).append("\n");
+        }
+        if (StringsUtil.notEmptyOrNull(request.getQueryString())) {
+            stringBuilder.append("url query string: ").append(request.getQueryString()).append("\n");
+        }
+        log.debug(stringBuilder.toString());
     }
 
 }

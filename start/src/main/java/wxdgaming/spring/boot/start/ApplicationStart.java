@@ -9,6 +9,7 @@ import wxdgaming.spring.boot.data.batis.DataBatisScan;
 import wxdgaming.spring.boot.data.excel.DataExcelScan;
 import wxdgaming.spring.boot.data.redis.DataRedisScan;
 import wxdgaming.spring.boot.web.WebScan;
+import wxdgaming.spring.boot.weblua.WebLuaScan;
 
 /**
  * 启动器
@@ -22,7 +23,8 @@ import wxdgaming.spring.boot.web.WebScan;
                 DataBatisScan.class,
                 DataRedisScan.class,
                 DataExcelScan.class,
-                WebScan.class
+                WebScan.class,
+                WebLuaScan.class
         },
         exclude = {
                 DataSourceAutoConfiguration.class,

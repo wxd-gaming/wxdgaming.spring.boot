@@ -30,12 +30,12 @@ public class LuaBus {
 
     /**
      * @param classLoader
-     * @param path        通过 resource 路径不允许出现 \ 需要使用 /
+     * @param path        有限查找物理文件，如果路径不存在，在查找 resources 文件
      * @return
      * @author: wxd-gaming(無心道, 15388152619)
      * @version: 2024-08-10 11:45
      */
-    public static LuaBus buildFromResources(ClassLoader classLoader, String path) {
+    public static LuaBus buildFromStreams(ClassLoader classLoader, String path) {
         LuaBus luaBus = new LuaBus();
         GlobalPool globalPool = new GlobalPool("resource");
         FileUtil.resourceStreams(classLoader, path)

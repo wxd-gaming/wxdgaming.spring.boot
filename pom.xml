@@ -24,6 +24,7 @@
         <module>data-batis</module>
         <module>script-lua</module>
         <module>web</module>
+        <module>web-lua</module>
     </modules>
 
     <properties>

@@ -7,7 +7,7 @@ server:
 
 spring:
   profiles:
-    active:
+    active: redis
   mvc:
     static-path-pattern: /**
   thymeleaf:

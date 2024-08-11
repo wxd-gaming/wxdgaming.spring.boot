@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.data.redis;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cache.annotation.CachingConfigurer;
@@ -24,6 +25,7 @@ import javax.sound.midi.Soundbank;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-08 13:54
  **/
+@Slf4j
 @Getter
 @Setter
 @EnableCaching
@@ -49,6 +51,7 @@ public class RedisConfig implements CachingConfigurer, InitPrint {
         redisTemplate.setHashValueSerializer(new StringRedisSerializer());
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
         redisTemplate.setConnectionFactory(redisConnectionFactory);
+        log.debug("redisTemplate hashCode: {}", redisTemplate.hashCode());
         return redisTemplate;
     }
 
