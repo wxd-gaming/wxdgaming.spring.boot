@@ -30,11 +30,13 @@ public class ExecutorConfig {
         return new DefaultExecutor(defaultCoreSize);
     }
 
+    /** 逻辑线程池 */
     @Bean
     public LogicExecutor logicExecutor() {
         return new LogicExecutor(logicCoreSize);
     }
 
+    /** 虚拟线程池 */
     @Bean
     public VirtualExecutor virtualExecutor() {
         return new VirtualExecutor(virtualCoreSize);

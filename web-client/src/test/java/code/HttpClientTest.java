@@ -1,10 +1,12 @@
 package code;
 
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.Mono;
+import wxdgaming.spring.boot.core.threading.ExecutorConfig;
 import wxdgaming.spring.boot.webclient.HttpClientConfig;
 import wxdgaming.spring.boot.webclient.HttpClientService;
+import wxdgaming.spring.boot.webclient.HttpGetWork;
 
 /**
  * http client test
@@ -14,19 +16,30 @@ import wxdgaming.spring.boot.webclient.HttpClientService;
  **/
 public class HttpClientTest {
 
-    CloseableHttpClient closeableHttpClient;
     HttpClientService httpClientService;
 
     @Before
     public void s() {
         HttpClientConfig httpClientConfig = new HttpClientConfig();
-        closeableHttpClient = httpClientConfig.httpClient();
-        httpClientService = new HttpClientService(null, null, closeableHttpClient);
+        ExecutorConfig executorConfig = new ExecutorConfig();
+        httpClientService = new HttpClientService(executorConfig.virtualExecutor(), httpClientConfig.httpClient());
+    }
+
+    @Test
+    public void h1() throws InterruptedException {
+        Mono<HttpGetWork> httpGetActionMono = httpClientService.doGet("https://www.baidu.com").requestAsync();
+        httpGetActionMono.subscribe(
+                httpGetAction -> {System.out.println(httpGetAction.bodyString());},
+                throwable -> {throwable.printStackTrace();}
+        );
+        httpGetActionMono.block();
     }
 
     @Test
     public void h0() {
-
+        String string = httpClientService.doGet("https://www.baidu.com").request().bodyString();
+        System.out.println(string);
     }
+
 
 }

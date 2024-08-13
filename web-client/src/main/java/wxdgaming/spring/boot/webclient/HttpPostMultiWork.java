@@ -11,8 +11,11 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 
 import java.io.File;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -24,12 +27,12 @@ import java.util.Map;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class HttpPostMultiAction<H extends HttpPostMultiAction> extends HttpAction<H> {
+public class HttpPostMultiWork extends HttpWork {
 
     private final Map<String, Object> paramMap = new LinkedHashMap<>();
 
-    public HttpPostMultiAction(CloseableHttpClient closeableHttpClient, String url) {
-        super(closeableHttpClient, url);
+    public HttpPostMultiWork(Executor executor, CloseableHttpClient closeableHttpClient, String url) {
+        super(executor, closeableHttpClient, url);
         contentType = ContentType.MULTIPART_FORM_DATA;
     }
 
@@ -55,8 +58,46 @@ public class HttpPostMultiAction<H extends HttpPostMultiAction> extends HttpActi
         return httpPost;
     }
 
-    @Override protected void addRequestParam0(String key, Object value) {
-        paramMap.put(key, value);
+    /** 请求 */
+    @Override public HttpPostMultiWork request() {
+        super.request();
+        return this;
     }
 
+    @Override public HttpPostMultiWork addRequestHeader(String headerKey, String headerValue) {
+        super.addRequestHeader(headerKey, headerValue);
+        return this;
+    }
+
+    /** 添加参数 */
+    public HttpPostMultiWork addRequestParams(Map<String, Object> params) {
+        return addRequestParams(params, true);
+    }
+
+    /** 添加参数 */
+    public HttpPostMultiWork addRequestParams(Map<String, Object> params, boolean urlEncode) {
+        for (Map.Entry<String, Object> stringObjectEntry : params.entrySet()) {
+            addRequestParam(stringObjectEntry.getKey(), stringObjectEntry.getValue(), urlEncode);
+        }
+        return this;
+    }
+
+    /** 添加参数 */
+    public HttpPostMultiWork addRequestParam(String key, Object value) {
+        return addRequestParam(key, value, true);
+    }
+
+    /** 添加参数 */
+    public HttpPostMultiWork addRequestParam(String key, Object value, boolean urlEncode) {
+        if (urlEncode) {
+            value = URLEncoder.encode(String.valueOf(value), StandardCharsets.UTF_8);
+        }
+        addRequestParam0(key, value);
+        return this;
+    }
+
+    /** 添加参数 */
+    protected void addRequestParam0(String key, Object value) {
+        paramMap.put(key, value);
+    }
 }

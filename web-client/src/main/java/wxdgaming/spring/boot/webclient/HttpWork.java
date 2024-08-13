@@ -8,13 +8,15 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import reactor.core.publisher.Mono;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 /**
  * http 执行器
@@ -24,8 +26,9 @@ import java.util.Map;
  **/
 @Slf4j
 @Getter
-public abstract class HttpAction<H extends HttpAction> {
+public abstract class HttpWork {
 
+    private final Executor executor;
     private final CloseableHttpClient closeableHttpClient;
     private final String url;
     protected ContentType contentType = ContentType.APPLICATION_FORM_URLENCODED;
@@ -33,7 +36,8 @@ public abstract class HttpAction<H extends HttpAction> {
     private ClassicHttpResponse response;
     private byte[] responseBody;
 
-    public HttpAction(CloseableHttpClient closeableHttpClient, String url) {
+    public HttpWork(Executor executor, CloseableHttpClient closeableHttpClient, String url) {
+        this.executor = executor;
         this.closeableHttpClient = closeableHttpClient;
         this.url = url;
         addRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -41,20 +45,47 @@ public abstract class HttpAction<H extends HttpAction> {
 
     protected abstract HttpUriRequestBase httpUriRequest();
 
-    public H doAction() {
+    /** 请求 */
+    public HttpWork request() {
         try {
             HttpUriRequestBase request = httpUriRequest();
             for (Map.Entry<String, String> entry : requestHeaders.entrySet()) {
                 request.setHeader(entry.getKey(), entry.getValue());
             }
             responseBody = closeableHttpClient.execute(request, response -> {
-                HttpAction.this.response = response;
+                HttpWork.this.response = response;
                 return EntityUtils.toByteArray(response.getEntity());
             });
-            return (H) this;
+            return this;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public <T extends HttpWork, M extends Mono<T>> M requestAsync() {
+        final CompletableFuture<T> future = new CompletableFuture<>();
+        this.executor.execute(() -> {
+            try {
+                future.complete((T) request());
+            } catch (Throwable e) {
+                future.completeExceptionally(e);
+            }
+        });
+        return (M) Mono.fromFuture(future);
+    }
+
+    /**
+     * 添加 head 标记
+     *
+     * @param headerKey   key
+     * @param headerValue value
+     * @return
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2024-08-13 21:07
+     */
+    public HttpWork addRequestHeader(String headerKey, String headerValue) {
+        this.requestHeaders.put(headerKey, headerValue);
+        return this;
     }
 
     public String bodyString() {
@@ -64,35 +95,5 @@ public abstract class HttpAction<H extends HttpAction> {
     public JSONObject bodyJson() {
         return FastJsonUtil.parse(bodyString());
     }
-
-    public H addRequestHeader(String headerKey, String headerValue) {
-        this.requestHeaders.put(headerKey, headerValue);
-        return (H) this;
-    }
-
-    public H addRequestParams(Map<String, Object> params) {
-        return addRequestParams(params, true);
-    }
-
-    public H addRequestParams(Map<String, Object> params, boolean urlEncode) {
-        for (Map.Entry<String, Object> stringObjectEntry : params.entrySet()) {
-            addRequestParam(stringObjectEntry.getKey(), stringObjectEntry.getValue(), urlEncode);
-        }
-        return (H) this;
-    }
-
-    public H addRequestParam(String key, Object value) {
-        return addRequestParam(key, value, true);
-    }
-
-    public H addRequestParam(String key, Object value, boolean urlEncode) {
-        if (urlEncode) {
-            value = URLEncoder.encode(String.valueOf(value), StandardCharsets.UTF_8);
-        }
-        addRequestParam0(key, value);
-        return (H) this;
-    }
-
-    protected abstract void addRequestParam0(String key, Object value);
 
 }
