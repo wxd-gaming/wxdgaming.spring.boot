@@ -85,11 +85,11 @@ public class AgentService implements Serializable {
         }
 
         String jreHome = jreHome();
-        log.info("java_home：" + jreHome);
+        log.info("java_home：{}", jreHome);
         ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
         try {
             Class<?> aClass = systemClassLoader.loadClass(Full_Class_Name);
-            log.warn("原始加载器加载成功：" + aClass);
+            log.warn("原始加载器加载成功：{}", aClass);
             return aClass;
         } catch (Exception e) {
             /*1.8和之前的版本需要附加 tools.jar 到系统加载器，java11开始原始加载器，在 src.zip 文件里面*/
@@ -103,14 +103,14 @@ public class AgentService implements Serializable {
                         .findFirst()
                         .orElse(null);
 
-                log.info("java_home：" + toolsJarPath);
+                log.info("java_home：{}", toolsJarPath);
 
                 try {
                     Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
                     method.setAccessible(true);
                     method.invoke(systemClassLoader, toolsJarPath.toURI().toURL());
                     final Class<?> loadClass = systemClassLoader.loadClass(Full_Class_Name);
-                    log.warn("附加外部 jar 包，加载器加载成功：" + loadClass);
+                    log.warn("附加外部 jar 包，加载器加载成功：{}", loadClass);
                     return loadClass;
                 } catch (Throwable throwable) {
                     throw new RuntimeException("ClassLoader 附加 jar 包", e);

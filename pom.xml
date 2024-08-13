@@ -25,6 +25,7 @@
         <module>script-lua</module>
         <module>web</module>
         <module>web-lua</module>
+        <module>web-client</module>
     </modules>
 
     <properties>
@@ -127,6 +128,12 @@
                 <artifactId>jol-core</artifactId>
                 <version>0.17</version>
             </dependency>
+            <!-- guava 集合分割 -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>23.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -196,6 +203,18 @@
             <artifactId>log4j-core</artifactId>
         </dependency>
         <!--日志框架-->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

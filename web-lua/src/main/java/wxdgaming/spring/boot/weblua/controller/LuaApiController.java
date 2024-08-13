@@ -54,8 +54,6 @@ public class LuaApiController implements InitPrint {
         servletPath = servletPath.substring(index, len);
         servletPath = servletPath.replace("/", "_");
 
-        SpringUtil.recordRequest(request);
-
         LuaValue[] luaValues = luaService.parse(request, response, body);
         LuaValue lua_func = luaService.get(servletPath);
         if (lua_func == null || lua_func == LuaValue.NIL) {

@@ -17,9 +17,6 @@ import java.io.Serializable;
 @Configuration
 public class EasyWebUrlConfig implements InitPrint, Serializable, WebMvcConfigurer {
 
-    private static final long serialVersionUID = 1L;
-
-
     /**
      * 访问路径大小写不敏感开启
      */

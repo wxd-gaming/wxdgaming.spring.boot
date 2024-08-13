@@ -3,7 +3,9 @@ server:
   tomcat:
     max-threads: 200
     min-spare-threads: 10
-
+  executor:
+    defaultCoreSize: 2 #默认线程池
+    logicCoreSize: 10 #逻辑线程池
 
 spring:
   profiles:

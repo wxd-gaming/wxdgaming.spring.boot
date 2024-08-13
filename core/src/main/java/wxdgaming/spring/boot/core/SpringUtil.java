@@ -46,6 +46,12 @@ import java.util.stream.Stream;
 @Service
 public class SpringUtil implements InitPrint, ApplicationContextAware {
 
+    @Getter private static SpringUtil ins;
+
+    public SpringUtil() {
+        ins = this;
+    }
+
     public static final Comparator<Class<?>> CLASS_COMPARATOR = (o1, o2) -> {
         int o1Annotation = Optional.ofNullable(o1.getAnnotation(Order.class)).map(Order::value).orElse(999999);
         int o2Annotation = Optional.ofNullable(o2.getAnnotation(Order.class)).map(Order::value).orElse(999999);
@@ -163,6 +169,13 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         return applicationContext.getBeansWithAnnotation(annotation).values().stream();
     }
 
+    /**
+     * 返回当前 spring 容器所有的bean
+     *
+     * @return
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2024-08-12 13:38
+     */
     public ReflectContext reflectContext() {
         String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
         List<Class<?>> clazzs = new ArrayList<>();
@@ -174,14 +187,39 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         return new ReflectContext(clazzs);
     }
 
+    /**
+     * 返回当前 spring 容器所有的bean
+     *
+     * @param annotation 指定注解
+     * @return
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2024-08-12 13:38
+     */
     public Stream<Class<?>> classWithAnnotated(Class<? extends Annotation> annotation) {
         return reflectContext().classWithAnnotated(annotation);
     }
 
+    /**
+     * 实现或者继承指定类
+     *
+     * @param cls 接口或者父类
+     * @param <U>
+     * @return
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2024-08-12 13:39
+     */
     public <U> Stream<Class<U>> classWithSuper(Class<U> cls) {
         return reflectContext().classWithSuper(cls);
     }
 
+    /**
+     * 指定注解的方法
+     *
+     * @param annotationType 注解
+     * @return
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2024-08-12 13:40
+     */
     public Stream<Method> withMethodAnnotated(Class<? extends Annotation> annotationType) {
         return reflectContext()
                 .withMethodAnnotated(annotationType)
@@ -210,6 +248,15 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         registerBean(name, beanClass, true);
     }
 
+    /**
+     * 注册bean
+     *
+     * @param name      bean name
+     * @param beanClass bean class
+     * @param removeOld 是否删除旧的bean
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2024-08-12 13:40
+     */
     public void registerBean(String name, Class<?> beanClass, boolean removeOld) {
 
         // 获取bean工厂并转换为DefaultListableBeanFactory
@@ -408,6 +455,13 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         return url.toString();
     }
 
+    /**
+     * 记录请求日志
+     *
+     * @param request
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2024-08-12 16:26
+     */
     public static void recordRequest(HttpServletRequest request) {
         StringBuilder stringBuilder = new StringBuilder().append("\n\n");
         stringBuilder.append(request.getMethod()).append(" ").append(getCurrentUrl(request)).append("\n");

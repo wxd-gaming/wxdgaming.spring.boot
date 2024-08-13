@@ -1,8 +1,10 @@
 package wxdgaming.spring.boot.weblua.service;
 
+import io.netty.util.internal.ResourcesUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -29,19 +31,19 @@ public class LuaService implements InitPrint {
 
     final LuaLoggerService logger;
     final RedisTemplate<Object, Object> redisTemplate;
-    final ResponseService responseService;
+    final LuaResponseService luaResponseService;
     Globals globals;
 
-    public LuaService(LuaLoggerService logger, RedisTemplate<Object, Object> redisTemplate, ResponseService responseService) {
+    public LuaService(LuaLoggerService logger, RedisTemplate<Object, Object> redisTemplate, LuaResponseService luaResponseService) {
         this.logger = logger;
         this.redisTemplate = redisTemplate;
-        this.responseService = responseService;
+        this.luaResponseService = luaResponseService;
     }
 
     @PostConstruct
     public void init() throws IOException {
         this.globals = JsePlatform.standardGlobals();
-        this.globals.set("responseUtil", CoerceJavaToLua.coerce(responseService));
+        this.globals.set("responseUtil", CoerceJavaToLua.coerce(luaResponseService));
         this.globals.set("logger", CoerceJavaToLua.coerce(logger));
         this.globals.set("redisTemplate", CoerceJavaToLua.coerce(redisTemplate));
         log.debug("redisTemplate hashCode: {}", redisTemplate.hashCode());

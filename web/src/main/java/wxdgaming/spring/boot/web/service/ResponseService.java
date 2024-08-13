@@ -1,12 +1,8 @@
-package wxdgaming.spring.boot.weblua.service;
+package wxdgaming.spring.boot.web.service;
 
-import com.alibaba.fastjson.JSONObject;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.lib.jse.CoerceLuaToJava;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -35,27 +31,6 @@ public class ResponseService implements InitPrint {
             outputStream.write(bytes);
             outputStream.flush();
         }
-    }
-
-    public void responseObj(HttpServletResponse response, Object obj) throws Exception {
-        String res;
-        if (obj instanceof LuaTable luaTable) {
-            JSONObject jsonObject = new JSONObject(true);
-            LuaValue[] keys = luaTable.keys();
-            for (LuaValue key : keys) {
-                jsonObject.put(key.toString(), CoerceLuaToJava.coerce(luaTable.get(key), String.class));
-            }
-            res = jsonObject.toJSONString();
-        } else if (obj instanceof LuaValue luaValue) {
-            res = (String) CoerceLuaToJava.coerce(luaValue, String.class);
-        } else {
-            res = String.valueOf(obj);
-        }
-        response(
-                response,
-                MediaType.TEXT_PLAIN.toString(),
-                res
-        );
     }
 
     public void responseJson(HttpServletResponse response, String json) throws Exception {

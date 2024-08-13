@@ -22,6 +22,11 @@
             <artifactId>script-lua</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>web</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

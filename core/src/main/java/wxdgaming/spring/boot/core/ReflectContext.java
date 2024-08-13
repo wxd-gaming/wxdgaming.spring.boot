@@ -91,7 +91,7 @@ public class ReflectContext {
     private final List<Class<?>> classList;
 
     public ReflectContext(Collection<Class<?>> classList) {
-        this.classList = new ArrayList<>(classList);
+        this.classList = List.copyOf(classList);
     }
 
     /** 所有的类 */
