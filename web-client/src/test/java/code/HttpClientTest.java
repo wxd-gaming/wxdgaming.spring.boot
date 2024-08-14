@@ -26,20 +26,22 @@ public class HttpClientTest {
     }
 
     @Test
-    public void h1() throws InterruptedException {
-        Mono<HttpGetWork> httpGetActionMono = httpClientService.doGet("https://www.baidu.com").requestAsync();
-        httpGetActionMono.subscribe(
-                httpGetAction -> {System.out.println(httpGetAction.bodyString());},
-                throwable -> {throwable.printStackTrace();}
-        );
-        httpGetActionMono.block();
-    }
-
-    @Test
     public void h0() {
         String string = httpClientService.doGet("https://www.baidu.com").request().bodyString();
         System.out.println(string);
     }
 
+    @Test
+    public void h1() throws InterruptedException {
+        Mono<HttpGetWork> httpGetActionMono = httpClientService.doGet("https://www.baidu.com").requestAsync();
+        httpGetActionMono.subscribe(
+                httpGetAction -> {
+                    System.out.println(httpGetAction.bodyString());
+                    System.out.println(Thread.currentThread().getName());
+                },
+                throwable -> {throwable.printStackTrace();}
+        );
+        httpGetActionMono.block();
+    }
 
 }

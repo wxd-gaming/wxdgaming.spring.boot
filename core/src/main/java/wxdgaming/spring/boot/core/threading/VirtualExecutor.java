@@ -28,7 +28,7 @@ public class VirtualExecutor extends LockBase implements Executor {
     public VirtualExecutor(int coreSize) {
         this.coreSize = coreSize;
         this.runnableBlockingQueue = new ArrayBlockingQueue<>(30000);
-        virtual = Thread.ofVirtual().name("virtual");
+        virtual = Thread.ofVirtual().name("virtual-", 1);
 
     }
 

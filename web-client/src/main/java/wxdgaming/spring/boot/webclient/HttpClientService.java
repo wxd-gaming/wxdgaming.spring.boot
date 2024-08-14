@@ -2,12 +2,15 @@ package wxdgaming.spring.boot.webclient;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.threading.VirtualExecutor;
 
 import java.io.File;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * http client 处理器
@@ -19,20 +22,26 @@ import java.util.Map;
 @Service
 public class HttpClientService {
 
-    final VirtualExecutor virtualExecutor;
+    final Executor executor;
     final CloseableHttpClient closeableHttpClient;
 
+    @Autowired
     public HttpClientService(VirtualExecutor virtualExecutor, CloseableHttpClient closeableHttpClient) {
-        this.virtualExecutor = virtualExecutor;
+        this.executor = virtualExecutor;
         this.closeableHttpClient = closeableHttpClient;
     }
 
+    @Scheduled(cron = "0 0 0/5 * * ?")
+    public void te() {
+
+    }
+
     public HttpGetWork doGet(String url) {
-        return new HttpGetWork(virtualExecutor, closeableHttpClient, url);
+        return new HttpGetWork(executor, closeableHttpClient, url);
     }
 
     public HttpPostTextWork doPostText(String url) {
-        return new HttpPostTextWork(virtualExecutor, closeableHttpClient, url);
+        return new HttpPostTextWork(executor, closeableHttpClient, url);
     }
 
     public HttpPostTextWork doPostText(String url, String data) {
@@ -44,7 +53,7 @@ public class HttpClientService {
     }
 
     public HttpPostJsonWork doPostJson(String url, String json) {
-        return new HttpPostJsonWork(virtualExecutor, closeableHttpClient, url).setJson(json);
+        return new HttpPostJsonWork(executor, closeableHttpClient, url).setJson(json);
     }
 
     public HttpPostJsonWork doPostJson(String url, Map<String, Object> datas) {
@@ -53,7 +62,7 @@ public class HttpClientService {
 
     /** 多段式提交 */
     public HttpPostMultiWork doPostMulti(String url) {
-        return new HttpPostMultiWork(virtualExecutor, closeableHttpClient, url);
+        return new HttpPostMultiWork(executor, closeableHttpClient, url);
     }
 
     /** 多段式提交 */
@@ -63,7 +72,7 @@ public class HttpClientService {
 
     /** 上传文件 */
     public HttpPostFileWork doPostFile(String url) {
-        return new HttpPostFileWork(virtualExecutor, closeableHttpClient, url);
+        return new HttpPostFileWork(executor, closeableHttpClient, url);
     }
 
     /** 上传文件 */
