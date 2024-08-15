@@ -26,6 +26,7 @@
         <module>web</module>
         <module>web-lua</module>
         <module>web-client</module>
+        <module>net</module>
     </modules>
 
     <properties>

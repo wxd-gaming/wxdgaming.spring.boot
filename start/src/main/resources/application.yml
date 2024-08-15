@@ -1,5 +1,9 @@
 server:
   port: 18801   #端口号
+  tcp:
+    tcpPort: 18001
+    bossThreadSize: 2
+    workerThreadSize: 10
   tomcat:
     max-threads: 200
     min-spare-threads: 10
