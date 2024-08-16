@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.net;
+package wxdgaming.spring.boot.net.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -7,12 +7,13 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.system.BytesUnit;
-import wxdgaming.spring.boot.core.system.JvmUtil;
+import wxdgaming.spring.boot.net.BootstrapConfig;
 import wxdgaming.spring.boot.net.ssl.WxOptionalSslHandler;
 
 import java.io.Closeable;
@@ -29,21 +30,24 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @Service
 @ConditionalOnProperty("server.tcp.tcpPort")
-public class TcpService implements Closeable, InitPrint {
+public class SocketService implements Closeable, InitPrint {
 
-    private final ServerBootstrapConfig serverBootstrapConfig;
+    private final BootstrapConfig bootstrapConfig;
+    private final SocketServerDeviceHandler socketServerDeviceHandler;
     private ServerBootstrap bootstrap = null;
     private ChannelFuture future = null;
 
-    public TcpService(ServerBootstrapConfig serverBootstrapConfig) {
-        this.serverBootstrapConfig = serverBootstrapConfig;
+    @Autowired
+    public SocketService(BootstrapConfig bootstrapConfig, SocketServerDeviceHandler socketServerDeviceHandler) {
+        this.bootstrapConfig = bootstrapConfig;
+        this.socketServerDeviceHandler = socketServerDeviceHandler;
     }
 
     public void init() {
         bootstrap = new ServerBootstrap();
-        bootstrap.group(this.serverBootstrapConfig.getBossLoop(), this.serverBootstrapConfig.getWorkerLoop());
+        bootstrap.group(this.bootstrapConfig.getBossLoop(), this.bootstrapConfig.getWorkerLoop());
         /*channel方法用来创建通道实例( NioServerSocketChannel 类来实例化一个进来的链接)*/
-        bootstrap.channel(this.serverBootstrapConfig.getServer_Socket_Channel_Class())
+        bootstrap.channel(this.bootstrapConfig.getServer_Socket_Channel_Class())
                 /*方法用于设置监听套接字*/
                 .option(ChannelOption.SO_BACKLOG, 0)
                 /*地址重用，socket链接断开后，立即可以被其他请求使用*/
@@ -64,18 +68,21 @@ public class TcpService implements Closeable, InitPrint {
                     @Override
                     public void initChannel(SocketChannel socketChannel) throws Exception {
                         ChannelPipeline pipeline = socketChannel.pipeline();
-                        if (JvmUtil.getProperty(JvmUtil.Netty_Debug_Logger, false, Boolean::parseBoolean)) {
-                            pipeline.addLast("logging", new LoggingHandler("DEBUG"));// 设置log监听器，并且日志级别为debug，方便观察运行流程
+                        if (bootstrapConfig.isDebugLogger()) {
+                            pipeline.addLast(new LoggingHandler("DEBUG"));// 设置log监听器，并且日志级别为debug，方便观察运行流程
                         }
 
-                        pipeline.addFirst(new WxOptionalSslHandler(serverBootstrapConfig.getSslContext()));
+                        pipeline.addFirst(new WxOptionalSslHandler(bootstrapConfig.getSslContext()));
 
-                        int idleTime = serverBootstrapConfig.getServerSessionIdleTime();
+                        int idleTime = bootstrapConfig.getServerSessionIdleTime();
                         if (idleTime > 0) {
                             /*设置15秒的读取空闲*/
-                            pipeline.addLast("idlehandler", new IdleStateHandler(idleTime, 0, 0, TimeUnit.SECONDS));
+                            pipeline.addLast(new IdleStateHandler(idleTime, 0, 0, TimeUnit.SECONDS));
                         }
-
+                        /* socket 选择器 区分是tcp websocket http*/
+                        pipeline.addLast("socket-choose-handler", new ServerSocketChooseHandler(bootstrapConfig));
+                        /*真正处理消息*/
+                        pipeline.addLast("device-handler", socketServerDeviceHandler);
                     }
 
                 });
@@ -83,23 +90,18 @@ public class TcpService implements Closeable, InitPrint {
 
     @Start
     public void start() {
-
-        log.info("开启 tcp 服务 {}", this.serverBootstrapConfig.getTcpPort());
+        this.future = bootstrap.bind(this.bootstrapConfig.getTcpPort());
+        this.future.syncUninterruptibly();
+        log.info("开启 socket 服务 {}", this.bootstrapConfig.getTcpPort());
     }
 
     /**
-     * Closes this stream and releases any system resources associated
-     * with it. If the stream is already closed then invoking this
-     * method has no effect.
-     * <p> As noted in {@link AutoCloseable#close()}, cases where the
-     * close may fail require careful attention. It is strongly advised
-     * to relinquish the underlying resources and to internally
-     * <em>mark</em> the {@code Closeable} as closed, prior to throwing
-     * the {@code IOException}.
-     *
-     * @throws IOException if an I/O error occurs
+     * 关闭
      */
     @Override public void close() throws IOException {
-
+        if (this.future != null) {
+            this.future.channel().close();
+        }
+        log.info("关闭 socket 服务 {}", this.bootstrapConfig.getTcpPort());
     }
 }

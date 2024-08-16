@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.net.util;
+package wxdgaming.spring.boot.net;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;

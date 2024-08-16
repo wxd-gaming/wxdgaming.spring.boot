@@ -6,7 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.ReferenceCountUtil;
-import wxdgaming.spring.boot.net.NioFactory;
+import wxdgaming.spring.boot.net.ChannelUtil;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -36,7 +36,7 @@ public class WxOptionalSslHandler extends ByteToMessageDecoder implements Serial
         }
         if (SslHandler.isEncrypted(in)) {
             handleSsl(ctx);
-            NioFactory.attr(ctx, SSL_KEY, true);
+            ChannelUtil.attr(ctx.channel(), SSL_KEY, true);
         } else {
             handleNonSsl(ctx);
         }
@@ -52,7 +52,7 @@ public class WxOptionalSslHandler extends ByteToMessageDecoder implements Serial
             sslHandler = new WxSslHandler(sslEngine);
             ctx.pipeline().replace(this, newSslHandlerName(), sslHandler);
             sslHandler = null;
-            NioFactory.attr(ctx, "ssl", true);
+            ChannelUtil.attr(ctx.channel(), "ssl", true);
         } finally {
             // Since the SslHandler was not inserted into the pipeline the ownership of the SSLEngine was not
             // transferred to the SslHandler.

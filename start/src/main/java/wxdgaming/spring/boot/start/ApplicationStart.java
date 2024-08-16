@@ -23,13 +23,14 @@ import wxdgaming.spring.boot.weblua.WebLuaScan;
  **/
 @SpringBootApplication(
         scanBasePackageClasses = {
+                ApplicationStart.class,
                 CoreScan.class,
                 DataBatisScan.class,
                 DataRedisScan.class,
                 DataExcelScan.class,
                 WebScan.class,
                 WebLuaScan.class,
-                NetScan.class
+                NetScan.class,
         },
         exclude = {
                 DataSourceAutoConfiguration.class,

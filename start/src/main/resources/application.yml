@@ -12,6 +12,8 @@ server:
     logicCoreSize: 10 #逻辑线程池
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   profiles:
     active: redis
   mvc:

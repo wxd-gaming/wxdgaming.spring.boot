@@ -18,15 +18,15 @@
     <modules>
         <module>core</module>
         <module>data</module>
+        <module>data-batis</module>
         <module>data-excel</module>
         <module>data-redis</module>
-        <module>start</module>
-        <module>data-batis</module>
-        <module>script-lua</module>
-        <module>web</module>
-        <module>web-lua</module>
-        <module>web-client</module>
         <module>net</module>
+        <module>script-lua</module>
+        <module>start</module>
+        <module>web</module>
+        <module>web-client</module>
+        <module>web-lua</module>
     </modules>
 
     <properties>
