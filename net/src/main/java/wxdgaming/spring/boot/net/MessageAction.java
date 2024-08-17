@@ -2,7 +2,6 @@ package wxdgaming.spring.boot.net;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.util.AttributeKey;
 import wxdgaming.spring.boot.core.LogbackUtil;
 
@@ -45,7 +44,7 @@ public interface MessageAction {
             if (len > 0 && byteBuf.readableBytes() >= len) {
                 /*读取消息ID*/
                 int messageId = byteBuf.readInt();
-                /*选择压缩*/
+                /*TODO 选择压缩*/
                 // byte isZip = tmpByteBuf.readByte();
                 byte[] messageBytes = new byte[len - 4];
                 /*读取报文类容*/
@@ -67,10 +66,6 @@ public interface MessageAction {
 
     default void action(SocketSession socketSession, String message) throws Exception {
         LogbackUtil.logger().info("收到消息：ctx={}, message={}", socketSession.toString(), message);
-    }
-
-    default void httpRequest(ChannelHandlerContext ctx, FullHttpRequest fullHttpRequest) throws Exception {
-
     }
 
 }

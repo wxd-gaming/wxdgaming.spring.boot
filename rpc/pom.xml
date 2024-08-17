@@ -9,7 +9,7 @@
         <version>1.0.1</version>
     </parent>
 
-    <artifactId>start</artifactId>
+    <artifactId>rpc</artifactId>
 
     <dependencies>
         <dependency>
@@ -19,37 +19,7 @@
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>data-batis</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>data-batis</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>data-excel</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>data-redis</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>script-lua</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>web</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>web-lua</artifactId>
+            <artifactId>message</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
@@ -59,12 +29,12 @@
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>message</artifactId>
+            <artifactId>web</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>rpc</artifactId>
+            <artifactId>web-client</artifactId>
             <version>1.0.1</version>
         </dependency>
     </dependencies>

@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import wxdgaming.spring.boot.core.InitPrint;
-import wxdgaming.spring.boot.core.SpringUtil;
-import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.weblua.service.LuaService;
 
 import java.io.IOException;
@@ -36,7 +34,6 @@ public class LuaApiController implements InitPrint {
     @ResponseBody
     @RequestMapping("/lua/reload")
     public String reload() throws IOException {
-        luaService._initPrint();
         return "ok";
     }
 

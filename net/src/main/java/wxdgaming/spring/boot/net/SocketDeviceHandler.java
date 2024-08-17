@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.internal.OutOfDirectMemoryError;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import wxdgaming.spring.boot.core.GlobalUtil;
@@ -18,17 +19,18 @@ import java.util.Optional;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2020-12-26 15:03
  **/
-public abstract class SocketDeviceHandler extends ChannelInboundHandlerAdapter {
+@Getter
+public abstract class SocketDeviceHandler<T extends MessageAction> extends ChannelInboundHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(SocketDeviceHandler.class);
 
-    private final MessageAction messageAction;
+    private final T messageAction;
     private final boolean autoRelease;
 
     /**
      * @param autoRelease 是否自动调用{@link ByteBuf#release()}
      */
-    public SocketDeviceHandler(MessageAction messageAction, boolean autoRelease) {
+    public SocketDeviceHandler(T messageAction, boolean autoRelease) {
         this.messageAction = messageAction;
         this.autoRelease = autoRelease;
     }
@@ -36,22 +38,22 @@ public abstract class SocketDeviceHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        if (log.isInfoEnabled())
-            log.info("channel 接入 {} {}", ChannelUtil.ctxTostring(ctx), ctx);
+        if (log.isDebugEnabled())
+            log.debug("channel 接入 {} {}", ChannelUtil.ctxTostring(ctx), ctx);
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
-        if (log.isInfoEnabled())
-            log.info("channel 关闭 {} {}", ChannelUtil.ctxTostring(ctx), ctx);
+        if (log.isDebugEnabled())
+            log.debug("channel 关闭 {} {}", ChannelUtil.ctxTostring(ctx), ctx);
     }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         super.userEventTriggered(ctx, evt);
         if (evt instanceof IdleStateEvent event) {
-            String ctxName = ChannelUtil.ctxTostring(ctx);
+            String ctxName = ChannelUtil.session(ctx.channel()).toString();
             switch (event.state()) {
                 case READER_IDLE: {
                     log.info("读空闲 {}", ctxName);
@@ -136,13 +138,12 @@ public abstract class SocketDeviceHandler extends ChannelInboundHandlerAdapter {
                 messageAction.readBytes(ctx, byteBuf);
                 break;
             }
-            case FullHttpRequest fullHttpRequest -> {
-                // 以http请求形式
-                messageAction.httpRequest(ctx, fullHttpRequest);
-                break;
-            }
             default -> {
-                log.error("未知处理类型：{}", object.getClass().getName());
+                if (log.isDebugEnabled()) {
+                    log.debug("{} 未知处理类型：{}", ChannelUtil.ctxTostring(ctx), object.getClass().getName());
+                }
+                ctx.disconnect();
+                ctx.close();
             }
         }
     }
@@ -150,16 +151,21 @@ public abstract class SocketDeviceHandler extends ChannelInboundHandlerAdapter {
     protected void handlerWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
         try {
             SocketSession session = ChannelUtil.session(ctx.channel());
-            if (frame instanceof PingWebSocketFrame /*判断是否ping消息*/) {
-                ctx.writeAndFlush(new PongWebSocketFrame(frame.content().retain()));
-            } else if (frame instanceof BinaryWebSocketFrame binaryWebSocketFrame/*二进制数据*/) {
-                ByteBuf byteBuf = Unpooled.wrappedBuffer(binaryWebSocketFrame.content());
-                messageAction.readBytes(ctx, byteBuf);
-            } else if (frame instanceof TextWebSocketFrame textWebSocketFrame/*文本数据*/) {
-                String request = textWebSocketFrame.text();
-                messageAction.action(session, request);
-            } else {
-                log.warn("无法处理：{}", frame.getClass().getName());
+            switch (frame) {
+                case PingWebSocketFrame pingWebSocketFrame ->
+                    /*判断是否ping消息*/
+                        ctx.writeAndFlush(new PongWebSocketFrame(frame.content().retain()));
+                case BinaryWebSocketFrame binaryWebSocketFrame -> {
+                    /*二进制数据*/
+                    ByteBuf byteBuf = Unpooled.wrappedBuffer(binaryWebSocketFrame.content());
+                    messageAction.readBytes(ctx, byteBuf);
+                }
+                case TextWebSocketFrame textWebSocketFrame -> {
+                    /*文本数据*/
+                    String request = textWebSocketFrame.text();
+                    messageAction.action(session, request);
+                }
+                default -> log.warn("无法处理：{}", frame.getClass().getName());
             }
         } catch (Throwable e) {
             log.error("处理消息异常", e);

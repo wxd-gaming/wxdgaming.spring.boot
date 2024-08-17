@@ -2,7 +2,6 @@ package wxdgaming.spring.boot.net.client;
 
 import io.netty.channel.ChannelHandler;
 import lombok.extern.slf4j.Slf4j;
-import wxdgaming.spring.boot.net.MessageAction;
 import wxdgaming.spring.boot.net.SocketDeviceHandler;
 
 /**
@@ -13,9 +12,9 @@ import wxdgaming.spring.boot.net.SocketDeviceHandler;
  **/
 @Slf4j
 @ChannelHandler.Sharable
-public class SocketClientDeviceHandler extends SocketDeviceHandler {
+public class SocketClientDeviceHandler extends SocketDeviceHandler<ClientMessageAction> {
 
-    public SocketClientDeviceHandler(MessageAction messageAction, boolean autoRelease) {
+    public SocketClientDeviceHandler(ClientMessageAction messageAction, boolean autoRelease) {
         super(messageAction, autoRelease);
     }
 

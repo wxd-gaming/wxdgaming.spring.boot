@@ -38,8 +38,8 @@ import javax.net.ssl.SSLContext;
 @Getter
 @Setter
 @Configuration
-@ConditionalOnProperty("server.tcp")
-@ConfigurationProperties("server.tcp")
+@ConditionalOnProperty("server.socket")
+@ConfigurationProperties("server.socket")
 public class BootstrapConfig implements InitPrint {
 
     private boolean debugLogger = false;
@@ -117,7 +117,7 @@ public class BootstrapConfig implements InitPrint {
     }
 
     @Bean
-    @ConditionalOnMissingBean(SocketServerDeviceHandler.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    @ConditionalOnMissingBean(SocketClientDeviceHandler.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
     public SocketClientDeviceHandler clientDeviceHandler(ClientMessageAction messageAction) {
         SocketClientDeviceHandler deviceHandler = new SocketClientDeviceHandler(messageAction, true);
         log.debug("default SocketClientDeviceHandler = {}", deviceHandler.hashCode(), new RuntimeException("日志"));

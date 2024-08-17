@@ -16,9 +16,9 @@ import wxdgaming.spring.boot.net.SocketSession;
  **/
 @Slf4j
 @ChannelHandler.Sharable
-public class SocketServerDeviceHandler extends SocketDeviceHandler {
+public class SocketServerDeviceHandler extends SocketDeviceHandler<ServerMessageAction> {
 
-    public SocketServerDeviceHandler(MessageAction messageAction, boolean autoRelease) {
+    public SocketServerDeviceHandler(ServerMessageAction messageAction, boolean autoRelease) {
         super(messageAction, autoRelease);
     }
 
@@ -27,4 +27,7 @@ public class SocketServerDeviceHandler extends SocketDeviceHandler {
         /*TODO 构造函数自动注册*/
         new SocketSession(ctx.channel(), ChannelUtil.attr(ctx.channel(), ChannelUtil.WEB_SOCKET_SESSION_KEY));
     }
+
+
+
 }

@@ -1,6 +1,6 @@
 server:
   port: 18801   #端口号
-  tcp:
+  socket:
     tcpPort: 18001
     bossThreadSize: 2
     workerThreadSize: 10

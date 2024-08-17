@@ -10,5 +10,4 @@ import wxdgaming.spring.boot.net.MessageAction;
  **/
 public interface ServerMessageAction extends MessageAction {
 
-
 }

@@ -27,6 +27,8 @@
         <module>web</module>
         <module>web-client</module>
         <module>web-lua</module>
+        <module>rpc</module>
+        <module>message</module>
     </modules>
 
     <properties>
@@ -133,7 +135,17 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>23.0</version>
+                <version>33.0.0-jre</version>
+            </dependency>
+            <dependency>
+                <groupId>io.protostuff</groupId>
+                <artifactId>protostuff-core</artifactId>
+                <version>1.8.0</version>
+            </dependency>
+            <dependency>
+                <groupId>io.protostuff</groupId>
+                <artifactId>protostuff-runtime</artifactId>
+                <version>1.8.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
