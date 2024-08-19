@@ -1,10 +1,7 @@
 package wxdgaming.spring.boot.net;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ReflectContext;
 import wxdgaming.spring.boot.core.SpringUtil;
@@ -12,7 +9,6 @@ import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.message.PojoBase;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -23,26 +19,18 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 @Slf4j
 @Getter
-@Service
-public class MessageDispatcherService implements InitPrint {
+public class MessageDispatcher implements InitPrint {
 
-    private final SpringUtil springUtil;
-    private final ConcurrentHashMap<Integer, MessageMapping> mappings = new ConcurrentHashMap<>();
-
+    private final ConcurrentHashMap<Integer, DoMessageMapping> mappings = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Integer> messageName2Id = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Integer, Class<? extends PojoBase>> messageId2Name = new ConcurrentHashMap<>();
-
-    public MessageDispatcherService(SpringUtil springUtil) {
-        this.springUtil = springUtil;
-    }
 
     @Start
-    public void start() {
+    public void start(SpringUtil springUtil) {
         springUtil.withMethodAnnotated(MsgMapper.class)
                 .forEach(method -> {
                     Class parameterType = method.getParameterTypes()[1];
                     if (PojoBase.class.isAssignableFrom(parameterType)) {
-                        MessageMapping messageMapping = new MessageMapping(springUtil.getBean(method.getDeclaringClass()), method, parameterType);
+                        DoMessageMapping messageMapping = new DoMessageMapping(springUtil.getBean(method.getDeclaringClass()), method, parameterType);
                         int msgId = registerMessage(parameterType);
                         mappings.put(msgId, messageMapping);
                         log.debug("扫描消息处理接口 {}#{} {}", method.getDeclaringClass().getName(), method.getName(), parameterType.getName());
@@ -65,27 +53,11 @@ public class MessageDispatcherService implements InitPrint {
     public int registerMessage(Class<? extends PojoBase> pojoClass) {
 
         int msgId = StringsUtil.hashcode(pojoClass.getName());
-        messageName2Id.put(pojoClass.getName(), msgId);
-        if (messageId2Name.put(msgId, pojoClass) == null) {
+        if (messageName2Id.put(pojoClass.getName(), msgId) == null) {
             log.debug("扫描注册消息：{} = {}", pojoClass.getName(), msgId);
         }
 
         return msgId;
-    }
-
-    @MsgMapper
-    public void test(SpringUtil springUtil, String msg) {
-
-    }
-
-    @Data
-    @AllArgsConstructor
-    public class MessageMapping {
-
-        private Object bean;
-        private Method method;
-        private Class<?> messageType;
-
     }
 
 }

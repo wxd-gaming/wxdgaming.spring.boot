@@ -24,6 +24,7 @@ public class SocketSession {
 
     private final Channel channel;
     private boolean webSocket;
+    private boolean ssl;
 
     public SocketSession(Channel channel, Boolean webSocket) {
         this.channel = channel;

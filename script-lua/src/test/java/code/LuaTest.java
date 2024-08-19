@@ -90,7 +90,7 @@ public class LuaTest {
 
         Thread.sleep(500);
         luaBus.forExecTry("t1");
-        Thread.sleep(500);
+        /* Thread.sleep(500);
         testString();
 
         luaBus.forExecTry("login");
@@ -104,7 +104,7 @@ public class LuaTest {
         luaBus.forExecTry("t2_2", 1, (file, value) -> {
             System.out.println(value);
         });
-        Thread.sleep(500);
+        Thread.sleep(500); */
 
         // test("t3");
         // Thread.sleep(3000);

@@ -7,6 +7,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.ReferenceCountUtil;
 import wxdgaming.spring.boot.net.ChannelUtil;
+import wxdgaming.spring.boot.net.SocketSession;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -19,7 +20,6 @@ import java.util.List;
  **/
 public class WxOptionalSslHandler extends ByteToMessageDecoder implements Serializable {
 
-    public static final String SSL_KEY = "WXD_GAMING_SSL_KEY";
     /** ssl 标记 */
     static final int SSL_RECORD_HEADER_LENGTH = 5;
     /** ssl处理 */
@@ -34,9 +34,10 @@ public class WxOptionalSslHandler extends ByteToMessageDecoder implements Serial
         if (in.readableBytes() < SSL_RECORD_HEADER_LENGTH) {
             return;
         }
-        if (SslHandler.isEncrypted(in)) {
+        SocketSession session = ChannelUtil.session(ctx.channel());
+        if (session.isWebSocket() && this.sslContext != null && SslHandler.isEncrypted(in)) {
             handleSsl(ctx);
-            ChannelUtil.attr(ctx.channel(), SSL_KEY, true);
+            session.setSsl(true);
         } else {
             handleNonSsl(ctx);
         }

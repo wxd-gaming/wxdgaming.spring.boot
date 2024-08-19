@@ -81,6 +81,11 @@ public class SocketClient {
                 .addListener(new ChannelFutureListener() {
 
                     @Override public void operationComplete(ChannelFuture future) throws Exception {
+                        Throwable cause = future.cause();
+                        if (cause != null) {
+                            completableFuture.completeExceptionally(cause);
+                            return;
+                        }
                         Channel channel = future.channel();
                         SocketSession socketSession = new SocketSession(channel, false);
                         completableFuture.complete(socketSession);

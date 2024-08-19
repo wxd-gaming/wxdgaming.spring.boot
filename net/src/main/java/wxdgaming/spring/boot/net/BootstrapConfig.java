@@ -15,11 +15,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import wxdgaming.spring.boot.core.InitPrint;
+import wxdgaming.spring.boot.core.ssl.SslContextServer;
+import wxdgaming.spring.boot.core.ssl.SslProtocolType;
 import wxdgaming.spring.boot.core.threading.ThreadNameFactory;
 import wxdgaming.spring.boot.net.client.ClientMessageAction;
 import wxdgaming.spring.boot.net.client.SocketClientDeviceHandler;
@@ -38,7 +39,7 @@ import javax.net.ssl.SSLContext;
 @Getter
 @Setter
 @Configuration
-@ConditionalOnProperty("server.socket")
+// @ConditionalOnProperty("server.socket")
 @ConfigurationProperties("server.socket")
 public class BootstrapConfig implements InitPrint {
 
@@ -78,7 +79,7 @@ public class BootstrapConfig implements InitPrint {
             Client_Socket_Channel_Class = NioSocketChannel.class;
             Server_Socket_Channel_Class = NioServerSocketChannel.class;
         }
-
+        sslContext = SslContextServer.sslContext(SslProtocolType.TLSV12, "jks/wxdtest-1.8.jks", "jks/wxdtest-1.8.jks.pwd");
     }
 
     private EventLoopGroup createGroup(int size, String prefix) {
@@ -90,12 +91,18 @@ public class BootstrapConfig implements InitPrint {
     }
 
     @Bean
+    @ConditionalOnMissingBean(MessageDispatcher.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    public MessageDispatcher messageDispatcher() {
+        MessageDispatcher messageDispatcher = new MessageDispatcher();
+        log.debug("default MessageDispatcher = {}", messageDispatcher.hashCode());
+        return messageDispatcher;
+    }
+
+    @Bean
     @ConditionalOnMissingBean(ServerMessageAction.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public ServerMessageAction serverMessageAction() {
-
-        ServerMessageAction messageAction = new ServerMessageAction() {};
-
-        log.debug("default ServerMessageAction = {}", messageAction.hashCode(), new RuntimeException("日志"));
+    public ServerMessageAction serverMessageAction(MessageDispatcher messageDispatcher) {
+        ServerMessageAction messageAction = new ServerMessageAction(messageDispatcher) {};
+        log.debug("default ServerMessageAction = {}", messageAction.hashCode());
         return messageAction;
     }
 
@@ -103,16 +110,15 @@ public class BootstrapConfig implements InitPrint {
     @ConditionalOnMissingBean(SocketServerDeviceHandler.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
     public SocketServerDeviceHandler socketServerDeviceHandler(ServerMessageAction messageAction) {
         SocketServerDeviceHandler deviceHandler = new SocketServerDeviceHandler(messageAction, true);
-        log.debug("default SocketServerDeviceHandler = {}", deviceHandler.hashCode(), new RuntimeException("日志"));
+        log.debug("default SocketServerDeviceHandler = {}", deviceHandler.hashCode());
         return deviceHandler;
     }
 
     @Bean
     @ConditionalOnMissingBean(ClientMessageAction.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public ClientMessageAction clientMessageAction() {
-
-        ClientMessageAction messageAction = new ClientMessageAction() {};
-        log.debug("default ClientMessageAction = {}", messageAction.hashCode(), new RuntimeException("日志"));
+    public ClientMessageAction clientMessageAction(MessageDispatcher messageDispatcher) {
+        ClientMessageAction messageAction = new ClientMessageAction(messageDispatcher) {};
+        log.debug("default ClientMessageAction = {}", messageAction.hashCode());
         return messageAction;
     }
 
@@ -120,7 +126,7 @@ public class BootstrapConfig implements InitPrint {
     @ConditionalOnMissingBean(SocketClientDeviceHandler.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
     public SocketClientDeviceHandler clientDeviceHandler(ClientMessageAction messageAction) {
         SocketClientDeviceHandler deviceHandler = new SocketClientDeviceHandler(messageAction, true);
-        log.debug("default SocketClientDeviceHandler = {}", deviceHandler.hashCode(), new RuntimeException("日志"));
+        log.debug("default SocketClientDeviceHandler = {}", deviceHandler.hashCode());
         return deviceHandler;
     }
 

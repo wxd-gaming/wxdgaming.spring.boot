@@ -61,6 +61,10 @@ public class RpcService implements InitPrint {
         int gzip = reqRemote.getGzip();
         JSONObject params = FastJsonUtil.parse(reqRemote.getParams());
         RpcHandler rpcHandler = rpcHandlerMap.get(cmd);
+        if (rpcHandler == null) {
+            log.error("rpcHandler is null, cmd={}", cmd);
+            return;
+        }
         rpcHandler.getMethod().invoke(rpcHandler.getBean(), params);
     }
 

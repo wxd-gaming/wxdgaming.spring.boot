@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import wxdgaming.spring.boot.net.BootstrapConfig;
 import wxdgaming.spring.boot.net.ByteBufUtil;
+import wxdgaming.spring.boot.net.MessageDispatcher;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.client.ClientMessageAction;
 import wxdgaming.spring.boot.net.client.SocketClient;
@@ -29,16 +30,18 @@ public class SocketTest {
 
     @Before
     public void before() {
+        MessageDispatcher messageDispatcher = new MessageDispatcher();
+        messageDispatcher.registerMessage(Thread.currentThread().getContextClassLoader(), "a");
         bootstrapConfig = new BootstrapConfig();
         bootstrapConfig.init();
-        socketService = new SocketService(bootstrapConfig, new SocketServerDeviceHandler(new ServerMessageAction() {
+        socketService = new SocketService(bootstrapConfig, new SocketServerDeviceHandler(new ServerMessageAction(messageDispatcher) {
             @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
                 log.info("收到消息：ctx={}, message={}", session, new String(messageBytes, StandardCharsets.UTF_8));
                 send(session, "socket server");
             }
 
             @Override public void action(SocketSession session, String message) throws Exception {
-                ServerMessageAction.super.action(session, message);
+                super.action(session, message);
                 session.writeAndFlush("socket server textWebSocketFrame");
             }
 
@@ -46,7 +49,7 @@ public class SocketTest {
         socketService.init();
         socketService.start();
 
-        socketClient = new SocketClient(bootstrapConfig, new SocketClientDeviceHandler(new ClientMessageAction() {
+        socketClient = new SocketClient(bootstrapConfig, new SocketClientDeviceHandler(new ClientMessageAction(messageDispatcher) {
 
             @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
                 log.info("收到消息：ctx={}, message={}", session, new String(messageBytes, StandardCharsets.UTF_8));
@@ -57,7 +60,7 @@ public class SocketTest {
         socketClient.setPort(bootstrapConfig.getTcpPort());
         socketClient.init();
 
-        webSocketClient = new WebSocketClient(bootstrapConfig, new SocketClientDeviceHandler(new ClientMessageAction() {
+        webSocketClient = new WebSocketClient(bootstrapConfig, new SocketClientDeviceHandler(new ClientMessageAction(messageDispatcher) {
 
             @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
                 log.info("收到消息：ctx={}, message={}", session, new String(messageBytes, StandardCharsets.UTF_8));

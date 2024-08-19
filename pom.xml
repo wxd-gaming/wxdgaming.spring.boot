@@ -125,6 +125,11 @@
                 <artifactId>luaj-jse</artifactId>
                 <version>3.0.1</version>
             </dependency>
+            <dependency>
+                <groupId>org.luaj</groupId>
+                <artifactId>luaj-jme</artifactId>
+                <version>3.0.1</version>
+            </dependency>
             <!--计算对象占用内存大小-->
             <dependency>
                 <groupId>org.openjdk.jol</groupId>

@@ -1,6 +1,7 @@
 package wxdgaming.spring.boot.net.server;
 
 import wxdgaming.spring.boot.net.MessageAction;
+import wxdgaming.spring.boot.net.MessageDispatcher;
 
 /**
  * 消息处理器
@@ -8,6 +9,11 @@ import wxdgaming.spring.boot.net.MessageAction;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-15 11:03
  **/
-public interface ServerMessageAction extends MessageAction {
+public abstract class ServerMessageAction extends MessageAction {
+
+    public ServerMessageAction(MessageDispatcher dispatcher) {
+        super(dispatcher);
+    }
 
 }
+

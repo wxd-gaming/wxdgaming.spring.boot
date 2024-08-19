@@ -5,6 +5,7 @@ import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Getter
 @Service
-@ConditionalOnProperty("server.tcp.tcpPort")
+@ConditionalOnProperty("server.socket.tcpPort")
 public class SocketService implements Closeable, InitPrint {
 
     private final BootstrapConfig bootstrapConfig;
@@ -43,6 +44,7 @@ public class SocketService implements Closeable, InitPrint {
         this.socketServerDeviceHandler = socketServerDeviceHandler;
     }
 
+    @PostConstruct
     public void init() {
         bootstrap = new ServerBootstrap();
         bootstrap.group(this.bootstrapConfig.getBossLoop(), this.bootstrapConfig.getWorkerLoop());
