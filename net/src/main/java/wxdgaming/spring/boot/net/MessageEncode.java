@@ -1,7 +1,6 @@
 package wxdgaming.spring.boot.net;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -18,8 +17,7 @@ import wxdgaming.spring.boot.message.SerializerUtil;
  * @version: 2024-08-20 09:09
  **/
 @Slf4j
-@ChannelHandler.Sharable
-public class MessageEncode extends ChannelOutboundHandlerAdapter {
+public abstract class MessageEncode extends ChannelOutboundHandlerAdapter {
 
     private final MessageDispatcher messageDispatcher;
 

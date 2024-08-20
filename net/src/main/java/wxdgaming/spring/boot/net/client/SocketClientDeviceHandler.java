@@ -1,7 +1,6 @@
 package wxdgaming.spring.boot.net.client;
 
 import io.netty.channel.ChannelHandler;
-import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.net.SocketDeviceHandler;
 
 /**

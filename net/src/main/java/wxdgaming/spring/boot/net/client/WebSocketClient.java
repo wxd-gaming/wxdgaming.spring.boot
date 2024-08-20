@@ -9,10 +9,17 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Service;
+import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.system.BytesUnit;
 import wxdgaming.spring.boot.net.BootstrapConfig;
 import wxdgaming.spring.boot.net.SocketSession;
@@ -29,6 +36,9 @@ import java.util.function.Consumer;
 @Slf4j
 @Getter
 @Accessors(chain = true)
+@Service
+@ConfigurationProperties("client.web-socket")
+@ConditionalOnProperty(prefix = "client.web-socket.config", name = "host")
 public class WebSocketClient extends SocketClient {
 
     @Setter private String prefix = "/websocket";
@@ -36,6 +46,7 @@ public class WebSocketClient extends SocketClient {
     /** 包含的http head参数 */
     protected final HttpHeaders httpHeaders = new DefaultHttpHeaders();
 
+    @Autowired
     public WebSocketClient(BootstrapConfig bootstrapConfig,
                            SocketClientDeviceHandler socketClientDeviceHandler,
                            ClientMessageDecode clientMessageDecode,
@@ -43,10 +54,11 @@ public class WebSocketClient extends SocketClient {
         super(bootstrapConfig, socketClientDeviceHandler, clientMessageDecode, clientMessageEncode);
     }
 
+    @PostConstruct
     @Override public void init() {
         super.init();
         handshaker = WebSocketClientHandshakerFactory.newHandshaker(
-                URI.create("ws://" + host + ":" + port + prefix),
+                URI.create("ws://" + getConfig().getHost() + ":" + getConfig().getPort() + prefix),
                 WebSocketVersion.V13,
                 null,
                 false,
@@ -73,14 +85,11 @@ public class WebSocketClient extends SocketClient {
         return connect;
     }
 
-    @Override public WebSocketClient setHost(String host) {
-        super.setHost(host);
-        return this;
-    }
+    SocketSession session;
 
-    @Override public WebSocketClient setPort(int port) {
-        super.setPort(port);
-        return this;
+    @Start
+    @Order(2000)
+    public void start() {
+        session = connect();
     }
-
 }

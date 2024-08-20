@@ -23,7 +23,7 @@ public class SocketTest {
 
     BootstrapConfig bootstrapConfig;
     SocketService socketService;
-    SocketClient socketClient;
+    TcpSocketClient tcpSocketClient;
     WebSocketClient webSocketClient;
 
     @Before
@@ -35,7 +35,7 @@ public class SocketTest {
         socketService = new SocketService(
                 bootstrapConfig,
                 new SocketServerDeviceHandler(),
-                new ServerMessageDecode(true, messageDispatcher) {
+                new ServerMessageDecode(messageDispatcher) {
                     @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
                         log.info("收到消息：ctx={}, message={}", session, new String(messageBytes, StandardCharsets.UTF_8));
                         send(session, "socket server");
@@ -52,38 +52,36 @@ public class SocketTest {
         socketService.init();
         socketService.start();
 
-        socketClient = new SocketClient(
-                bootstrapConfig,
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.setHost("127.0.0.1");
+        clientConfig.setPort(bootstrapConfig.getTcpPort());
+
+        tcpSocketClient = new TcpSocketClient(bootstrapConfig,
                 new SocketClientDeviceHandler(),
-                new ClientMessageDecode(true, messageDispatcher) {
+                new ClientMessageDecode(messageDispatcher) {
 
                     @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
                         log.info("收到消息：ctx={}, message={}", session, new String(messageBytes, StandardCharsets.UTF_8));
                     }
 
                 },
-                new ClientMessageEncode(messageDispatcher)
-        );
-        socketClient.setHost("127.0.0.1");
-        socketClient.setPort(bootstrapConfig.getTcpPort());
-        socketClient.init();
+                new ClientMessageEncode(messageDispatcher));
+        tcpSocketClient.setConfig(clientConfig);
+        tcpSocketClient.init();
 
-        webSocketClient = new WebSocketClient(
-                bootstrapConfig,
+        webSocketClient = new WebSocketClient(bootstrapConfig,
                 new SocketClientDeviceHandler(),
-                new ClientMessageDecode(true, messageDispatcher) {
+                new ClientMessageDecode(messageDispatcher) {
 
                     @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
                         log.info("收到消息：ctx={}, message={}", session, new String(messageBytes, StandardCharsets.UTF_8));
                     }
 
                 },
-                new ClientMessageEncode(messageDispatcher)
-        );
-
-        webSocketClient.setHost("127.0.0.1");
-        webSocketClient.setPort(bootstrapConfig.getTcpPort());
+                new ClientMessageEncode(messageDispatcher));
+        webSocketClient.setConfig(clientConfig);
         webSocketClient.init();
+
     }
 
     @After
@@ -95,7 +93,7 @@ public class SocketTest {
     public void t0() throws Exception {
 
         {
-            SocketSession session = socketClient.connect();
+            SocketSession session = tcpSocketClient.connect();
             send(session, "tcp socket client");
         }
         {

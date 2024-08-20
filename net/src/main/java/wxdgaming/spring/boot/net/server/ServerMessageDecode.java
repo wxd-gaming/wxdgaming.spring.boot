@@ -1,6 +1,8 @@
 package wxdgaming.spring.boot.net.server;
 
 import io.netty.channel.ChannelHandler;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.net.MessageDecode;
 import wxdgaming.spring.boot.net.MessageDispatcher;
 
@@ -13,8 +15,8 @@ import wxdgaming.spring.boot.net.MessageDispatcher;
 @ChannelHandler.Sharable
 public class ServerMessageDecode extends MessageDecode {
 
-    public ServerMessageDecode(boolean autoRelease, MessageDispatcher dispatcher) {
-        super(autoRelease, dispatcher);
+    public ServerMessageDecode(MessageDispatcher dispatcher) {
+        super(true, dispatcher);
     }
 }
 

@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.net.BootstrapConfig;
 import wxdgaming.spring.boot.net.SocketSession;
 
@@ -25,15 +26,16 @@ import java.util.function.Consumer;
 @Slf4j
 @Getter
 @Accessors(chain = true)
-public class SocketClient {
+public abstract class SocketClient implements InitPrint {
+
+    protected Bootstrap bootstrap;
 
     protected final BootstrapConfig bootstrapConfig;
     protected final SocketClientDeviceHandler socketClientDeviceHandler;
     protected final ClientMessageDecode clientMessageDecode;
     protected final ClientMessageEncode clientMessageEncode;
-    @Setter protected String host;
-    @Setter protected int port;
-    protected Bootstrap bootstrap;
+
+    @Setter protected ClientConfig config;
 
     public SocketClient(BootstrapConfig bootstrapConfig,
                         SocketClientDeviceHandler socketClientDeviceHandler,
@@ -66,7 +68,7 @@ public class SocketClient {
                             pipeline.addLast(new LoggingHandler("DEBUG"));/*设置log监听器，并且日志级别为debug，方便观察运行流程*/
                         }
                         /*空闲链接检查*/
-                        int idleTime = bootstrapConfig.getServerSessionIdleTime();
+                        int idleTime = bootstrapConfig.getClientSessionIdleTime();
                         if (idleTime > 0) {
                             pipeline.addLast(new IdleStateHandler(0, 0, idleTime, TimeUnit.SECONDS));
                         }
@@ -89,7 +91,7 @@ public class SocketClient {
 
     public SocketSession connect(Consumer<Channel> consumer) {
         CompletableFuture<SocketSession> completableFuture = new CompletableFuture<>();
-        bootstrap.connect(host, port)
+        bootstrap.connect(config.getHost(), config.getPort())
                 .addListener(new ChannelFutureListener() {
 
                     @Override public void operationComplete(ChannelFuture future) throws Exception {
@@ -101,7 +103,7 @@ public class SocketClient {
                         Channel channel = future.channel();
                         SocketSession socketSession = new SocketSession(channel, false);
                         completableFuture.complete(socketSession);
-                        log.info("connect success {}", channel);
+                        log.info("{} connect success {}", SocketClient.this.getClass().getSimpleName(), channel);
                         if (consumer != null) {
                             consumer.accept(channel);
                         }

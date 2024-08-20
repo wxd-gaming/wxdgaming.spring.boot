@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -33,13 +32,8 @@ public class SocketSession {
         ChannelUtil.attr(this.channel, ChannelUtil.SOCKET_SESSION_KEY, this);
     }
 
-    public void writeAndFlush(String message) {
-        if (webSocket) {
-            TextWebSocketFrame webSocketFrame = new TextWebSocketFrame(message);
-            channel.writeAndFlush(webSocketFrame);
-        } else {
-            throw new RuntimeException("not web socket forbid string");
-        }
+    public void writeAndFlush(Object message) {
+        channel.writeAndFlush(message);
     }
 
     public ChannelFuture writeAndFlush(PojoBase pojoBase) {

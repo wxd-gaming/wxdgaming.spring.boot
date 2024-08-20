@@ -13,14 +13,9 @@ import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.data.batis.DataBatisScan;
 import wxdgaming.spring.boot.data.excel.DataExcelScan;
 import wxdgaming.spring.boot.data.redis.DataRedisScan;
-import wxdgaming.spring.boot.net.BootstrapConfig;
-import wxdgaming.spring.boot.net.MessageDispatcher;
 import wxdgaming.spring.boot.net.NetScan;
-import wxdgaming.spring.boot.net.SocketSession;
-import wxdgaming.spring.boot.net.client.ClientMessageDecode;
-import wxdgaming.spring.boot.net.client.ClientMessageEncode;
-import wxdgaming.spring.boot.net.client.SocketClient;
-import wxdgaming.spring.boot.net.client.SocketClientDeviceHandler;
+import wxdgaming.spring.boot.net.client.TcpSocketClient;
+import wxdgaming.spring.boot.net.client.WebSocketClient;
 import wxdgaming.spring.boot.rpc.RpcScan;
 import wxdgaming.spring.boot.rpc.pojo.RpcMessage;
 import wxdgaming.spring.boot.web.WebScan;
@@ -70,19 +65,7 @@ public class ApplicationStart {
                     }
                 });
 
-        BootstrapConfig bootstrapConfig = run.getBean(BootstrapConfig.class);
-        MessageDispatcher messageDispatcher = run.getBean(MessageDispatcher.class);
-        SocketClient socketClient = new SocketClient(
-                bootstrapConfig,
-                new SocketClientDeviceHandler(),
-                new ClientMessageDecode(true, messageDispatcher),
-                new ClientMessageEncode(messageDispatcher)
-        );
-        socketClient.setHost("127.0.0.1");
-        socketClient.setPort(bootstrapConfig.getTcpPort());
-        socketClient.init();
 
-        SocketSession socketSession = socketClient.connect();
         RpcMessage.ReqRemote rpcMessage = new RpcMessage.ReqRemote();
         rpcMessage
                 .setRpcId(1)
@@ -91,7 +74,17 @@ public class ApplicationStart {
                 .setParams(new JSONObject().fluentPut("type", 1).toString())
         ;
 
-        socketSession.writeAndFlush(rpcMessage);
+
+        try {
+            run.getBean(TcpSocketClient.class).getSession().writeAndFlush(rpcMessage);
+            run.getBean(TcpSocketClient.class).getSession().writeAndFlush("string message");
+        } catch (Exception ignore) {}
+
+        try {
+            run.getBean(WebSocketClient.class).getSession().writeAndFlush(rpcMessage);
+            run.getBean(WebSocketClient.class).getSession().writeAndFlush("string message");
+        } catch (Exception ignore) {}
+
     }
 
 }

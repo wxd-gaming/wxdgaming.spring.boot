@@ -2,14 +2,25 @@ server:
   port: 18801   #端口号
   socket:
     tcpPort: 18001
-    bossThreadSize: 2
-    workerThreadSize: 10
+    bossThreadSize: 2 #线程池的线程数量，共享
+    workerThreadSize: 10 #线程池的线程数量，共享
+    clientThreadSize: 2 #client 线程池的线程数量，共享
   tomcat:
     max-threads: 200
     min-spare-threads: 10
   executor:
     defaultCoreSize: 2 #默认线程池
     logicCoreSize: 10 #逻辑线程池
+
+client:
+  tcp-socket:
+    config:
+      host: 127.0.0.1
+      port: 18001
+  web-socket:
+    config:
+      host: 127.0.0.1
+      port: 18001
 
 spring:
   main:

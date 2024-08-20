@@ -9,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ann.Start;
@@ -29,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Getter
 @Service
-@ConditionalOnProperty("server.socket.tcpPort")
+@ConditionalOnProperty(prefix = "server.socket", name = "tcpPort")
 public class SocketService implements Closeable, InitPrint {
 
     private final BootstrapConfig bootstrapConfig;
@@ -99,7 +100,8 @@ public class SocketService implements Closeable, InitPrint {
                 });
     }
 
-    @Start
+    @Start()
+    @Order(1000)
     public void start() {
         this.future = bootstrap.bind(this.bootstrapConfig.getTcpPort());
         this.future.syncUninterruptibly();

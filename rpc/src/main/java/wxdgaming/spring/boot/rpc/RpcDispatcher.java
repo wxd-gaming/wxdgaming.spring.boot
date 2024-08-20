@@ -1,7 +1,6 @@
 package wxdgaming.spring.boot.rpc;
 
 import com.alibaba.fastjson.JSONObject;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -16,7 +15,6 @@ import wxdgaming.spring.boot.net.MsgMapper;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.rpc.pojo.RpcMessage;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,13 +27,13 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 @Slf4j
 @Service
-public class RpcService implements InitPrint {
+public class RpcDispatcher implements InitPrint {
 
     private final SpringUtil springUtil;
     private final ConcurrentHashMap<String, RpcActionMapping> rpcHandlerMap = new ConcurrentHashMap<>();
 
     @Autowired
-    public RpcService(SpringUtil springUtil) {
+    public RpcDispatcher(SpringUtil springUtil) {
         this.springUtil = springUtil;
     }
 
@@ -92,24 +90,29 @@ public class RpcService implements InitPrint {
             }
         }
 
-        Object invoke = rpcActionMapping.getMethod().invoke(rpcActionMapping.getBean(), params);
-        if (rpcId < 1) {
-            return;
-        }
-        if (invoke instanceof RpcMessage.ResRemote resRemote) {
-            resRemote.setRpcId(rpcId);
-            resRemote.setRpcToken(rpcToken);
-            session.writeAndFlush(resRemote);
-        } else {
-            RpcMessage.ResRemote resRemote = new RpcMessage.ResRemote();
-            resRemote.setRpcId(rpcId);
-            resRemote.setRpcToken(rpcToken);
-            resRemote.setCode(1);
-            if (invoke != null) {
-                resRemote.setParams(String.valueOf(invoke));
+        RpcMessage.ResRemote res;
+        try {
+            Object invoke = rpcActionMapping.getMethod().invoke(rpcActionMapping.getBean(), params);
+            if (rpcId < 1) {
+                return;
             }
-            session.writeAndFlush(resRemote);
+            if (invoke instanceof RpcMessage.ResRemote resRemote) {
+                res = resRemote;
+            } else {
+                res = new RpcMessage.ResRemote();
+                res.setCode(1);
+                if (invoke != null) {
+                    res.setParams(String.valueOf(invoke));
+                }
+            }
+        } catch (Throwable t) {
+            res = new RpcMessage.ResRemote();
+            res.setCode(500);
+            res.setParams(String.valueOf(t));
         }
+        res.setRpcId(rpcId);
+        res.setRpcToken(rpcToken);
+        session.writeAndFlush(res);
     }
 
     @MsgMapper
@@ -130,28 +133,6 @@ public class RpcService implements InitPrint {
     public String rpcTest(SocketSession session, JSONObject jsonObject, @RequestParam(name = "type") int type) throws Exception {
         log.debug("rpc action rpcTest {}, {}, {}", session, jsonObject, type);
         return "ok";
-    }
-
-    @Data
-    public class RpcActionMapping {
-
-        Object bean;
-        Method method;
-
-        public RpcActionMapping(Method method, Object bean) {
-            this.method = method;
-            this.bean = bean;
-        }
-
-        public void doAction(JSONObject jsonObject) {
-            String path = jsonObject.getString("path");
-            RpcActionMapping rpcActionMapping = RpcService.this.rpcHandlerMap.get(path);
-            if (rpcActionMapping == null) {
-                return;
-            }
-
-        }
-
     }
 
 }
