@@ -18,14 +18,14 @@ import java.util.List;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2022-08-01 13:56
  **/
-public class WxOptionalSslHandler extends ByteToMessageDecoder implements Serializable {
+public class WxdOptionalSslHandler extends ByteToMessageDecoder implements Serializable {
 
     /** ssl 标记 */
     static final int SSL_RECORD_HEADER_LENGTH = 5;
     /** ssl处理 */
     private final SSLContext sslContext;
 
-    public WxOptionalSslHandler(SSLContext sslContext) {
+    public WxdOptionalSslHandler(SSLContext sslContext) {
         this.sslContext = sslContext;
     }
 
@@ -50,7 +50,7 @@ public class WxOptionalSslHandler extends ByteToMessageDecoder implements Serial
             sslEngine.setUseClientMode(false);/*false服务器模式*/
             // sslEngine.setWantClientAuth(false);
             sslEngine.setNeedClientAuth(false);
-            sslHandler = new WxSslHandler(sslEngine);
+            sslHandler = new WxdSslHandler(sslEngine);
             ctx.pipeline().replace(this, newSslHandlerName(), sslHandler);
             sslHandler = null;
             ChannelUtil.attr(ctx.channel(), "ssl", true);

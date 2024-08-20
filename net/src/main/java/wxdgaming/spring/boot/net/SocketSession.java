@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import wxdgaming.spring.boot.message.PojoBase;
 
 /**
  * socket session
@@ -41,6 +42,10 @@ public class SocketSession {
         }
     }
 
+    public ChannelFuture writeAndFlush(PojoBase pojoBase) {
+        return channel.writeAndFlush(pojoBase);
+    }
+
     public ChannelFuture writeAndFlush(ByteBuf byteBuf) {
         if (webSocket) {
             BinaryWebSocketFrame webSocketFrame = new BinaryWebSocketFrame(byteBuf);
@@ -51,6 +56,6 @@ public class SocketSession {
     }
 
     @Override public String toString() {
-        return ChannelUtil.ctxTostring(channel) + ", webSocket=" + webSocket;
+        return "【" + ChannelUtil.ctxTostring(channel) + ", webSocket=" + webSocket + ", ssl=" + ssl + "】";
     }
 }

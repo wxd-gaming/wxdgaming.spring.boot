@@ -13,7 +13,7 @@ import wxdgaming.spring.boot.message.PojoBase;
  * rpc.proto
  *
  * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-08-17 21:19:24
+ * @version: 2024-08-20 11:30:19
  */
 public class RpcMessage {
 
@@ -26,12 +26,9 @@ public class RpcMessage {
        /**  */
        @Tag(1)
        private long rpcId;
-       /** 1表示压缩过 */
-       @Tag(2)
-       private int gzip;
        /** 执行的命令 */
        @Tag(3)
-       private String cmd;
+       private String path;
        /** 用JsonObject来解析 */
        @Tag(4)
        private String params;
@@ -50,15 +47,15 @@ public class RpcMessage {
        /**  */
        @Tag(1)
        private long rpcId;
-       /** 1表示压缩过 */
-       @Tag(2)
-       private int gzip;
-       /** 用JsonObject来解析 */
-       @Tag(3)
-       private String params;
        /** 用于验证的消息 */
-       @Tag(4)
+       @Tag(3)
        private String rpcToken;
+       /** code==1 params 是正常参数，如果非1是错误码 */
+       @Tag(4)
+       private int code;
+       /** 用JsonObject来解析 */
+       @Tag(5)
+       private String params;
 
    }
 }

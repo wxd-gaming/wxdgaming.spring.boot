@@ -9,11 +9,9 @@ import wxdgaming.spring.boot.net.BootstrapConfig;
 import wxdgaming.spring.boot.net.ByteBufUtil;
 import wxdgaming.spring.boot.net.MessageDispatcher;
 import wxdgaming.spring.boot.net.SocketSession;
-import wxdgaming.spring.boot.net.client.ClientMessageAction;
-import wxdgaming.spring.boot.net.client.SocketClient;
-import wxdgaming.spring.boot.net.client.SocketClientDeviceHandler;
-import wxdgaming.spring.boot.net.client.WebSocketClient;
-import wxdgaming.spring.boot.net.server.ServerMessageAction;
+import wxdgaming.spring.boot.net.client.*;
+import wxdgaming.spring.boot.net.server.ServerMessageDecode;
+import wxdgaming.spring.boot.net.server.ServerMessageEncode;
 import wxdgaming.spring.boot.net.server.SocketServerDeviceHandler;
 import wxdgaming.spring.boot.net.server.SocketService;
 
@@ -34,39 +32,55 @@ public class SocketTest {
         messageDispatcher.registerMessage(Thread.currentThread().getContextClassLoader(), "a");
         bootstrapConfig = new BootstrapConfig();
         bootstrapConfig.init();
-        socketService = new SocketService(bootstrapConfig, new SocketServerDeviceHandler(new ServerMessageAction(messageDispatcher) {
-            @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
-                log.info("收到消息：ctx={}, message={}", session, new String(messageBytes, StandardCharsets.UTF_8));
-                send(session, "socket server");
-            }
+        socketService = new SocketService(
+                bootstrapConfig,
+                new SocketServerDeviceHandler(),
+                new ServerMessageDecode(true, messageDispatcher) {
+                    @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
+                        log.info("收到消息：ctx={}, message={}", session, new String(messageBytes, StandardCharsets.UTF_8));
+                        send(session, "socket server");
+                    }
 
-            @Override public void action(SocketSession session, String message) throws Exception {
-                super.action(session, message);
-                session.writeAndFlush("socket server textWebSocketFrame");
-            }
+                    @Override public void action(SocketSession session, String message) throws Exception {
+                        super.action(session, message);
+                        session.writeAndFlush("socket server textWebSocketFrame");
+                    }
 
-        }, true));
+                },
+                new ServerMessageEncode(messageDispatcher)
+        );
         socketService.init();
         socketService.start();
 
-        socketClient = new SocketClient(bootstrapConfig, new SocketClientDeviceHandler(new ClientMessageAction(messageDispatcher) {
+        socketClient = new SocketClient(
+                bootstrapConfig,
+                new SocketClientDeviceHandler(),
+                new ClientMessageDecode(true, messageDispatcher) {
 
-            @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
-                log.info("收到消息：ctx={}, message={}", session, new String(messageBytes, StandardCharsets.UTF_8));
-            }
+                    @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
+                        log.info("收到消息：ctx={}, message={}", session, new String(messageBytes, StandardCharsets.UTF_8));
+                    }
 
-        }, true));
+                },
+                new ClientMessageEncode(messageDispatcher)
+        );
         socketClient.setHost("127.0.0.1");
         socketClient.setPort(bootstrapConfig.getTcpPort());
         socketClient.init();
 
-        webSocketClient = new WebSocketClient(bootstrapConfig, new SocketClientDeviceHandler(new ClientMessageAction(messageDispatcher) {
+        webSocketClient = new WebSocketClient(
+                bootstrapConfig,
+                new SocketClientDeviceHandler(),
+                new ClientMessageDecode(true, messageDispatcher) {
 
-            @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
-                log.info("收到消息：ctx={}, message={}", session, new String(messageBytes, StandardCharsets.UTF_8));
-            }
+                    @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
+                        log.info("收到消息：ctx={}, message={}", session, new String(messageBytes, StandardCharsets.UTF_8));
+                    }
 
-        }, true));
+                },
+                new ClientMessageEncode(messageDispatcher)
+        );
+
         webSocketClient.setHost("127.0.0.1");
         webSocketClient.setPort(bootstrapConfig.getTcpPort());
         webSocketClient.init();

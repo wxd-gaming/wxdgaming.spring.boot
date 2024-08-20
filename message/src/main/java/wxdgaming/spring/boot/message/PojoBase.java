@@ -1,6 +1,8 @@
 package wxdgaming.spring.boot.message;
 
 
+import wxdgaming.spring.boot.core.json.FastJsonUtil;
+
 /**
  * protobuf 映射 基类
  *
@@ -17,6 +19,10 @@ public class PojoBase {
     /** 解码 */
     public void decode(byte[] bytes) {
         SerializerUtil.decode(bytes, this);
+    }
+
+    @Override public String toString() {
+        return this.getClass().getSimpleName() + FastJsonUtil.toJson(this);
     }
 
 }

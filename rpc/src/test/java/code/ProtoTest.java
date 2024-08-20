@@ -26,8 +26,7 @@ public class ProtoTest {
     public void t1() {
         RpcMessage.ReqRemote builder = new RpcMessage.ReqRemote();
         builder.setRpcId(1);
-        builder.setGzip(1);
-        builder.setCmd("ss");
+        builder.setPath("ss");
         builder.setParams("1");
         builder.setRpcToken("1");
         byte[] encode1 = SerializerUtil.encode(builder);

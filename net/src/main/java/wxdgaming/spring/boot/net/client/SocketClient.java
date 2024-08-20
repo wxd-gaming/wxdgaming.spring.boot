@@ -29,13 +29,20 @@ public class SocketClient {
 
     protected final BootstrapConfig bootstrapConfig;
     protected final SocketClientDeviceHandler socketClientDeviceHandler;
+    protected final ClientMessageDecode clientMessageDecode;
+    protected final ClientMessageEncode clientMessageEncode;
     @Setter protected String host;
     @Setter protected int port;
     protected Bootstrap bootstrap;
 
-    public SocketClient(BootstrapConfig bootstrapConfig, SocketClientDeviceHandler socketClientDeviceHandler) {
+    public SocketClient(BootstrapConfig bootstrapConfig,
+                        SocketClientDeviceHandler socketClientDeviceHandler,
+                        ClientMessageDecode clientMessageDecode,
+                        ClientMessageEncode clientMessageEncode) {
         this.bootstrapConfig = bootstrapConfig;
         this.socketClientDeviceHandler = socketClientDeviceHandler;
+        this.clientMessageDecode = clientMessageDecode;
+        this.clientMessageEncode = clientMessageEncode;
     }
 
     public void init() {
@@ -63,7 +70,12 @@ public class SocketClient {
                         if (idleTime > 0) {
                             pipeline.addLast(new IdleStateHandler(0, 0, idleTime, TimeUnit.SECONDS));
                         }
+                        /*处理链接*/
                         pipeline.addLast("device-handler", socketClientDeviceHandler);
+                        /*解码消息*/
+                        pipeline.addLast("decode", clientMessageDecode);
+                        /*解码消息*/
+                        pipeline.addLast("encode", clientMessageEncode);
                         addChanelHandler(socketChannel, pipeline);
                     }
                 });

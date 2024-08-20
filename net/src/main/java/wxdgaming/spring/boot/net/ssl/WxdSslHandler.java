@@ -12,21 +12,21 @@ import java.util.concurrent.Executor;
  * @version: 2021-09-30 12:06
  **/
 @Slf4j
-public class WxSslHandler extends io.netty.handler.ssl.SslHandler implements Serializable {
+public class WxdSslHandler extends io.netty.handler.ssl.SslHandler implements Serializable {
 
-    public WxSslHandler(SSLEngine engine) {
+    public WxdSslHandler(SSLEngine engine) {
         super(engine);
     }
 
-    public WxSslHandler(SSLEngine engine, boolean startTls) {
+    public WxdSslHandler(SSLEngine engine, boolean startTls) {
         super(engine, startTls);
     }
 
-    public WxSslHandler(SSLEngine engine, Executor delegatedTaskExecutor) {
+    public WxdSslHandler(SSLEngine engine, Executor delegatedTaskExecutor) {
         super(engine, delegatedTaskExecutor);
     }
 
-    public WxSslHandler(SSLEngine engine, boolean startTls, Executor delegatedTaskExecutor) {
+    public WxdSslHandler(SSLEngine engine, boolean startTls, Executor delegatedTaskExecutor) {
         super(engine, startTls, delegatedTaskExecutor);
     }
 

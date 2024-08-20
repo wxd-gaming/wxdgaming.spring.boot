@@ -22,9 +22,11 @@ import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ssl.SslContextServer;
 import wxdgaming.spring.boot.core.ssl.SslProtocolType;
 import wxdgaming.spring.boot.core.threading.ThreadNameFactory;
-import wxdgaming.spring.boot.net.client.ClientMessageAction;
+import wxdgaming.spring.boot.net.client.ClientMessageDecode;
+import wxdgaming.spring.boot.net.client.ClientMessageEncode;
 import wxdgaming.spring.boot.net.client.SocketClientDeviceHandler;
-import wxdgaming.spring.boot.net.server.ServerMessageAction;
+import wxdgaming.spring.boot.net.server.ServerMessageDecode;
+import wxdgaming.spring.boot.net.server.ServerMessageEncode;
 import wxdgaming.spring.boot.net.server.SocketServerDeviceHandler;
 
 import javax.net.ssl.SSLContext;
@@ -99,33 +101,49 @@ public class BootstrapConfig implements InitPrint {
     }
 
     @Bean
-    @ConditionalOnMissingBean(ServerMessageAction.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public ServerMessageAction serverMessageAction(MessageDispatcher messageDispatcher) {
-        ServerMessageAction messageAction = new ServerMessageAction(messageDispatcher) {};
-        log.debug("default ServerMessageAction = {}", messageAction.hashCode());
-        return messageAction;
+    @ConditionalOnMissingBean(ServerMessageEncode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    public ServerMessageEncode serverMessageEncode(MessageDispatcher messageDispatcher) {
+        ServerMessageEncode encode = new ServerMessageEncode(messageDispatcher) {};
+        log.debug("default ServerMessageEncode = {}", encode.hashCode());
+        return encode;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ServerMessageDecode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    public ServerMessageDecode serverMessageDecode(MessageDispatcher messageDispatcher) {
+        ServerMessageDecode decode = new ServerMessageDecode(true, messageDispatcher) {};
+        log.debug("default ServerMessageDecode = {}", decode.hashCode());
+        return decode;
     }
 
     @Bean
     @ConditionalOnMissingBean(SocketServerDeviceHandler.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public SocketServerDeviceHandler socketServerDeviceHandler(ServerMessageAction messageAction) {
-        SocketServerDeviceHandler deviceHandler = new SocketServerDeviceHandler(messageAction, true);
+    public SocketServerDeviceHandler socketServerDeviceHandler() {
+        SocketServerDeviceHandler deviceHandler = new SocketServerDeviceHandler();
         log.debug("default SocketServerDeviceHandler = {}", deviceHandler.hashCode());
         return deviceHandler;
     }
 
     @Bean
-    @ConditionalOnMissingBean(ClientMessageAction.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public ClientMessageAction clientMessageAction(MessageDispatcher messageDispatcher) {
-        ClientMessageAction messageAction = new ClientMessageAction(messageDispatcher) {};
-        log.debug("default ClientMessageAction = {}", messageAction.hashCode());
-        return messageAction;
+    @ConditionalOnMissingBean(ClientMessageEncode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    public ClientMessageEncode clientMessageEncode(MessageDispatcher messageDispatcher) {
+        ClientMessageEncode decode = new ClientMessageEncode(messageDispatcher) {};
+        log.debug("default ClientMessageEncode = {}", decode.hashCode());
+        return decode;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ClientMessageDecode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    public ClientMessageDecode clientMessageDecode(MessageDispatcher messageDispatcher) {
+        ClientMessageDecode decode = new ClientMessageDecode(true, messageDispatcher) {};
+        log.debug("default ClientMessageDecode = {}", decode.hashCode());
+        return decode;
     }
 
     @Bean
     @ConditionalOnMissingBean(SocketClientDeviceHandler.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public SocketClientDeviceHandler clientDeviceHandler(ClientMessageAction messageAction) {
-        SocketClientDeviceHandler deviceHandler = new SocketClientDeviceHandler(messageAction, true);
+    public SocketClientDeviceHandler clientDeviceHandler() {
+        SocketClientDeviceHandler deviceHandler = new SocketClientDeviceHandler();
         log.debug("default SocketClientDeviceHandler = {}", deviceHandler.hashCode());
         return deviceHandler;
     }

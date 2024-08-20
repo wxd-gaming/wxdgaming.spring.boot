@@ -20,20 +20,10 @@ import java.util.Optional;
  * @version: 2020-12-26 15:03
  **/
 @Getter
-public abstract class SocketDeviceHandler<T extends MessageAction> extends ChannelInboundHandlerAdapter {
+public abstract class SocketDeviceHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(SocketDeviceHandler.class);
 
-    private final T messageAction;
-    private final boolean autoRelease;
-
-    /**
-     * @param autoRelease 是否自动调用{@link ByteBuf#release()}
-     */
-    public SocketDeviceHandler(T messageAction, boolean autoRelease) {
-        this.messageAction = messageAction;
-        this.autoRelease = autoRelease;
-    }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -100,75 +90,6 @@ public abstract class SocketDeviceHandler<T extends MessageAction> extends Chann
             if (cause instanceof OutOfDirectMemoryError) {
                 GlobalUtil.exception(ctxName, cause);
             }
-        }
-    }
-
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        try {
-            ctx.flush();
-        } finally {
-            super.channelReadComplete(ctx);
-        }
-    }
-
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        boolean release = false;
-        try {
-            channelRead0(ctx, msg);
-        } catch (Throwable throwable) {
-            release = true;
-            throw throwable;
-        } finally {
-            if (autoRelease || release) {
-                ByteBufUtil.release(msg);
-            }
-        }
-    }
-
-    protected void channelRead0(ChannelHandlerContext ctx, Object object) throws Exception {
-        switch (object) {
-            case WebSocketFrame webSocketFrame -> {
-                // 处理websocket客户端的消息
-                handlerWebSocketFrame(ctx, webSocketFrame);
-                break;
-            }
-            case ByteBuf byteBuf -> {
-                messageAction.readBytes(ctx, byteBuf);
-                break;
-            }
-            default -> {
-                if (log.isDebugEnabled()) {
-                    log.debug("{} 未知处理类型：{}", ChannelUtil.ctxTostring(ctx), object.getClass().getName());
-                }
-                ctx.disconnect();
-                ctx.close();
-            }
-        }
-    }
-
-    protected void handlerWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
-        try {
-            SocketSession session = ChannelUtil.session(ctx.channel());
-            switch (frame) {
-                case PingWebSocketFrame pingWebSocketFrame ->
-                    /*判断是否ping消息*/
-                        ctx.writeAndFlush(new PongWebSocketFrame(frame.content().retain()));
-                case BinaryWebSocketFrame binaryWebSocketFrame -> {
-                    /*二进制数据*/
-                    ByteBuf byteBuf = Unpooled.wrappedBuffer(binaryWebSocketFrame.content());
-                    messageAction.readBytes(ctx, byteBuf);
-                }
-                case TextWebSocketFrame textWebSocketFrame -> {
-                    /*文本数据*/
-                    String request = textWebSocketFrame.text();
-                    messageAction.action(session, request);
-                }
-                default -> log.warn("无法处理：{}", frame.getClass().getName());
-            }
-        } catch (Throwable e) {
-            log.error("处理消息异常", e);
         }
     }
 

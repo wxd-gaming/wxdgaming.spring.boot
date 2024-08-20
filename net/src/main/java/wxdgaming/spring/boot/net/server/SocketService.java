@@ -8,14 +8,13 @@ import io.netty.handler.timeout.IdleStateHandler;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.system.BytesUnit;
 import wxdgaming.spring.boot.net.BootstrapConfig;
-import wxdgaming.spring.boot.net.ssl.WxOptionalSslHandler;
+import wxdgaming.spring.boot.net.ssl.WxdOptionalSslHandler;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -35,13 +34,19 @@ public class SocketService implements Closeable, InitPrint {
 
     private final BootstrapConfig bootstrapConfig;
     private final SocketServerDeviceHandler socketServerDeviceHandler;
+    private final ServerMessageDecode serverMessageDecode;
+    private final ServerMessageEncode serverMessageEncode;
     private ServerBootstrap bootstrap = null;
     private ChannelFuture future = null;
 
-    @Autowired
-    public SocketService(BootstrapConfig bootstrapConfig, SocketServerDeviceHandler socketServerDeviceHandler) {
+    public SocketService(BootstrapConfig bootstrapConfig,
+                         SocketServerDeviceHandler socketServerDeviceHandler,
+                         ServerMessageDecode serverMessageDecode,
+                         ServerMessageEncode serverMessageEncode) {
         this.bootstrapConfig = bootstrapConfig;
         this.socketServerDeviceHandler = socketServerDeviceHandler;
+        this.serverMessageDecode = serverMessageDecode;
+        this.serverMessageEncode = serverMessageEncode;
     }
 
     @PostConstruct
@@ -74,7 +79,7 @@ public class SocketService implements Closeable, InitPrint {
                             pipeline.addLast(new LoggingHandler("DEBUG"));// 设置log监听器，并且日志级别为debug，方便观察运行流程
                         }
 
-                        pipeline.addFirst(new WxOptionalSslHandler(bootstrapConfig.getSslContext()));
+                        pipeline.addFirst(new WxdOptionalSslHandler(bootstrapConfig.getSslContext()));
 
                         int idleTime = bootstrapConfig.getServerSessionIdleTime();
                         if (idleTime > 0) {
@@ -83,8 +88,12 @@ public class SocketService implements Closeable, InitPrint {
                         }
                         /* socket 选择器 区分是tcp websocket http*/
                         pipeline.addLast("socket-choose-handler", new ServerSocketChooseHandler(bootstrapConfig));
-                        /*真正处理消息*/
+                        /*处理链接*/
                         pipeline.addLast("device-handler", socketServerDeviceHandler);
+                        /*解码消息*/
+                        pipeline.addLast("decode", serverMessageDecode);
+                        /*解码消息*/
+                        pipeline.addLast("encode", serverMessageEncode);
                     }
 
                 });

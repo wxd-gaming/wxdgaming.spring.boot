@@ -1,25 +1,93 @@
 package wxdgaming.spring.boot.net;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.AttributeKey;
+import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.core.LogbackUtil;
 import wxdgaming.spring.boot.message.SerializerUtil;
 
 /**
- * 消息处理器
+ * 消息解码，收到消息处理
  *
  * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-08-15 11:03
+ * @version: 2024-08-20 09:09
  **/
-public abstract class MessageAction {
+@Slf4j
+public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
 
     public static final AttributeKey<ByteBuf> byteBufAttributeKey = AttributeKey.<ByteBuf>valueOf("__ctx_byteBuf__");
 
-    protected MessageDispatcher dispatcher;
+    protected final boolean autoRelease;
+    protected final MessageDispatcher dispatcher;
 
-    public MessageAction(MessageDispatcher dispatcher) {
+    public MessageDecode(boolean autoRelease, MessageDispatcher dispatcher) {
+        this.autoRelease = autoRelease;
         this.dispatcher = dispatcher;
+    }
+
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        boolean release = false;
+        try {
+            channelRead0(ctx, msg);
+        } catch (Throwable throwable) {
+            release = true;
+            throw throwable;
+        } finally {
+            if (autoRelease || release) {
+                ByteBufUtil.release(msg);
+            }
+        }
+    }
+
+    protected void channelRead0(ChannelHandlerContext ctx, Object object) throws Exception {
+        switch (object) {
+            case WebSocketFrame webSocketFrame -> {
+                // 处理websocket客户端的消息
+                handlerWebSocketFrame(ctx, webSocketFrame);
+                break;
+            }
+            case ByteBuf byteBuf -> {
+                readBytes(ctx, byteBuf);
+                break;
+            }
+            default -> {
+                if (log.isDebugEnabled()) {
+                    log.debug("{} 未知处理类型：{}", ChannelUtil.ctxTostring(ctx), object.getClass().getName());
+                }
+                ctx.disconnect();
+                ctx.close();
+            }
+        }
+    }
+
+    protected void handlerWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
+        try {
+            SocketSession session = ChannelUtil.session(ctx.channel());
+            switch (frame) {
+                case PingWebSocketFrame pingWebSocketFrame ->
+                    /*判断是否ping消息*/
+                        ctx.writeAndFlush(new PongWebSocketFrame(frame.content().retain()));
+                case BinaryWebSocketFrame binaryWebSocketFrame -> {
+                    /*二进制数据*/
+                    ByteBuf byteBuf = Unpooled.wrappedBuffer(binaryWebSocketFrame.content());
+                    readBytes(ctx, byteBuf);
+                }
+                case TextWebSocketFrame textWebSocketFrame -> {
+                    /*文本数据*/
+                    String request = textWebSocketFrame.text();
+                    action(session, request);
+                }
+                default -> log.warn("无法处理：{}", frame.getClass().getName());
+            }
+        } catch (Throwable e) {
+            log.error("处理消息异常", e);
+        }
     }
 
     protected void readBytes(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
@@ -80,5 +148,4 @@ public abstract class MessageAction {
     protected void action(SocketSession socketSession, String message) throws Exception {
         LogbackUtil.logger().info("收到消息：ctx={}, message={}", socketSession.toString(), message);
     }
-
 }

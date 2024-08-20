@@ -10,12 +10,7 @@ import wxdgaming.spring.boot.net.SocketDeviceHandler;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-16 09:05
  **/
-@Slf4j
 @ChannelHandler.Sharable
-public class SocketClientDeviceHandler extends SocketDeviceHandler<ClientMessageAction> {
-
-    public SocketClientDeviceHandler(ClientMessageAction messageAction, boolean autoRelease) {
-        super(messageAction, autoRelease);
-    }
+public class SocketClientDeviceHandler extends SocketDeviceHandler {
 
 }

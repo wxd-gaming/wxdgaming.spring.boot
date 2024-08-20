@@ -36,8 +36,11 @@ public class WebSocketClient extends SocketClient {
     /** 包含的http head参数 */
     protected final HttpHeaders httpHeaders = new DefaultHttpHeaders();
 
-    public WebSocketClient(BootstrapConfig bootstrapConfig, SocketClientDeviceHandler socketClientDeviceHandler) {
-        super(bootstrapConfig, socketClientDeviceHandler);
+    public WebSocketClient(BootstrapConfig bootstrapConfig,
+                           SocketClientDeviceHandler socketClientDeviceHandler,
+                           ClientMessageDecode clientMessageDecode,
+                           ClientMessageEncode clientMessageEncode) {
+        super(bootstrapConfig, socketClientDeviceHandler, clientMessageDecode, clientMessageEncode);
     }
 
     @Override public void init() {
