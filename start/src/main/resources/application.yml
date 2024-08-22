@@ -26,7 +26,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   profiles:
-    active: redis
+    active: redis,mysql
   mvc:
     static-path-pattern: /**
   thymeleaf:

@@ -1,5 +1,5 @@
 function t1()
-    local ts = tostring(os.time())
+    local ts = os.time()
     print("1-1 lua script holle world " .. type(ts) .. " " .. ts .. " " .. printThreadInfo())
 end
 
