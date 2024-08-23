@@ -116,19 +116,20 @@
                 <version>2.16.1</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.bcel</groupId>
-                <artifactId>bcel</artifactId>
-                <version>6.7.0</version>
+                <groupId>party.iroiro.luajava</groupId>
+                <artifactId>luajava</artifactId>
+                <version>4.0.1</version>
             </dependency>
             <dependency>
-                <groupId>org.luaj</groupId>
-                <artifactId>luaj-jse</artifactId>
-                <version>3.0.1</version>
+                <groupId>party.iroiro.luajava</groupId>
+                <artifactId>lua54</artifactId>
+                <version>4.0.1</version>
             </dependency>
             <dependency>
-                <groupId>org.luaj</groupId>
-                <artifactId>luaj-jme</artifactId>
-                <version>3.0.1</version>
+                <groupId>party.iroiro.luajava</groupId>
+                <artifactId>lua54-platform</artifactId>
+                <version>4.0.1</version>
+                <classifier>natives-desktop</classifier>
             </dependency>
             <!--计算对象占用内存大小-->
             <dependency>

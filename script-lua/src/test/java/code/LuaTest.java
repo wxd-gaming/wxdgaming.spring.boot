@@ -2,15 +2,14 @@ package code;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.Varargs;
-import org.luaj.vm2.lib.VarArgFunction;
+import party.iroiro.luajava.Lua;
 import wxdgaming.spring.boot.core.io.FileUtil;
-import wxdgaming.spring.boot.lua.LuaBus;
+import wxdgaming.spring.boot.lua.JavaFunction;
+import wxdgaming.spring.boot.lua.LuaEventBus;
+import wxdgaming.spring.boot.lua.LuaLogger;
 
 import java.io.File;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
+import java.util.Arrays;
 
 /**
  * 测试lua
@@ -40,7 +39,7 @@ public class LuaTest {
 
     }
 
-    protected static LuaBus luaBus = null;
+    protected static LuaEventBus luaEventBus = null;
 
     static int forCount = 5000;
 
@@ -51,140 +50,18 @@ public class LuaTest {
     public static void main(String[] args) throws Exception {
         System.out.println(System.currentTimeMillis() + " - " + System.getProperty("user.dir"));
         // luaBus = LuaBus.buildFromResources(Thread.currentThread().getContextClassLoader(), "script/");
-        luaBus = LuaBus.buildFromDirs("script-lua/src/main/lua");
-        luaBus.set("objVar", 1);
+        luaEventBus = LuaEventBus.buildFromDirs("script-lua/src/main/lua");
+        luaEventBus.set("objVar", 1);
+        luaEventBus.set("jlog", LuaLogger.getIns());
         /*注册函数*/
-        luaBus.set("testfun0", new VarArgFunction() {
-
-            @Override public Varargs onInvoke(Varargs args) {
-                /*参数的数量*/
-                int narg = args.narg();
-                System.out.println(narg + " - " + args.toString());
-                return LuaValue.valueOf("无参");
+        luaEventBus.set("testfun0", new JavaFunction() {
+            @Override public Object doAction(Lua L, Object[] args) {
+                log.info("{}", Arrays.toString(args));
+                return "java 返回值";
             }
         });
-        /*注册函数*/
-        luaBus.set("testfun1", new VarArgFunction() {
-
-            @Override public Varargs onInvoke(Varargs args) {
-                /*参数的数量*/
-                int narg = args.narg();
-                LuaValue checkvalue = args.checkvalue(1);
-                System.out.println(narg + " - " + args.toString());
-                return LuaValue.valueOf("testfun1");
-            }
-        });
-
-        /*注册函数*/
-        luaBus.set("testfun2", new VarArgFunction() {
-
-            @Override public Varargs onInvoke(Varargs args) {
-                /*参数的数量*/
-                int narg = args.narg();
-                LuaValue v1 = args.checkvalue(1);
-                LuaValue v2 = args.checkvalue(2);
-                System.out.println(narg + " - " + args.toString());
-                return LuaValue.valueOf("testfun2");
-            }
-        });
-
-        Thread.sleep(500);
-        luaBus.forExecTry("t1");
-        /* Thread.sleep(500);
-        testString();
-
-        luaBus.forExecTry("login");
-        Thread.sleep(500);
-
-        luaBus.forExecTry("t2_2", (file, value) -> {
-            System.out.println(value);
-        });
-        Thread.sleep(500);
-
-        luaBus.forExecTry("t2_2", 1, (file, value) -> {
-            System.out.println(value);
-        });
-        Thread.sleep(500); */
-
-        // test("t3");
-        // Thread.sleep(3000);
-        // test("t3");
-        // Thread.sleep(3000);
-        // test("t4");
-        // Thread.sleep(3000);
-        // test("t4");
-        // Thread.sleep(3000);
-        // test("t2_2");
-        // Thread.sleep(3000);
-        // test("t2_2");
-        // Thread.sleep(3000);
-
+        luaEventBus.call("login");
     }
 
-    public static void testString() throws Exception {
-        LuaValue chunk = luaBus.globalPoolNew("main")
-                .loadString("print(\"holle world \" .. tostring(os.time()))");
-        for (int i = 0; i < 1; i++) {
-            CompletableFuture.runAsync(() -> chunk.call())
-                    .exceptionally(ex -> {
-                        ex.printStackTrace(System.out);
-                        return null;
-                    });
-        }
-
-    }
-
-    public static void test(String method_name) throws Exception {
-        CountDownLatch countDownLatch = new CountDownLatch(forCount);
-        long l = System.currentTimeMillis();
-        for (int i = 0; i < forCount; i++) {
-            // luaBus.exec("t2", i + " - " + String.valueOf(System.currentTimeMillis()));
-            luaBus.execUserdataAsync(method_name, new M(i))
-                    .thenApply((value) -> {
-                        // log.info("{}", value);
-                        countDownLatch.countDown();
-                        return null;
-                    });
-        }
-        countDownLatch.await();
-        long l1 = System.currentTimeMillis() - l;
-        System.out.println("执行：" + method_name + ", " + forCount + " 次, 耗时：" + l1 + " ms");
-    }
-
-    public static class M {
-
-        private final int i;
-
-        public M(int i) {
-            this.i = i;
-        }
-
-        public void log_info(String msg) {
-            log.info(msg);
-        }
-
-        public int index() {
-            return i;
-        }
-
-        public String gString() {
-            // return LuaValue.valueOf("g1");
-            return "gString";
-        }
-
-        public LuaValue gStringValue() {
-            return LuaValue.valueOf("gStringValue");
-        }
-
-        public LuaValue gValue() {
-            return LuaValue.listOf(
-                    new LuaValue[]{
-                            LuaValue.valueOf("gValue"),
-                            LuaValue.valueOf(i)
-                    }
-            );
-        }
-
-    }
 
 }

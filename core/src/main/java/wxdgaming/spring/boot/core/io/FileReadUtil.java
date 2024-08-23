@@ -11,6 +11,7 @@ import wxdgaming.spring.boot.core.zip.ReadZipFile;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,7 +42,7 @@ public class FileReadUtil implements Serializable {
     }
 
     /** 递归查找所有文件 */
-    public static void readBytesAll(File file, String[] extendNames, Consumer2<String, byte[]> call) {
+    public static void readBytesAll(Path file, String[] extendNames, Consumer2<String, byte[]> call) {
         FileUtil.walkFiles(file, extendNames)
                 .forEach(f -> call.accept(f.getPath(), readBytes(f)));
     }

@@ -50,10 +50,10 @@ import java.util.List;
                 DataBatisScan.class,
                 DataRedisScan.class,
                 DataExcelScan.class,
-                WebScan.class,
-                WebLuaScan.class,
                 NetScan.class,
                 RpcScan.class,
+                WebScan.class,
+                WebLuaScan.class,
         },
         exclude = {
                 DataSourceAutoConfiguration.class,

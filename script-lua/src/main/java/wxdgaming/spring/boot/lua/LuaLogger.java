@@ -1,7 +1,7 @@
-package wxdgaming.spring.boot.weblua.service;
+package wxdgaming.spring.boot.lua;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
 
 /**
@@ -11,8 +11,9 @@ import wxdgaming.spring.boot.core.InitPrint;
  * @version: 2024-08-07 20:07
  **/
 @Slf4j
-@Service
-public class LuaLoggerService implements InitPrint {
+public class LuaLogger implements InitPrint {
+
+    @Getter private static final LuaLogger ins = new LuaLogger();
 
     public void debug(String msg) {
         log.debug(msg);

@@ -7,11 +7,13 @@ import wxdgaming.spring.boot.core.lang.Record2;
 import wxdgaming.spring.boot.core.zip.ReadZipFile;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 /**
@@ -179,7 +181,7 @@ public class FileUtil implements Serializable {
     public static void downloadFile(String url, String saveFileName) {
         try {
             long millis = System.currentTimeMillis();
-            URL url1 = new URL(url);
+            URL url1 = URI.create(url).toURL();
             try (InputStream inputStream = url1.openStream()) {
                 File file = new File(saveFileName);
                 FileWriteUtil.fileOutputStream(
@@ -229,10 +231,10 @@ public class FileUtil implements Serializable {
     /**
      * 删除文件 或者 文件夹
      *
-     * @param fileName
+     * @param filePath 需要删除的文件或者文件夹
      */
-    public static void del(String fileName) {
-        del(new File(fileName));
+    public static void del(String filePath) {
+        del(Paths.get(filePath));
     }
 
     /**
@@ -240,7 +242,7 @@ public class FileUtil implements Serializable {
      *
      * @param file
      */
-    public static void del(File file) {
+    public static void del(Path file) {
         Stream<File> walk = walk(file);
         walk.forEach(f -> {
             boolean delete = f.delete();
@@ -289,7 +291,7 @@ public class FileUtil implements Serializable {
     }
 
     /** 所有的文件 */
-    public static Stream<File> walkFiles(File path, String... extendNames) {
+    public static Stream<File> walkFiles(Path path, String... extendNames) {
         return walkFiles(path, Integer.MAX_VALUE, extendNames);
     }
 
@@ -298,7 +300,7 @@ public class FileUtil implements Serializable {
         return walk(path, maxDepth, extendNames).filter(File::isFile);
     }
 
-    public static Stream<File> walkFiles(File path, int maxDepth, String... extendNames) {
+    public static Stream<File> walkFiles(Path path, int maxDepth, String... extendNames) {
         return walk(path, maxDepth, extendNames).filter(File::isFile);
     }
 
@@ -315,12 +317,11 @@ public class FileUtil implements Serializable {
      * @return
      */
     public static Stream<File> walk(String path, int maxDepth, String... extendNames) {
-        File file = new File(path);
-        return walk(file, maxDepth, extendNames);
+        return walk(Paths.get(path), maxDepth, extendNames);
     }
 
     /** 查找所有文件, 文件夹 */
-    public static Stream<File> walk(File path, String... extendNames) {
+    public static Stream<File> walk(Path path, String... extendNames) {
         return walk(path, Integer.MAX_VALUE, extendNames);
     }
 
@@ -331,20 +332,9 @@ public class FileUtil implements Serializable {
      * @param maxDepth 深度 当前目录是1
      * @return
      */
-    public static Stream<File> walk(File path, int maxDepth, String... extendNames) {
-        if (path.exists()) return walk(path.toPath(), maxDepth, extendNames);
-        return Stream.of();
-    }
-
-    /**
-     * 查找文件, 文件夹
-     *
-     * @param path        路径
-     * @param maxDepth    深度 当前目录是1
-     * @param extendNames 查找的扩展名
-     * @return
-     */
     public static Stream<File> walk(Path path, int maxDepth, String... extendNames) {
+        if (!Files.exists(path))
+            return Stream.of();
         try {
             Stream<File> walk = Files.walk(path, maxDepth).map(Path::toFile);
             if (extendNames.length > 0) {

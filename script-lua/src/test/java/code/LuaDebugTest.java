@@ -1,21 +1,17 @@
 package code;
 
 import org.junit.Test;
-import org.luaj.vm2.Globals;
-import org.luaj.vm2.lib.jse.JsePlatform;
-import org.luaj.vm2.luajc.LuaJC;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
+import wxdgaming.spring.boot.lua.LuaRuntime;
 
 public class LuaDebugTest {
 
 
     @Test
     public void t0() {
-        Globals globals = JsePlatform.debugGlobals();
+        LuaRuntime luaRuntime = new LuaRuntime("test");
         // LuaJC.install(globals);
-        globals.loadfile("src/test/lua/test.lua").call();
-
-
+        luaRuntime.loadfile("src/test/lua/test.lua");
     }
 
 

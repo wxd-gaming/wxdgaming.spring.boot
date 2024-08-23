@@ -3,7 +3,6 @@ package wxdgaming.spring.boot.weblua.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.luaj.vm2.LuaValue;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,12 +50,8 @@ public class LuaApiController implements InitPrint {
         servletPath = servletPath.substring(index, len);
         servletPath = servletPath.replace("/", "_");
 
-        LuaValue[] luaValues = luaService.parse(request, response, body);
-        LuaValue lua_func = luaService.get(servletPath);
-        if (lua_func == null || lua_func == LuaValue.NIL) {
-            lua_func = luaService.get("root");
-        }
-        lua_func.invoke(luaValues);
+        luaService.getGlobals().context().call(servletPath, request, response, body);
+
     }
 
 }

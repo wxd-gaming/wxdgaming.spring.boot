@@ -5,6 +5,7 @@ import wxdgaming.spring.boot.core.Throw;
 import wxdgaming.spring.boot.core.io.FileUtil;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -653,7 +654,7 @@ public class MyClock {
      * @param filePath 文件路径，会递归查找路径下的所有文件
      * @param names    文件的后缀名
      */
-    public static void clearFile(int fileDays, File filePath, String... names) {
+    public static void clearFile(int fileDays, Path filePath, String... names) {
         try {
             FileUtil.walkFiles(filePath, names)
                     .sorted(Comparator.reverseOrder())

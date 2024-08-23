@@ -1,22 +1,15 @@
 package wxdgaming.spring.boot.weblua.service;
 
-import io.netty.util.internal.ResourcesUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.luaj.vm2.Globals;
-import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.Varargs;
-import org.luaj.vm2.lib.jse.CoerceJavaToLua;
-import org.luaj.vm2.lib.jse.JsePlatform;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.io.FileReadUtil;
 import wxdgaming.spring.boot.core.io.FileUtil;
-
-import java.io.IOException;
+import wxdgaming.spring.boot.lua.LuaLogger;
+import wxdgaming.spring.boot.lua.LuaRuntime;
 
 /**
  * lua service
@@ -29,23 +22,21 @@ import java.io.IOException;
 @Service
 public class LuaService implements InitPrint {
 
-    final LuaLoggerService logger;
     final RedisTemplate<Object, Object> redisTemplate;
     final LuaResponseService luaResponseService;
-    Globals globals;
+    LuaRuntime globals;
 
-    public LuaService(LuaLoggerService logger, RedisTemplate<Object, Object> redisTemplate, LuaResponseService luaResponseService) {
-        this.logger = logger;
+    public LuaService(RedisTemplate<Object, Object> redisTemplate, LuaResponseService luaResponseService) {
         this.redisTemplate = redisTemplate;
         this.luaResponseService = luaResponseService;
     }
 
     @PostConstruct
-    public void init() throws IOException {
-        this.globals = JsePlatform.standardGlobals();
-        this.globals.set("responseUtil", CoerceJavaToLua.coerce(luaResponseService));
-        this.globals.set("logger", CoerceJavaToLua.coerce(logger));
-        this.globals.set("redisTemplate", CoerceJavaToLua.coerce(redisTemplate));
+    public void init() {
+        this.globals = new LuaRuntime("main");
+        this.globals.set("responseUtil", luaResponseService);
+        this.globals.set("jlog", LuaLogger.getIns());
+        this.globals.set("redisTemplate", redisTemplate);
         log.debug("redisTemplate hashCode: {}", redisTemplate.hashCode());
         FileUtil
                 .resourceStreams(this.getClass().getClassLoader(), "lua")
@@ -53,34 +44,11 @@ public class LuaService implements InitPrint {
                     try {
                         log.info("load lua {}", item.t1());
                         String string = FileReadUtil.readString(item.t2());
-                        this.globals.load(string, item.t1()).call();
+                        this.globals.load(string, item.t1());
                     } catch (Exception e) {
                         log.error("load lua error", e);
                     }
                 });
-    }
-
-    public LuaValue[] parse(Object... params) {
-        LuaValue[] luaValues = new LuaValue[params.length];
-        for (int i = 0; i < params.length; i++) {
-            luaValues[i] = CoerceJavaToLua.coerce(params[i]);
-        }
-        return luaValues;
-    }
-
-    public LuaValue get(String key) {
-        return this.globals.get(key);
-    }
-
-    public LuaValue func(String method, Object... params) {
-        LuaValue luaValue = this.globals.get(method);
-        LuaValue[] luaValues = parse(params);
-        Varargs invoke = luaValue.invoke(luaValues);
-        LuaValue ret = null;
-        if (invoke != null && invoke != LuaValue.NONE && invoke != LuaValue.NIL) {
-            ret = invoke.arg1();
-        }
-        return ret;
     }
 
 }

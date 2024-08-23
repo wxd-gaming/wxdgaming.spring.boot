@@ -18,16 +18,17 @@
             <version>1.0.1</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.bcel</groupId>
-            <artifactId>bcel</artifactId>
+            <groupId>party.iroiro.luajava</groupId>
+            <artifactId>luajava</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.luaj</groupId>
-            <artifactId>luaj-jse</artifactId>
+            <groupId>party.iroiro.luajava</groupId>
+            <artifactId>lua54</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.luaj</groupId>
-            <artifactId>luaj-jme</artifactId>
+            <groupId>party.iroiro.luajava</groupId>
+            <artifactId>lua54-platform</artifactId>
+            <classifier>natives-desktop</classifier>
         </dependency>
     </dependencies>
 
