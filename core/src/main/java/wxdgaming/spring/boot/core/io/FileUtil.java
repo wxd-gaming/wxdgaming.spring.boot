@@ -116,23 +116,28 @@ public class FileUtil implements Serializable {
             }
             if (!fileExists) {/*当本地文件不存在才查找资源文件*/
                 URL resource = classLoader.getResource(path);
-                if (findPath.startsWith("/")) {
-                    findPath = findPath.substring(1);
-                }
 
                 if (resource != null) {
-                    findPath = URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8);
-                    if (findPath.contains(".zip!") || findPath.contains(".jar!")) {
-                        findPath = findPath.substring(5, findPath.indexOf("!/"));
-                        try (ReadZipFile zipFile = new ReadZipFile(findPath)) {
-                            return zipFile.stream()
-                                    .filter(z -> !z.isDirectory())
-                                    .filter(p -> p.getName().startsWith(path))
-                                    .map(z -> new Record2<String, InputStream>(z.getName(), new ByteArrayInputStream(zipFile.unzipFile(z))))
-                                    .toList()
-                                    .stream();
+                    if ("file".equalsIgnoreCase(resource.getProtocol())) {
+                        File file1 = new File(resource.toURI());
+                        findPath= file1.toPath().toString();
+                    } else {
+                        findPath = URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8);
+                        if (findPath.contains(".zip!") || findPath.contains(".jar!")) {
+                            findPath = findPath.substring(5, findPath.indexOf("!/"));
+                            try (ReadZipFile zipFile = new ReadZipFile(findPath)) {
+                                return zipFile.stream()
+                                        .filter(z -> !z.isDirectory())
+                                        .filter(p -> p.getName().startsWith(path))
+                                        .map(z -> new Record2<String, InputStream>(z.getName(), new ByteArrayInputStream(zipFile.unzipFile(z))))
+                                        .toList()
+                                        .stream();
+                            }
                         }
                     }
+                }
+                if (findPath.startsWith("/")) {
+                    findPath = findPath.substring(1);
                 }
             }
             return walkFiles(findPath).map(file -> {

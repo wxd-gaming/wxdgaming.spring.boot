@@ -3,8 +3,11 @@
 --- Created by wxd-gaming.
 --- DateTime: 2024/7/28 下午2:49
 ---
+--require 'luajava'
 
-TimeUnit = luajava.bindClass("java.util.concurrent.TimeUnit");
+-- luaj 使用 TimeUnit = luajava.bindClass("java.util.concurrent.TimeUnit");
+
+TimeUnit = java.import("java.util.concurrent.TimeUnit");
 
 function urlPath(request)
     return request:getServletPath();

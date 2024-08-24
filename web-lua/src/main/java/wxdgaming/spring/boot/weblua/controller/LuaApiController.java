@@ -50,7 +50,7 @@ public class LuaApiController implements InitPrint {
         servletPath = servletPath.substring(index, len);
         servletPath = servletPath.replace("/", "_");
 
-        luaService.getGlobals().context().call(servletPath, request, response, body);
+        luaService.getLuaRuntime().context().call(servletPath, request, response, body);
 
     }
 

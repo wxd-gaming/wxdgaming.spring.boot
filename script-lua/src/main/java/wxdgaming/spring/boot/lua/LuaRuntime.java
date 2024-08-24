@@ -71,6 +71,8 @@ public class LuaRuntime implements Closeable {
     }
 
     public void load(String filePath, byte[] bytes) {
+        filePath = filePath.replace("\\", "/");
+        log.info("load lua {}", filePath);
         Buffer flip = ByteBuffer.allocateDirect(bytes.length).put(bytes).flip();
         lua54.run(flip, filePath);
     }

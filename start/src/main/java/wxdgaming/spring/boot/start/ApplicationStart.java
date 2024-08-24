@@ -106,18 +106,18 @@ public class ApplicationStart {
 
         UserRepository userRepository = run.getBean(UserRepository.class);
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             long nanoTime = System.nanoTime();
-            userRepository.save(new User().setUid(System.nanoTime()).setUserName(RandomStringUtils.randomAlphanumeric(32)));
+            userRepository.saveAndFlush(new User().setUid(System.nanoTime()).setUserName(RandomStringUtils.randomAlphanumeric(32)));
             log.info("插入 耗时：{} ms", (System.nanoTime() - nanoTime) / 10000 / 100f);
         }
         {
             List<User> users = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 100; i++) {
                 users.add(new User().setUid(System.nanoTime()).setUserName(RandomStringUtils.randomAlphanumeric(32)));
             }
             long nanoTime = System.nanoTime();
-            userRepository.saveAll(users);
+            userRepository.saveAllAndFlush(users);
             log.info("插入 耗时：{} ms", (System.nanoTime() - nanoTime) / 10000 / 100f);
         }
     }

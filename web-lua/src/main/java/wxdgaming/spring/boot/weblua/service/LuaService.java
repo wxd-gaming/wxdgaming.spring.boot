@@ -24,7 +24,7 @@ public class LuaService implements InitPrint {
 
     final RedisTemplate<Object, Object> redisTemplate;
     final LuaResponseService luaResponseService;
-    LuaRuntime globals;
+    LuaRuntime luaRuntime;
 
     public LuaService(RedisTemplate<Object, Object> redisTemplate, LuaResponseService luaResponseService) {
         this.redisTemplate = redisTemplate;
@@ -33,20 +33,19 @@ public class LuaService implements InitPrint {
 
     @PostConstruct
     public void init() {
-        this.globals = new LuaRuntime("main");
-        this.globals.set("responseUtil", luaResponseService);
-        this.globals.set("jlog", LuaLogger.getIns());
-        this.globals.set("redisTemplate", redisTemplate);
+        this.luaRuntime = new LuaRuntime("main");
+        this.luaRuntime.set("responseUtil", luaResponseService);
+        this.luaRuntime.set("jlog", LuaLogger.getIns());
+        this.luaRuntime.set("redisTemplate", redisTemplate);
         log.debug("redisTemplate hashCode: {}", redisTemplate.hashCode());
         FileUtil
                 .resourceStreams(this.getClass().getClassLoader(), "lua")
                 .forEach(item -> {
                     try {
-                        log.info("load lua {}", item.t1());
                         String string = FileReadUtil.readString(item.t2());
-                        this.globals.load(string, item.t1());
+                        this.luaRuntime.load(item.t1(), string);
                     } catch (Exception e) {
-                        log.error("load lua error", e);
+                        log.error("load lua error {}", item.t1(), e);
                     }
                 });
     }
