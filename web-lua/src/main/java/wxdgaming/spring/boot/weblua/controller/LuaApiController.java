@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import party.iroiro.luajava.value.LuaValue;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.weblua.service.LuaService;
 
@@ -33,6 +34,7 @@ public class LuaApiController implements InitPrint {
     @ResponseBody
     @RequestMapping("/lua/reload")
     public String reload() throws IOException {
+        luaService.init();
         return "ok";
     }
 
@@ -50,7 +52,7 @@ public class LuaApiController implements InitPrint {
         servletPath = servletPath.substring(index, len);
         servletPath = servletPath.replace("/", "_");
 
-        luaService.getLuaRuntime().context().call(servletPath, request, response, body);
+        LuaValue call = luaService.getLuaRuntime().context().call(servletPath, request, response, body);
 
     }
 

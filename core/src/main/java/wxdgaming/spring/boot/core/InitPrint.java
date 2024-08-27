@@ -12,7 +12,9 @@ public interface InitPrint {
 
     @PostConstruct
     default void __initPrint() {
-        LogbackUtil.logger().debug("\n{}\n", this.getClass().getName());
+        if (LogbackUtil.logger().isDebugEnabled()) {
+            LogbackUtil.logger().debug("{}", this.getClass().getName());
+        }
     }
 
 }

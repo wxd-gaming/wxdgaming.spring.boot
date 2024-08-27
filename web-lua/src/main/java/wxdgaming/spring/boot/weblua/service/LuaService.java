@@ -11,6 +11,8 @@ import wxdgaming.spring.boot.core.io.FileUtil;
 import wxdgaming.spring.boot.lua.LuaLogger;
 import wxdgaming.spring.boot.lua.LuaRuntime;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * lua service
  *
@@ -33,21 +35,35 @@ public class LuaService implements InitPrint {
 
     @PostConstruct
     public void init() {
-        this.luaRuntime = new LuaRuntime("main");
-        this.luaRuntime.set("responseUtil", luaResponseService);
-        this.luaRuntime.set("jlog", LuaLogger.getIns());
-        this.luaRuntime.set("redisTemplate", redisTemplate);
+        LuaRuntime main = new LuaRuntime("main");
+        main.set("responseUtil", luaResponseService);
+        main.set("jlog", LuaLogger.getIns());
+        main.set("redisTemplate", redisTemplate);
         log.debug("redisTemplate hashCode: {}", redisTemplate.hashCode());
         FileUtil
                 .resourceStreams(this.getClass().getClassLoader(), "lua")
                 .forEach(item -> {
                     try {
                         String string = FileReadUtil.readString(item.t2());
-                        this.luaRuntime.load(item.t1(), string);
+                        main.load(item.t1(), string);
                     } catch (Exception e) {
                         log.error("load lua error {}", item.t1(), e);
                     }
                 });
+        LuaRuntime tmp = luaRuntime;
+        if (tmp != null) {
+            CompletableFuture.runAsync(() -> {
+                        try {
+                            Thread.sleep(10000);
+                        } catch (InterruptedException ignore) {}
+                        tmp.close();
+                    })
+                    .exceptionally(exception -> {
+                        log.error("释放资源", exception);
+                        return null;
+                    });
+        }
+        luaRuntime = main;
     }
 
 }

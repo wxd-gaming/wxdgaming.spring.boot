@@ -1,10 +1,13 @@
 package wxdgaming.spring.boot.lua;
 
 import lombok.extern.slf4j.Slf4j;
+import party.iroiro.luajava.Consts;
 import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.value.LuaValue;
 
 import java.io.Closeable;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * 当前lua上下文
@@ -15,14 +18,14 @@ import java.io.Closeable;
 @Slf4j
 public class LuaContext implements Closeable {
 
-    private final Lua context;
+    private final Lua lua;
 
     public LuaContext(Lua context) {
-        this.context = context;
+        this.lua = context;
     }
 
     public boolean has(String key) {
-        LuaValue luaValue = context.get(key);
+        LuaValue luaValue = lua.get(key);
         return has(luaValue);
     }
 
@@ -31,20 +34,43 @@ public class LuaContext implements Closeable {
     }
 
     public LuaValue find(String key) {
-        return context.get(key);
+        return lua.get(key);
     }
 
-    public Object call(String key, Object... args) {
+    public LuaValue call(String key, Object... args) {
         LuaValue luaValue = find(key);
-        if (!has(luaValue)) return null;
-        LuaValue[] call = luaValue.call(args);
-        if (call.length == 0) {
+        int top = lua.getTop();
+        luaValue.push(lua);
+        for (Object o : args) {
+            if (o instanceof Map<?, ?>) {
+                lua.push((Map<?, ?>) o);
+            } else if (o instanceof Collection<?>) {
+                lua.push((Collection<?>) o);
+            } else if (o instanceof Number) {
+                lua.push((Number) o);
+            } else if (o.getClass().isArray()) {
+                lua.pushArray(o);
+            } else {
+                lua.push(o, Lua.Conversion.SEMI);
+            }
+        }
+        lua.pCall(args.length, Consts.LUA_MULTRET);
+        int returnCount = lua.getTop() - top;
+        if (returnCount == 0) {
             return null;
         }
-        return call[0].toJavaObject();
+        LuaValue[] call = new LuaValue[returnCount];
+        for (int i = 0; i < returnCount; i++) {
+            call[returnCount - i - 1] = lua.get();
+        }
+        LuaValue value = call[0];
+        if (value.type() == Lua.LuaType.NONE || value.type() == Lua.LuaType.NIL) {
+            return null;
+        }
+        return value;
     }
 
     @Override public void close() {
-        context.close();
+        lua.close();
     }
 }

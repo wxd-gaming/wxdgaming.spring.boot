@@ -15,7 +15,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -98,56 +97,9 @@ public class BootstrapConfig implements InitPrint {
     @ConditionalOnMissingBean(MessageDispatcher.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
     public MessageDispatcher messageDispatcher() {
         MessageDispatcher messageDispatcher = new MessageDispatcher();
-        log.debug("default MessageDispatcher = {}", messageDispatcher.hashCode());
+        log.debug("init default MessageDispatcher = {}", messageDispatcher.hashCode());
         return messageDispatcher;
     }
 
-    @Bean
-    @ConditionalOnMissingBean(ServerMessageEncode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public ServerMessageEncode serverMessageEncode(MessageDispatcher messageDispatcher) {
-        ServerMessageEncode encode = new ServerMessageEncode(messageDispatcher) {};
-        log.debug("default ServerMessageEncode = {}", encode.hashCode());
-        return encode;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(ServerMessageDecode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public ServerMessageDecode serverMessageDecode(MessageDispatcher messageDispatcher) {
-        ServerMessageDecode decode = new ServerMessageDecode(messageDispatcher) {};
-        log.debug("default ServerMessageDecode = {}", decode.hashCode());
-        return decode;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(SocketServerDeviceHandler.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public SocketServerDeviceHandler socketServerDeviceHandler() {
-        SocketServerDeviceHandler deviceHandler = new SocketServerDeviceHandler();
-        log.debug("default SocketServerDeviceHandler = {}", deviceHandler.hashCode());
-        return deviceHandler;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(ClientMessageEncode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public ClientMessageEncode clientMessageEncode(MessageDispatcher messageDispatcher) {
-        ClientMessageEncode decode = new ClientMessageEncode(messageDispatcher) {};
-        log.debug("default ClientMessageEncode = {}", decode.hashCode());
-        return decode;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(ClientMessageDecode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public ClientMessageDecode clientMessageDecode(MessageDispatcher messageDispatcher) {
-        ClientMessageDecode decode = new ClientMessageDecode(messageDispatcher) {};
-        log.debug("default ClientMessageDecode = {}", decode.hashCode());
-        return decode;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(SocketClientDeviceHandler.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public SocketClientDeviceHandler socketClientDeviceHandler() {
-        SocketClientDeviceHandler deviceHandler = new SocketClientDeviceHandler();
-        log.debug("default SocketClientDeviceHandler = {}", deviceHandler.hashCode());
-        return deviceHandler;
-    }
 
 }

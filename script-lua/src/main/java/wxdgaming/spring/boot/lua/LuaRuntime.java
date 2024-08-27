@@ -4,15 +4,18 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.lua54.Lua54;
+import party.iroiro.luajava.value.LuaTableValue;
+import party.iroiro.luajava.value.LuaValue;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * lua 装载器
@@ -24,9 +27,34 @@ import java.nio.file.Paths;
 @Getter
 public class LuaRuntime implements Closeable {
 
+    public static Object luaValue2Object(LuaValue luaValue) {
+        if (luaValue.type() == Lua.LuaType.NUMBER) {
+            long integer = luaValue.toInteger();
+            if (integer == (int) integer) {
+                return (int) integer;
+            }
+            double number = luaValue.toNumber();
+            if (integer == number) {
+                return integer;
+            }
+            return number;
+
+        } else if (luaValue.type() == Lua.LuaType.TABLE) {
+            LuaTableValue luaTableValue = (LuaTableValue) luaValue;
+            Map<Object, Object> map = new HashMap<>();
+            for (Map.Entry<LuaValue, LuaValue> entry : luaTableValue.entrySet()) {
+                map.put(entry.getKey().toString(), luaValue2Object(entry.getValue()));
+            }
+            return map;
+        } else if (luaValue.type() == Lua.LuaType.NONE || luaValue.type() == Lua.LuaType.NIL) {
+            return null;
+        }
+        return luaValue.toJavaObject();
+    }
+
     final String name;
-    final Lua lua54;
-    final ThreadLocal<LuaContext> threadLocal;
+    Lua lua54;
+    ThreadLocal<LuaContext> threadLocal;
 
     public LuaRuntime(String name) {
         this.name = name;
@@ -77,7 +105,7 @@ public class LuaRuntime implements Closeable {
         lua54.run(flip, filePath);
     }
 
-    /** 设置全局变量 */
+    /** 设置全局变量，全局函数会有线程共享问题 */
     public void set(String key, JavaFunction value) {
         lua54.set(key, value);
     }
@@ -96,7 +124,9 @@ public class LuaRuntime implements Closeable {
     }
 
     /** 关闭资源 */
-    @Override public void close() throws IOException {
+    @Override public void close() {
         lua54.close();
+        lua54 = null;
+        threadLocal = null;
     }
 }
