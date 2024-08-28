@@ -6,8 +6,6 @@ import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.value.LuaValue;
 
 import java.io.Closeable;
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * 当前lua上下文
@@ -42,17 +40,7 @@ public class LuaContext implements Closeable {
         int top = lua.getTop();
         luaValue.push(lua);
         for (Object o : args) {
-            if (o instanceof Map<?, ?>) {
-                lua.push((Map<?, ?>) o);
-            } else if (o instanceof Collection<?>) {
-                lua.push((Collection<?>) o);
-            } else if (o instanceof Number) {
-                lua.push((Number) o);
-            } else if (o.getClass().isArray()) {
-                lua.pushArray(o);
-            } else {
-                lua.push(o, Lua.Conversion.SEMI);
-            }
+            LuaRuntime.push(lua, o);
         }
         lua.pCall(args.length, Consts.LUA_MULTRET);
         int returnCount = lua.getTop() - top;

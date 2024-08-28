@@ -4,9 +4,6 @@ import party.iroiro.luajava.JFunction;
 import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.value.LuaValue;
 
-import java.util.Collection;
-import java.util.Map;
-
 /**
  * JFun
  *
@@ -24,18 +21,8 @@ public interface JavaFunction extends JFunction {
                 _args[_args.length - i - 1] = javaObject;
             }
             Object results = doAction(L, _args);
-            if (results != null) {
-                if (results instanceof Map<?, ?> map) {
-                    L.push(map);
-                } else if (results instanceof Collection<?> collection) {
-                    L.push(collection);
-                } else if (results instanceof Number number) {
-                    L.push(number);
-                } else {
-                    L.push(results, Lua.Conversion.SEMI);
-                }
-            }
-            return results == null ? 0 : 1;
+            LuaRuntime.push(L, results);
+            return 1;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

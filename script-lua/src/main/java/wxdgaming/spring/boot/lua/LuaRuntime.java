@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,13 +44,30 @@ public class LuaRuntime implements Closeable {
             LuaTableValue luaTableValue = (LuaTableValue) luaValue;
             Map<Object, Object> map = new HashMap<>();
             for (Map.Entry<LuaValue, LuaValue> entry : luaTableValue.entrySet()) {
-                map.put(entry.getKey().toString(), luaValue2Object(entry.getValue()));
+                map.put(luaValue2Object(entry.getKey()), luaValue2Object(entry.getValue()));
             }
             return map;
         } else if (luaValue.type() == Lua.LuaType.NONE || luaValue.type() == Lua.LuaType.NIL) {
             return null;
         }
         return luaValue.toJavaObject();
+    }
+
+    public static void push(Lua L, Object value) {
+        if (value == null) {
+            L.pushNil();
+        } else if (value instanceof Map<?, ?> map) {
+            L.push(map);
+        } else if (value instanceof Collection<?> collection) {
+            L.push(collection);
+        } else if (value instanceof Number number) {
+            L.push(number);
+        } else if (value.getClass().isArray()) {
+            // L.pushArray(results);/*相当于table 在lua下面没有数组概念*/
+            L.pushJavaArray(value);/*相当于userdata*/
+        } else {
+            L.push(value, Lua.Conversion.SEMI);
+        }
     }
 
     final String name;
