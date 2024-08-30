@@ -5,7 +5,7 @@
 ---
 function api_test(request, response, postBody)
     print("api_test")
-    responseUtil:responseText(response, "api_test")
+    responseUtil:responseObj(response, "api_test")
 end
 
 function paramsTest(p1, p2, p3, p4, p5, p6)

@@ -6,11 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
-import wxdgaming.spring.boot.core.io.FileReadUtil;
-import wxdgaming.spring.boot.core.io.FileUtil;
+import wxdgaming.spring.boot.lua.LuaContext;
 import wxdgaming.spring.boot.lua.LuaLogger;
 import wxdgaming.spring.boot.lua.LuaRuntime;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -35,21 +36,11 @@ public class LuaService implements InitPrint {
 
     @PostConstruct
     public void init() {
-        LuaRuntime main = new LuaRuntime("main");
-        main.set("responseUtil", luaResponseService);
-        main.set("jlog", LuaLogger.getIns());
-        main.set("redisTemplate", redisTemplate);
+        LuaRuntime main = new LuaRuntime("main", new Path[]{Paths.get("lua")});
+        main.getGlobals().put("responseUtil", luaResponseService);
+        main.getGlobals().put("jlog", LuaLogger.getIns());
+        main.getGlobals().put("opsForValue", redisTemplate.opsForValue());
         log.debug("redisTemplate hashCode: {}", redisTemplate.hashCode());
-        FileUtil
-                .resourceStreams(this.getClass().getClassLoader(), "lua")
-                .forEach(item -> {
-                    try {
-                        String string = FileReadUtil.readString(item.t2());
-                        main.load(item.t1(), string);
-                    } catch (Exception e) {
-                        log.error("load lua error {}", item.t1(), e);
-                    }
-                });
         LuaRuntime tmp = luaRuntime;
         if (tmp != null) {
             CompletableFuture.runAsync(() -> {
@@ -64,6 +55,9 @@ public class LuaService implements InitPrint {
                     });
         }
         luaRuntime = main;
+        try (LuaContext luaContext = luaRuntime.newContext()) {
+            luaContext.pCall("root");
+        }
     }
 
 }

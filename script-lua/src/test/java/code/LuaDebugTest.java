@@ -4,14 +4,15 @@ import org.junit.Test;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.lua.LuaRuntime;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public class LuaDebugTest {
 
 
     @Test
     public void t0() {
-        LuaRuntime luaRuntime = new LuaRuntime("test");
-        // LuaJC.install(globals);
-        luaRuntime.loadfile("src/test/lua/test.lua");
+        LuaRuntime luaRuntime = new LuaRuntime("test", new Path[]{Paths.get("src/test/lua/test.lua")});
     }
 
 

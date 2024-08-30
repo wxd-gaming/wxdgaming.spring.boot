@@ -15,7 +15,4 @@ import org.springframework.data.repository.NoRepositoryBean;
 @NoRepositoryBean
 public interface BaseJpaRepository<T, ID> extends JpaRepository<T, ID> {
 
-    @Query
-    T queryAll();
-
 }

@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.value.LuaValue;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
+import wxdgaming.spring.boot.lua.LuaRuntime;
 import wxdgaming.spring.boot.web.service.ResponseService;
 
 /**
@@ -23,11 +23,16 @@ public class LuaResponseService {
     @Autowired ResponseService responseService;
 
     public void responseObj(HttpServletResponse response, Object obj) throws Exception {
-        String res;
-        if (obj instanceof LuaValue luaValue && luaValue.type() == Lua.LuaType.TABLE) {
-            res = FastJsonUtil.toJson(luaValue.toJavaObject());
+        String res = "";
+        Object object = obj;
+        if (obj instanceof LuaValue) {
+            object = LuaRuntime.luaValue2Object((LuaValue) obj);
+        }
+        if (object instanceof Number
+                || object instanceof String) {
+            res = String.valueOf(object);
         } else {
-            res = String.valueOf(obj);
+            res = FastJsonUtil.toJson(object);
         }
         responseService.response(
                 response,

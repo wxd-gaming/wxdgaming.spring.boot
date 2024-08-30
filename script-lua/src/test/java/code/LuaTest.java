@@ -47,10 +47,11 @@ public class LuaTest {
         int t1 = 1;
     }
 
-    public static void main(String[] args) throws Exception {
+    @Test
+    public void t34() {
         System.out.println(System.currentTimeMillis() + " - " + System.getProperty("user.dir"));
         // luaBus = LuaBus.buildFromResources(Thread.currentThread().getContextClassLoader(), "script/");
-        luaEventBus = LuaEventBus.buildFromDirs("script-lua/src/main/lua");
+        luaEventBus = LuaEventBus.buildFromDirs("src/main/lua");
         luaEventBus.set("objVar", 1);
         luaEventBus.set("jlog", LuaLogger.getIns());
         /*注册函数*/
@@ -60,7 +61,7 @@ public class LuaTest {
                 return "java 返回值";
             }
         });
-        luaEventBus.call("login");
+        luaEventBus.pCall("login");
     }
 
 

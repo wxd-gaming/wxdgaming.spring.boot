@@ -23,11 +23,13 @@ function table.printTableJson(t)
         if type(k) == "number" or type(k) == "boolean" then
             json = json .. tostring(k)
         else
-            json = json .. tostring(v)
+            json = json .. "\"" .. tostring(k) .. "\""
         end
         json = json .. ":"
         if type(v) == "number" or type(v) == "boolean" then
             json = json .. tostring(v)
+        elseif type(v) == "table" then
+            json = json .. table.printTableJson(v)
         else
             json = json .. "\"" .. tostring(v) .. "\""
         end
@@ -46,6 +48,8 @@ function table.printArrayJson(t)
             end
             if type(v) == "number" or type(v) == "boolean" then
                 json = json .. tostring(v)
+            elseif type(v) == "table" then
+                json = json .. table.printTableJson(v)
             else
                 json = json .. "\"" .. tostring(v) .. "\""
             end

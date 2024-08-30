@@ -19,6 +19,6 @@ function login()
     print("我是2")
     local testfun0 = testfun0("我是lua")
     print(testfun0)
-    jlog:info(testfun0)
+    jlog:info("测试Log: " .. testfun0)
     print(globalArgs:get("ss"))
 end

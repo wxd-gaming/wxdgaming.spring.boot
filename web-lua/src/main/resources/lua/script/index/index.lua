@@ -5,13 +5,19 @@
 ---
 
 function root(request, response, postBody)
-    responseUtil:responseText(response, "root hello world")
+    print("root")
+    local s, e = pcall(function()
+        responseUtil:responseObj(response, "root hello world")
+    end)
+    if not s then
+        print("error:" .. debug.traceback(e))
+    end
 end
 
 function index(request, response, postBody)
     --临时缓存设置300秒过期
-    redisTemplate:opsForValue():set("lua-dd", "dd", 300, TimeUnit.SECONDS);
-    responseUtil:responseText(response, "index lua -- dd")
+    opsForValue:set("lua-dd", "dd", 300, TimeUnit.SECONDS);
+    responseUtil:responseObj(response, "index lua -- dd")
 end
 
 function index3(request, response, postBody)
