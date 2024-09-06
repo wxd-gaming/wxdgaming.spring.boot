@@ -3,11 +3,7 @@ package wxdgaming.spring.boot.net.client;
 
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.net.BootstrapConfig;
 import wxdgaming.spring.boot.net.SocketSession;
@@ -19,17 +15,15 @@ import wxdgaming.spring.boot.net.SocketSession;
  * @version: 2024-08-20 19:13
  */
 @Getter
-@Service
-@ConfigurationProperties("client.tcp-socket")
-@ConditionalOnProperty(prefix = "client.tcp-socket.config", name = "host")
 public class TcpSocketClient extends SocketClient {
 
-    @Autowired
     public TcpSocketClient(BootstrapConfig bootstrapConfig,
+                           SocketClientBuilder socketClientBuilder,
+                           SocketClientBuilder.Config config,
                            SocketClientDeviceHandler socketClientDeviceHandler,
                            ClientMessageDecode clientMessageDecode,
                            ClientMessageEncode clientMessageEncode) {
-        super(bootstrapConfig, socketClientDeviceHandler, clientMessageDecode, clientMessageEncode);
+        super(bootstrapConfig, socketClientBuilder, config, socketClientDeviceHandler, clientMessageDecode, clientMessageEncode);
     }
 
     @PostConstruct

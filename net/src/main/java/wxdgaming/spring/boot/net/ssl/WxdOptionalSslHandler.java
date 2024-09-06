@@ -20,6 +20,24 @@ import java.util.List;
  **/
 public class WxdOptionalSslHandler extends ByteToMessageDecoder implements Serializable {
 
+    static final short DTLS_1_0 = (short) 0xFEFF;
+    static final short DTLS_1_2 = (short) 0xFEFD;
+    static final short DTLS_1_3 = (short) 0xFEFC;
+    /** change cipher spec */
+    static final int SSL_CONTENT_TYPE_CHANGE_CIPHER_SPEC = 20;
+
+    /** alert */
+    static final int SSL_CONTENT_TYPE_ALERT = 21;
+
+    /** handshake */
+    static final int SSL_CONTENT_TYPE_HANDSHAKE = 22;
+
+    /** application data */
+    static final int SSL_CONTENT_TYPE_APPLICATION_DATA = 23;
+
+    /** HeartBeat Extension */
+    static final int SSL_CONTENT_TYPE_EXTENSION_HEARTBEAT = 24;
+
     /** ssl 标记 */
     static final int SSL_RECORD_HEADER_LENGTH = 5;
     /** ssl处理 */
@@ -30,17 +48,18 @@ public class WxdOptionalSslHandler extends ByteToMessageDecoder implements Seria
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        if (in.readableBytes() < SSL_RECORD_HEADER_LENGTH) {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> out) throws Exception {
+        if (buffer.readableBytes() < SSL_RECORD_HEADER_LENGTH) {
             return;
         }
         SocketSession session = ChannelUtil.session(ctx.channel());
-        if (session.isWebSocket() && this.sslContext != null && SslHandler.isEncrypted(in)) {
+        int encryptedPacketLength = SslUtils.getEncryptedPacketLength(buffer, buffer.readerIndex());
+        if (encryptedPacketLength != SslUtils.NOT_ENCRYPTED && encryptedPacketLength != SslUtils.NOT_ENOUGH_DATA) {
             handleSsl(ctx);
             session.setSsl(true);
-        } else {
-            handleNonSsl(ctx);
+            return;
         }
+        handleNonSsl(ctx);
     }
 
     private void handleSsl(ChannelHandlerContext ctx) {

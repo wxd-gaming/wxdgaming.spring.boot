@@ -11,19 +11,16 @@ import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.system.BytesUnit;
 import wxdgaming.spring.boot.net.BootstrapConfig;
 import wxdgaming.spring.boot.net.SocketSession;
+import wxdgaming.spring.boot.net.ssl.WxdSslHandler;
 
+import javax.net.ssl.SSLEngine;
 import java.net.URI;
 import java.util.function.Consumer;
 
@@ -36,29 +33,30 @@ import java.util.function.Consumer;
 @Slf4j
 @Getter
 @Accessors(chain = true)
-@Service
-@ConfigurationProperties("client.web-socket")
-@ConditionalOnProperty(prefix = "client.web-socket.config", name = "host")
 public class WebSocketClient extends SocketClient {
 
-    @Setter private String prefix = "/websocket";
     private WebSocketClientHandshaker handshaker;
     /** 包含的http head参数 */
     protected final HttpHeaders httpHeaders = new DefaultHttpHeaders();
 
-    @Autowired
     public WebSocketClient(BootstrapConfig bootstrapConfig,
+                           SocketClientBuilder socketClientBuilder,
+                           SocketClientBuilder.Config config,
                            SocketClientDeviceHandler socketClientDeviceHandler,
                            ClientMessageDecode clientMessageDecode,
                            ClientMessageEncode clientMessageEncode) {
-        super(bootstrapConfig, socketClientDeviceHandler, clientMessageDecode, clientMessageEncode);
+        super(bootstrapConfig, socketClientBuilder, config, socketClientDeviceHandler, clientMessageDecode, clientMessageEncode);
     }
 
     @PostConstruct
     @Override public void init() {
         super.init();
+        String protocol = "ws";
+        if (config.isEnableSsl()) {
+            protocol = "wss";
+        }
         handshaker = WebSocketClientHandshakerFactory.newHandshaker(
-                URI.create("ws://" + getConfig().getHost() + ":" + getConfig().getPort() + prefix),
+                URI.create(protocol + "://" + getConfig().getHost() + ":" + getConfig().getPort() + this.getConfig().getPrefix()),
                 WebSocketVersion.V13,
                 null,
                 false,
@@ -80,9 +78,10 @@ public class WebSocketClient extends SocketClient {
     }
 
     @Override public SocketSession connect(Consumer<Channel> consumer) {
-        SocketSession connect = super.connect(consumer);
-        connect.setWebSocket(true);
-        return connect;
+        SocketSession socketSession = super.connect(consumer);
+        socketSession.setSsl(config.isEnableSsl());
+        socketSession.setWebSocket(true);
+        return socketSession;
     }
 
     SocketSession session;

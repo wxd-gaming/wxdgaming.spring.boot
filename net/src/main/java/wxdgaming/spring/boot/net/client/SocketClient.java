@@ -6,13 +6,14 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.net.BootstrapConfig;
 import wxdgaming.spring.boot.net.SocketSession;
+import wxdgaming.spring.boot.net.ssl.WxdSslHandler;
 
+import javax.net.ssl.SSLEngine;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -35,13 +36,18 @@ public abstract class SocketClient implements InitPrint {
     protected final ClientMessageDecode clientMessageDecode;
     protected final ClientMessageEncode clientMessageEncode;
 
-    @Setter protected ClientConfig config;
+    protected final SocketClientBuilder socketClientBuilder;
+    protected final SocketClientBuilder.Config config;
 
     public SocketClient(BootstrapConfig bootstrapConfig,
+                        SocketClientBuilder socketClientBuilder,
+                        SocketClientBuilder.Config config,
                         SocketClientDeviceHandler socketClientDeviceHandler,
                         ClientMessageDecode clientMessageDecode,
                         ClientMessageEncode clientMessageEncode) {
         this.bootstrapConfig = bootstrapConfig;
+        this.socketClientBuilder = socketClientBuilder;
+        this.config = config;
         this.socketClientDeviceHandler = socketClientDeviceHandler;
         this.clientMessageDecode = clientMessageDecode;
         this.clientMessageEncode = clientMessageEncode;
@@ -49,10 +55,10 @@ public abstract class SocketClient implements InitPrint {
 
     public void init() {
         bootstrap = new Bootstrap();
-        bootstrap.group(bootstrapConfig.getClientLoop())
-                .channel(bootstrapConfig.getClient_Socket_Channel_Class())
+        bootstrap.group(socketClientBuilder.getClientLoop())
+                .channel(socketClientBuilder.getClient_Socket_Channel_Class())
                 /*链接超时设置*/
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, bootstrapConfig.getClientConnectTimeOut())
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, this.config.getConnectTimeout())
                 /*是否启用心跳保活机机制*/
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 /*发送缓冲区 影响 channel.isWritable()*/
@@ -67,8 +73,14 @@ public abstract class SocketClient implements InitPrint {
                         if (bootstrapConfig.isDebugLogger()) {
                             pipeline.addLast(new LoggingHandler("DEBUG"));/*设置log监听器，并且日志级别为debug，方便观察运行流程*/
                         }
+                        if (config.isEnableSsl()) {
+                            SSLEngine sslEngine = config.getSslContext().createSSLEngine();
+                            sslEngine.setUseClientMode(true);
+                            sslEngine.setNeedClientAuth(false);
+                            pipeline.addFirst("sslhandler", new WxdSslHandler(sslEngine));
+                        }
                         /*空闲链接检查*/
-                        int idleTime = bootstrapConfig.getClientSessionIdleTime();
+                        int idleTime = config.getIdleTimeout();
                         if (idleTime > 0) {
                             pipeline.addLast(new IdleStateHandler(0, 0, idleTime, TimeUnit.SECONDS));
                         }
@@ -78,6 +90,7 @@ public abstract class SocketClient implements InitPrint {
                         pipeline.addLast("decode", clientMessageDecode);
                         /*解码消息*/
                         pipeline.addLast("encode", clientMessageEncode);
+
                         addChanelHandler(socketChannel, pipeline);
                     }
                 });
@@ -102,6 +115,7 @@ public abstract class SocketClient implements InitPrint {
                         }
                         Channel channel = future.channel();
                         SocketSession socketSession = new SocketSession(channel, false);
+                        socketSession.setSsl(config.isEnableSsl());
                         completableFuture.complete(socketSession);
                         log.info("{} connect success {}", SocketClient.this.getClass().getSimpleName(), channel);
                         if (consumer != null) {

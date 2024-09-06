@@ -1,14 +1,11 @@
 package wxdgaming.spring.boot.net;
 
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -19,15 +16,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import wxdgaming.spring.boot.core.InitPrint;
-import wxdgaming.spring.boot.core.ssl.SslContextServer;
+import wxdgaming.spring.boot.core.ssl.SslContextByJks;
 import wxdgaming.spring.boot.core.ssl.SslProtocolType;
 import wxdgaming.spring.boot.core.threading.ThreadNameFactory;
-import wxdgaming.spring.boot.net.client.ClientMessageDecode;
-import wxdgaming.spring.boot.net.client.ClientMessageEncode;
-import wxdgaming.spring.boot.net.client.SocketClientDeviceHandler;
-import wxdgaming.spring.boot.net.server.ServerMessageDecode;
-import wxdgaming.spring.boot.net.server.ServerMessageEncode;
-import wxdgaming.spring.boot.net.server.SocketServerDeviceHandler;
+import wxdgaming.spring.boot.net.server.SocketServerBuilder;
 
 import javax.net.ssl.SSLContext;
 
@@ -41,51 +33,12 @@ import javax.net.ssl.SSLContext;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties("server.socket")
+@ConfigurationProperties("socket")
 public class BootstrapConfig implements InitPrint {
 
     private boolean debugLogger = false;
 
-    private int tcpPort = 18001;
-    private int bossThreadSize = 2;
-    private int workerThreadSize = 10;
-    private int serverSessionIdleTime = 20;
-    private String webSocketPrefix = "/websocket";
-
-
-    private int clientSessionIdleTime = 22;
-    private int clientConnectTimeOut = 2000;
-    private int clientThreadSize = 2;
-
-    private SSLContext sslContext = null;
-
-    private EventLoopGroup bossLoop;
-    private EventLoopGroup workerLoop;
-    private EventLoopGroup clientLoop;
-
-    /** 服务监听的channel */
-    private Class<? extends ServerChannel> Server_Socket_Channel_Class;
-    private Class<? extends SocketChannel> Client_Socket_Channel_Class;
-
-
-    @PostConstruct
-    public void init() {
-
-        bossLoop = createGroup(bossThreadSize, "boss");
-        workerLoop = createGroup(workerThreadSize, "worker");
-        clientLoop = createGroup(clientThreadSize, "client");
-
-        if (Epoll.isAvailable()) {
-            Client_Socket_Channel_Class = EpollSocketChannel.class;
-            Server_Socket_Channel_Class = EpollServerSocketChannel.class;
-        } else {
-            Client_Socket_Channel_Class = NioSocketChannel.class;
-            Server_Socket_Channel_Class = NioServerSocketChannel.class;
-        }
-        sslContext = SslContextServer.sslContext(SslProtocolType.TLSV12, "jks/wxdtest-1.8.jks", "jks/wxdtest-1.8.jks.pwd");
-    }
-
-    private EventLoopGroup createGroup(int size, String prefix) {
+    public static EventLoopGroup createGroup(int size, String prefix) {
         if (Epoll.isAvailable()) {
             return new EpollEventLoopGroup(size, new ThreadNameFactory(prefix));
         } else {

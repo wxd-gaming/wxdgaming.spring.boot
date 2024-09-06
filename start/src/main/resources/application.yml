@@ -1,10 +1,5 @@
 server:
   port: 18801   #端口号
-  socket:
-    tcpPort: 18001
-    bossThreadSize: 2 #线程池的线程数量，共享
-    workerThreadSize: 10 #线程池的线程数量，共享
-    clientThreadSize: 2 #client 线程池的线程数量，共享
   tomcat:
     max-threads: 200
     min-spare-threads: 10
@@ -12,21 +7,12 @@ server:
     defaultCoreSize: 2 #默认线程池
     logicCoreSize: 10 #逻辑线程池
 
-client:
-  tcp-socket:
-    config:
-      host: 127.0.0.1
-      port: 18001
-  web-socket:
-    config:
-      host: 127.0.0.1
-      port: 18001
 
 spring:
   main:
     allow-bean-definition-overriding: true
   profiles:
-    active: redis,mysql
+    active: redis,mysql,socket
   mvc:
     static-path-pattern: /**
   thymeleaf:
@@ -38,11 +24,11 @@ spring:
     encoding: UTF-8                         # 设置编码
 
   servlet:
-    multipart:
+    multipart: # 文件上传配置
       max-file-size: 20MB
       max-request-size: 100MB
       enabled: true
   task:
-    scheduling:
+    scheduling: # 定时任务线程池配置
       pool:
         size: 2

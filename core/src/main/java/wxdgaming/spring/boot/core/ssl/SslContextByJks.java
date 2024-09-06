@@ -17,13 +17,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * https协议证书
+ * 基于 jks 文件初始化 SSLContext
  *
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2020-12-18 16:18
  **/
 @Slf4j
-public class SslContextServer implements Serializable {
+public class SslContextByJks implements Serializable {
 
     private static final ConcurrentHashMap<SslProtocolType, ConcurrentHashMap<String, SSLContext>> sslContextMap = new ConcurrentHashMap<>();
 
@@ -40,12 +40,12 @@ public class SslContextServer implements Serializable {
                 AtomicReference<InputStream> streams = new AtomicReference<>();
                 AtomicReference<String> pwd = new AtomicReference<>();
                 // 获取当前运行的JAR文件
-                Record2<String, InputStream> jksStream = FileUtil.findInputStream(SslContextServer.class.getClassLoader(), jks_path);
+                Record2<String, InputStream> jksStream = FileUtil.findInputStream(SslContextByJks.class.getClassLoader(), jks_path);
                 streams.set(jksStream.t2());
                 System.out.printf("读取文件目录：jks=%s, 文件大小：%s\n", jksStream.t1(), jksStream.t2().available());
                 pwd.set(jks_pwd_path);
 
-                Record2<String, InputStream> pwdStream = FileUtil.findInputStream(SslContextServer.class.getClassLoader(), jks_pwd_path);
+                Record2<String, InputStream> pwdStream = FileUtil.findInputStream(SslContextByJks.class.getClassLoader(), jks_pwd_path);
                 if (pwdStream != null) {
                     // 判断是否为资源文件
                     System.out.printf("读取文件目录：jkspwd=%s\n", pwdStream.t1());

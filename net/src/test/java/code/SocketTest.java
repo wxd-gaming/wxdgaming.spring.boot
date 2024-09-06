@@ -10,10 +10,7 @@ import wxdgaming.spring.boot.net.ByteBufUtil;
 import wxdgaming.spring.boot.net.MessageDispatcher;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.client.*;
-import wxdgaming.spring.boot.net.server.ServerMessageDecode;
-import wxdgaming.spring.boot.net.server.ServerMessageEncode;
-import wxdgaming.spring.boot.net.server.SocketServerDeviceHandler;
-import wxdgaming.spring.boot.net.server.SocketService;
+import wxdgaming.spring.boot.net.server.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -31,8 +28,10 @@ public class SocketTest {
         MessageDispatcher messageDispatcher = new MessageDispatcher();
         messageDispatcher.registerMessage(Thread.currentThread().getContextClassLoader(), "a");
         bootstrapConfig = new BootstrapConfig();
-        bootstrapConfig.init();
-        socketService = new SocketService(
+        SocketServerBuilder socketServerBuilder = new SocketServerBuilder();
+        socketServerBuilder.init();
+        socketServerBuilder.setConfig(new SocketServerBuilder.Config());
+        socketService = socketServerBuilder.socketService(
                 bootstrapConfig,
                 new SocketServerDeviceHandler(),
                 new ServerMessageDecode(messageDispatcher) {
@@ -52,11 +51,13 @@ public class SocketTest {
         socketService.init();
         socketService.start();
 
-        ClientConfig clientConfig = new ClientConfig();
-        clientConfig.setHost("127.0.0.1");
-        clientConfig.setPort(bootstrapConfig.getTcpPort());
+        SocketClientBuilder socketClientBuilder = new SocketClientBuilder();
+        socketClientBuilder.setTcp(new SocketClientBuilder.Config().setPort(socketServerBuilder.getConfig().getPort()));
+        socketClientBuilder.setWeb(new SocketClientBuilder.Config().setPort(socketServerBuilder.getConfig().getPort()));
+        socketClientBuilder.init();
 
-        tcpSocketClient = new TcpSocketClient(bootstrapConfig,
+        tcpSocketClient = socketClientBuilder.tcpSocketClient(
+                bootstrapConfig,
                 new SocketClientDeviceHandler(),
                 new ClientMessageDecode(messageDispatcher) {
 
@@ -65,11 +66,12 @@ public class SocketTest {
                     }
 
                 },
-                new ClientMessageEncode(messageDispatcher));
-        tcpSocketClient.setConfig(clientConfig);
+                new ClientMessageEncode(messageDispatcher)
+        );
         tcpSocketClient.init();
 
-        webSocketClient = new WebSocketClient(bootstrapConfig,
+        webSocketClient = socketClientBuilder.webSocketClient(
+                bootstrapConfig,
                 new SocketClientDeviceHandler(),
                 new ClientMessageDecode(messageDispatcher) {
 
@@ -78,8 +80,9 @@ public class SocketTest {
                     }
 
                 },
-                new ClientMessageEncode(messageDispatcher));
-        webSocketClient.setConfig(clientConfig);
+                new ClientMessageEncode(messageDispatcher)
+        );
+
         webSocketClient.init();
 
     }

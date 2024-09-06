@@ -8,9 +8,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.system.BytesUnit;
@@ -29,11 +27,11 @@ import java.util.concurrent.TimeUnit;
  **/
 @Slf4j
 @Getter
-@Service
-@ConditionalOnProperty(prefix = "server.socket", name = "tcpPort")
 public class SocketService implements Closeable, InitPrint {
 
     private final BootstrapConfig bootstrapConfig;
+    private final SocketServerBuilder socketServerBuilder;
+    private final SocketServerBuilder.Config config;
     private final SocketServerDeviceHandler socketServerDeviceHandler;
     private final ServerMessageDecode serverMessageDecode;
     private final ServerMessageEncode serverMessageEncode;
@@ -41,10 +39,14 @@ public class SocketService implements Closeable, InitPrint {
     private ChannelFuture future = null;
 
     public SocketService(BootstrapConfig bootstrapConfig,
+                         SocketServerBuilder socketServerBuilder,
+                         SocketServerBuilder.Config config,
                          SocketServerDeviceHandler socketServerDeviceHandler,
                          ServerMessageDecode serverMessageDecode,
                          ServerMessageEncode serverMessageEncode) {
         this.bootstrapConfig = bootstrapConfig;
+        this.socketServerBuilder = socketServerBuilder;
+        this.config = config;
         this.socketServerDeviceHandler = socketServerDeviceHandler;
         this.serverMessageDecode = serverMessageDecode;
         this.serverMessageEncode = serverMessageEncode;
@@ -53,9 +55,9 @@ public class SocketService implements Closeable, InitPrint {
     @PostConstruct
     public void init() {
         bootstrap = new ServerBootstrap();
-        bootstrap.group(this.bootstrapConfig.getBossLoop(), this.bootstrapConfig.getWorkerLoop());
+        bootstrap.group(this.socketServerBuilder.getBossLoop(), this.socketServerBuilder.getWorkerLoop());
         /*channel方法用来创建通道实例( NioServerSocketChannel 类来实例化一个进来的链接)*/
-        bootstrap.channel(this.bootstrapConfig.getServer_Socket_Channel_Class())
+        bootstrap.channel(this.socketServerBuilder.getServer_Socket_Channel_Class())
                 /*方法用于设置监听套接字*/
                 .option(ChannelOption.SO_BACKLOG, 0)
                 /*地址重用，socket链接断开后，立即可以被其他请求使用*/
@@ -80,15 +82,15 @@ public class SocketService implements Closeable, InitPrint {
                             pipeline.addLast(new LoggingHandler("DEBUG"));// 设置log监听器，并且日志级别为debug，方便观察运行流程
                         }
 
-                        pipeline.addFirst(new WxdOptionalSslHandler(bootstrapConfig.getSslContext()));
+                        pipeline.addFirst(new WxdOptionalSslHandler(config.getSslContext()));
 
-                        int idleTime = bootstrapConfig.getServerSessionIdleTime();
+                        int idleTime = config.getIdleTimeout();
                         if (idleTime > 0) {
                             /*设置15秒的读取空闲*/
                             pipeline.addLast(new IdleStateHandler(idleTime, 0, 0, TimeUnit.SECONDS));
                         }
                         /* socket 选择器 区分是tcp websocket http*/
-                        pipeline.addLast("socket-choose-handler", new ServerSocketChooseHandler(bootstrapConfig));
+                        pipeline.addLast("socket-choose-handler", new SocketServerChooseHandler(config));
                         /*处理链接*/
                         pipeline.addLast("device-handler", socketServerDeviceHandler);
                         /*解码消息*/
@@ -103,9 +105,9 @@ public class SocketService implements Closeable, InitPrint {
     @Start()
     @Order(1000)
     public void start() {
-        this.future = bootstrap.bind(this.bootstrapConfig.getTcpPort());
+        this.future = bootstrap.bind(this.config.getPort());
         this.future.syncUninterruptibly();
-        log.info("开启 socket 服务 {}", this.bootstrapConfig.getTcpPort());
+        log.info("开启 socket 服务 {}", this.config.getPort());
     }
 
     /**
@@ -115,6 +117,6 @@ public class SocketService implements Closeable, InitPrint {
         if (this.future != null) {
             this.future.channel().close();
         }
-        log.info("关闭 socket 服务 {}", this.bootstrapConfig.getTcpPort());
+        log.info("关闭 socket 服务 {}", this.config.getPort());
     }
 }
