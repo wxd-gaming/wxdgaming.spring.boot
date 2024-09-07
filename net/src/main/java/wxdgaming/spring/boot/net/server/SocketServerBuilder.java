@@ -9,6 +9,8 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +19,9 @@ import wxdgaming.spring.boot.core.ssl.SslContextByJks;
 import wxdgaming.spring.boot.core.ssl.SslContextNoFile;
 import wxdgaming.spring.boot.core.ssl.SslProtocolType;
 import wxdgaming.spring.boot.core.util.StringsUtil;
-import wxdgaming.spring.boot.net.BootstrapConfig;
+import wxdgaming.spring.boot.net.BootstrapBuilder;
+import wxdgaming.spring.boot.net.MessageDispatcher;
+import wxdgaming.spring.boot.net.SessionHandler;
 
 import javax.net.ssl.SSLContext;
 
@@ -27,6 +31,7 @@ import javax.net.ssl.SSLContext;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-09-06 19:48
  **/
+@Slf4j
 @Getter
 @Setter
 @Accessors(chain = true)
@@ -48,8 +53,8 @@ public class SocketServerBuilder {
 
     @PostConstruct
     public void init() {
-        bossLoop = BootstrapConfig.createGroup(bossThreadSize, "boss");
-        workerLoop = BootstrapConfig.createGroup(workerThreadSize, "worker");
+        bossLoop = BootstrapBuilder.createGroup(bossThreadSize, "boss");
+        workerLoop = BootstrapBuilder.createGroup(workerThreadSize, "worker");
         if (Epoll.isAvailable()) {
             Server_Socket_Channel_Class = EpollServerSocketChannel.class;
         } else {
@@ -58,17 +63,32 @@ public class SocketServerBuilder {
 
     }
 
+    @Bean
+    @ConditionalOnMissingBean(ServerMessageEncode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    public ServerMessageEncode serverMessageEncode(MessageDispatcher messageDispatcher) {
+        ServerMessageEncode encode = new ServerMessageEncode(messageDispatcher) {};
+        log.debug("init default ServerMessageEncode = {}", encode.hashCode());
+        return encode;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ServerMessageDecode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    public ServerMessageDecode serverMessageDecode(MessageDispatcher messageDispatcher) {
+        ServerMessageDecode decode = new ServerMessageDecode(messageDispatcher) {};
+        log.debug("init default ServerMessageDecode = {}", decode.hashCode());
+        return decode;
+    }
+
     @Bean(name = "socketService")
     @ConditionalOnProperty(prefix = "socket.server.config", name = "port")
-    public SocketService socketService(BootstrapConfig bootstrapConfig,
-                                       SocketServerDeviceHandler socketServerDeviceHandler,
+    public SocketService socketService(BootstrapBuilder bootstrapBuilder,
+                                       SessionHandler sessionHandler,
                                        ServerMessageDecode serverMessageDecode,
                                        ServerMessageEncode serverMessageEncode) {
         return new SocketService(
-                bootstrapConfig,
+                bootstrapBuilder,
                 this,
-                config,
-                socketServerDeviceHandler,
+                config, sessionHandler,
                 serverMessageDecode,
                 serverMessageEncode
         );
@@ -83,7 +103,9 @@ public class SocketServerBuilder {
 
         private int port = 18001;
         private int idleTimeout = 30;
+        /** 是否开启 ssl */
         private boolean enableSsl = false;
+        /** 是否开启 web socket */
         private boolean enableWebSocket = false;
         private String webSocketPrefix = "/wxd-gaming";
         /** 默认的 ssl 类型 */

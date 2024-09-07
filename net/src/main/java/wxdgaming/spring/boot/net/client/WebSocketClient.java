@@ -13,14 +13,12 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.annotation.Order;
-import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.system.BytesUnit;
-import wxdgaming.spring.boot.net.BootstrapConfig;
+import wxdgaming.spring.boot.core.threading.DefaultExecutor;
+import wxdgaming.spring.boot.net.BootstrapBuilder;
+import wxdgaming.spring.boot.net.SessionHandler;
 import wxdgaming.spring.boot.net.SocketSession;
-import wxdgaming.spring.boot.net.ssl.WxdSslHandler;
 
-import javax.net.ssl.SSLEngine;
 import java.net.URI;
 import java.util.function.Consumer;
 
@@ -39,13 +37,14 @@ public class WebSocketClient extends SocketClient {
     /** 包含的http head参数 */
     protected final HttpHeaders httpHeaders = new DefaultHttpHeaders();
 
-    public WebSocketClient(BootstrapConfig bootstrapConfig,
+    public WebSocketClient(DefaultExecutor defaultExecutor,
+                           BootstrapBuilder bootstrapBuilder,
                            SocketClientBuilder socketClientBuilder,
                            SocketClientBuilder.Config config,
-                           SocketClientDeviceHandler socketClientDeviceHandler,
+                           SessionHandler sessionHandler,
                            ClientMessageDecode clientMessageDecode,
                            ClientMessageEncode clientMessageEncode) {
-        super(bootstrapConfig, socketClientBuilder, config, socketClientDeviceHandler, clientMessageDecode, clientMessageEncode);
+        super(defaultExecutor, bootstrapBuilder, socketClientBuilder, config, sessionHandler, clientMessageDecode, clientMessageEncode);
     }
 
     @PostConstruct
@@ -55,8 +54,10 @@ public class WebSocketClient extends SocketClient {
         if (config.isEnableSsl()) {
             protocol = "wss";
         }
+        String url = protocol + "://" + getConfig().getHost() + ":" + getConfig().getPort() + this.getConfig().getPrefix();
+        log.debug("{}", url);
         handshaker = WebSocketClientHandshakerFactory.newHandshaker(
-                URI.create(protocol + "://" + getConfig().getHost() + ":" + getConfig().getPort() + this.getConfig().getPrefix()),
+                URI.create(url),
                 WebSocketVersion.V13,
                 null,
                 false,
@@ -84,11 +85,4 @@ public class WebSocketClient extends SocketClient {
         return socketSession;
     }
 
-    SocketSession session;
-
-    @Start
-    @Order(2000)
-    public void start() {
-        session = connect();
-    }
 }

@@ -1,16 +1,11 @@
 package wxdgaming.spring.boot.net;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.internal.OutOfDirectMemoryError;
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.core.GlobalUtil;
 
 import java.util.Optional;
@@ -19,11 +14,15 @@ import java.util.Optional;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2020-12-26 15:03
  **/
+@Slf4j
 @Getter
 public abstract class SocketDeviceHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger log = LoggerFactory.getLogger(SocketDeviceHandler.class);
+    protected final SessionHandler sessionHandler;
 
+    public SocketDeviceHandler(SessionHandler sessionHandler) {
+        this.sessionHandler = sessionHandler;
+    }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -37,31 +36,28 @@ public abstract class SocketDeviceHandler extends ChannelInboundHandlerAdapter {
         super.channelUnregistered(ctx);
         if (log.isDebugEnabled())
             log.debug("channel 关闭 {} {}", ChannelUtil.ctxTostring(ctx), ctx);
+        SocketSession session = ChannelUtil.session(ctx.channel());
+        if (session != null) {
+            sessionHandler.closeSession(session);
+        }
     }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         super.userEventTriggered(ctx, evt);
         if (evt instanceof IdleStateEvent event) {
-            String ctxName = ChannelUtil.session(ctx.channel()).toString();
+            SocketSession session = ChannelUtil.session(ctx.channel());
             switch (event.state()) {
                 case READER_IDLE: {
-                    log.info("读空闲 {}", ctxName);
-                    ctx.disconnect();
-                    ctx.close();
+                    session.close("读空闲");
                 }
                 break;
                 case WRITER_IDLE: {
-                    log.info("写空闲 {}", ctxName);
-                    ctx.disconnect();
-                    ctx.close();
+                    session.close("写空闲");
                 }
                 break;
                 case ALL_IDLE: {
-                    log.info("读写空闲 {}", ctxName);
-                    /*写空闲的计数加1*/
-                    ctx.disconnect();
-                    ctx.close();
+                    session.close("读写空闲");
                 }
                 break;
             }

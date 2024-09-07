@@ -9,6 +9,8 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -16,8 +18,11 @@ import org.springframework.context.annotation.Configuration;
 import wxdgaming.spring.boot.core.ssl.SslContextByJks;
 import wxdgaming.spring.boot.core.ssl.SslContextNoFile;
 import wxdgaming.spring.boot.core.ssl.SslProtocolType;
+import wxdgaming.spring.boot.core.threading.DefaultExecutor;
 import wxdgaming.spring.boot.core.util.StringsUtil;
-import wxdgaming.spring.boot.net.BootstrapConfig;
+import wxdgaming.spring.boot.net.BootstrapBuilder;
+import wxdgaming.spring.boot.net.MessageDispatcher;
+import wxdgaming.spring.boot.net.SessionHandler;
 
 import javax.net.ssl.SSLContext;
 
@@ -25,6 +30,7 @@ import javax.net.ssl.SSLContext;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-20 17:48
  **/
+@Slf4j
 @Getter
 @Setter
 @Accessors(chain = true)
@@ -41,7 +47,7 @@ public class SocketClientBuilder {
 
     @PostConstruct
     public void init() {
-        clientLoop = BootstrapConfig.createGroup(clientThreadSize, "client");
+        clientLoop = BootstrapBuilder.createGroup(clientThreadSize, "client");
 
         if (Epoll.isAvailable()) {
             Client_Socket_Channel_Class = EpollSocketChannel.class;
@@ -50,33 +56,49 @@ public class SocketClientBuilder {
         }
     }
 
-    @Bean(name = "tcpSocketClient")
+    @Bean
+    @ConditionalOnMissingBean(ClientMessageEncode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    public ClientMessageEncode clientMessageEncode(MessageDispatcher messageDispatcher) {
+        ClientMessageEncode decode = new ClientMessageEncode(messageDispatcher) {};
+        log.debug("init default ClientMessageEncode = {}", decode.hashCode());
+        return decode;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ClientMessageDecode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    public ClientMessageDecode clientMessageDecode(MessageDispatcher messageDispatcher) {
+        ClientMessageDecode decode = new ClientMessageDecode(messageDispatcher) {};
+        log.debug("init default ClientMessageDecode = {}", decode.hashCode());
+        return decode;
+    }
+
+    @Bean()
     @ConditionalOnProperty(prefix = "socket.client.tcp", name = "port")
-    public TcpSocketClient tcpSocketClient(BootstrapConfig bootstrapConfig,
-                                           SocketClientDeviceHandler socketClientDeviceHandler,
+    public TcpSocketClient tcpSocketClient(DefaultExecutor defaultExecutor, BootstrapBuilder bootstrapBuilder,
+                                           SessionHandler sessionHandler,
                                            ClientMessageDecode clientMessageDecode,
                                            ClientMessageEncode clientMessageEncode) {
         return new TcpSocketClient(
-                bootstrapConfig,
+                defaultExecutor,
+                bootstrapBuilder,
                 this,
-                tcp,
-                socketClientDeviceHandler,
+                tcp, sessionHandler,
                 clientMessageDecode,
                 clientMessageEncode
         );
     }
 
-    @Bean(name = "webSocketClient")
+    @Bean()
     @ConditionalOnProperty(prefix = "socket.client.web", name = "port")
-    public WebSocketClient webSocketClient(BootstrapConfig bootstrapConfig,
-                                           SocketClientDeviceHandler socketClientDeviceHandler,
+    public WebSocketClient webSocketClient(DefaultExecutor defaultExecutor, BootstrapBuilder bootstrapBuilder,
+                                           SessionHandler sessionHandler,
                                            ClientMessageDecode clientMessageDecode,
                                            ClientMessageEncode clientMessageEncode) {
         return new WebSocketClient(
-                bootstrapConfig,
+                defaultExecutor,
+                bootstrapBuilder,
                 this,
-                web,
-                socketClientDeviceHandler,
+                web, sessionHandler,
                 clientMessageDecode,
                 clientMessageEncode
         );

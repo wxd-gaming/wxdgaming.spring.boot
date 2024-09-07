@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.core.LogbackUtil;
+import wxdgaming.spring.boot.message.PojoBase;
 import wxdgaming.spring.boot.message.SerializerUtil;
 
 /**
@@ -136,12 +137,25 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
 
 
     protected void action(SocketSession socketSession, int messageId, byte[] messageBytes) throws Exception {
-        LogbackUtil.logger().info("收到消息：ctx={}, id={}, bytes len={}", socketSession.toString(), messageId, messageBytes.length);
         DoMessageMapping doMessageMapping = dispatcher.getMappings().get(messageId);
         if (doMessageMapping != null) {
-            Object decode = SerializerUtil.decode(messageBytes, doMessageMapping.getMessageType());
+            PojoBase decode = (PojoBase) SerializerUtil.decode(messageBytes, doMessageMapping.getMessageType());
+            LogbackUtil.logger().debug(
+                    "收到消息：ctx={}, id={}, len={}, body={}",
+                    socketSession.toString(),
+                    messageId,
+                    messageBytes.length,
+                    decode
+            );
             /* TODO 这里考虑如何线程规划 */
             doMessageMapping.getMethod().invoke(doMessageMapping.getBean(), socketSession, decode);
+        } else {
+            LogbackUtil.logger().info(
+                    "收到消息：ctx={}, id={}, len={} (未知消息)",
+                    socketSession.toString(),
+                    messageId,
+                    messageBytes.length
+            );
         }
     }
 

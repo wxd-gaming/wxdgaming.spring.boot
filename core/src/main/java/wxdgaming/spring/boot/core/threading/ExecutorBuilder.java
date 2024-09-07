@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 @Configuration
 @ConfigurationProperties("server.executor")
-public class ExecutorConfig {
+public class ExecutorBuilder {
 
     /** 核心线程数量 */
     private int defaultCoreSize = 2;

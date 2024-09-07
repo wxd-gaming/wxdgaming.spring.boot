@@ -61,17 +61,7 @@ public class ApplicationStart {
         ConfigurableApplicationContext run = SpringApplication.run(ApplicationStart.class, args);
 
         SpringUtil ins = SpringUtil.getIns();
-        ins.withMethodAnnotated(Start.class)
-                .forEach(method -> {
-                    try {
-                        Object bean = ins.getBean(method.getDeclaringClass());
-                        method.setAccessible(true);
-                        Object[] array = Arrays.stream(method.getParameterTypes()).map(ins::getBean).toArray();
-                        method.invoke(bean, array);
-                    } catch (Exception e) {
-                        throw new RuntimeException(method.toString(), e);
-                    }
-                });
+        ins.executor(Start.class);
 
         RpcService rpcService = ins.getBean(RpcService.class);
 
@@ -84,7 +74,7 @@ public class ApplicationStart {
         ;
 
         try {
-            SocketSession session = run.getBean(TcpSocketClient.class).getSession();
+            SocketSession session = run.getBean(TcpSocketClient.class).idleSession();
             Mono<String> rpc = rpcService.request(session, "rpcTest", new JSONObject().fluentPut("type", 1).toString());
             rpc.subscribe(str -> log.debug("{}", str));
             rpc.block();
@@ -93,7 +83,7 @@ public class ApplicationStart {
         }
 
         try {
-            SocketSession session = run.getBean(WebSocketClient.class).getSession();
+            SocketSession session = run.getBean(WebSocketClient.class).idleSession();
             Mono<String> rpc = rpcService.request(session, "rpcTest", new JSONObject().fluentPut("type", 1).toString());
             rpc.subscribe(str -> log.debug("{}", str));
             rpc.block();

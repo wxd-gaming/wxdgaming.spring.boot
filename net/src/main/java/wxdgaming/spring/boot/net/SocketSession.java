@@ -10,6 +10,8 @@ import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.message.PojoBase;
 
+import java.io.Closeable;
+
 /**
  * socket session
  *
@@ -22,11 +24,18 @@ import wxdgaming.spring.boot.message.PojoBase;
 @Accessors(chain = true)
 public class SocketSession {
 
+    public enum Type {
+        server,
+        client,
+    }
+
+    private final Type type;
     private final Channel channel;
     private boolean webSocket;
     private boolean ssl;
 
-    public SocketSession(Channel channel, Boolean webSocket) {
+    public SocketSession(Type type, Channel channel, Boolean webSocket) {
+        this.type = type;
         this.channel = channel;
         this.webSocket = Boolean.TRUE.equals(webSocket);
         ChannelUtil.attr(this.channel, ChannelUtil.SOCKET_SESSION_KEY, this);
@@ -49,7 +58,25 @@ public class SocketSession {
         }
     }
 
+    /** 是否可用 */
+    public boolean isOpen() {
+        return channel.isRegistered() && channel.isOpen();
+    }
+
+    public void close(String string) {
+        try {channel.disconnect();} catch (Exception ignore) {}
+        try {channel.close();} catch (Exception ignore) {}
+        try {channel.deregister();} catch (Exception ignore) {}
+        log.info("{} {}", toString(), string);
+    }
+
     @Override public String toString() {
-        return "【" + ChannelUtil.ctxTostring(channel) + ", webSocket=" + webSocket + ", ssl=" + ssl + "】";
+        return """
+                【%s - %s%s%s】""".formatted(
+                type.name(),
+                ChannelUtil.ctxTostring(channel),
+                isWebSocket() ? ", websocket" : "",
+                isSsl() ? ", ssl" : ""
+        );
     }
 }

@@ -3,7 +3,7 @@ package code;
 import io.protostuff.Tag;
 import lombok.Data;
 import org.junit.Test;
-import wxdgaming.spring.boot.message.ProtoBufPojo;
+import wxdgaming.spring.boot.message.ProtoBuf2Pojo;
 import wxdgaming.spring.boot.message.SerializerUtil;
 import wxdgaming.spring.boot.rpc.pojo.RpcMessage;
 
@@ -19,7 +19,7 @@ public class ProtoTest {
 
     @Test
     public void t0() {
-        ProtoBufPojo.actionProtoFile("./src/main/java", "./src/main");
+        ProtoBuf2Pojo.actionProtoFile("./src/main/java", "./src/main");
     }
 
     @Test

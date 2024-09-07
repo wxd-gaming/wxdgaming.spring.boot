@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-05-27 16:39
  **/
-public class ProtoBufPojo {
+public class ProtoBuf2Pojo {
 
     public static void actionProtoFile(String outPath, String readPath) {
 
@@ -124,6 +124,7 @@ public class ProtoBufPojo {
         }
 
         public String classString() {
+
             String to = "";
             to += "\n";
             to += "\n   /** " + comment + " */";

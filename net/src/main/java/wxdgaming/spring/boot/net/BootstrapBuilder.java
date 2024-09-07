@@ -3,11 +3,7 @@ package wxdgaming.spring.boot.net;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -16,12 +12,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import wxdgaming.spring.boot.core.InitPrint;
-import wxdgaming.spring.boot.core.ssl.SslContextByJks;
-import wxdgaming.spring.boot.core.ssl.SslProtocolType;
 import wxdgaming.spring.boot.core.threading.ThreadNameFactory;
-import wxdgaming.spring.boot.net.server.SocketServerBuilder;
-
-import javax.net.ssl.SSLContext;
 
 /**
  * 配置项
@@ -34,7 +25,7 @@ import javax.net.ssl.SSLContext;
 @Setter
 @Configuration
 @ConfigurationProperties("socket")
-public class BootstrapConfig implements InitPrint {
+public class BootstrapBuilder implements InitPrint {
 
     private boolean debugLogger = false;
 
@@ -44,6 +35,14 @@ public class BootstrapConfig implements InitPrint {
         } else {
             return new NioEventLoopGroup(size, new ThreadNameFactory(prefix));
         }
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SessionHandler.class)
+    public SessionHandler sessionHandler() {
+        SessionHandler sessionHandler = new SessionHandler() {};
+        log.debug("init default sessionHandler = {}", sessionHandler.hashCode());
+        return sessionHandler;
     }
 
     @Bean

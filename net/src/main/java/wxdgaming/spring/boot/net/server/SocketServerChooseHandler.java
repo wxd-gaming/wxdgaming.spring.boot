@@ -36,16 +36,19 @@ public class SocketServerChooseHandler extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        if (config.isEnableWebSocket()) {
-            String protocol = getBufStart(in);
-            if (protocol.startsWith(WEBSOCKET_PREFIX)) {
-                websocketAdd(ctx);
-                // 对于 webSocket ，不设置超时断开
-                // ctx.pipeline().remove(IdleStateHandler.class);
-                // ctx.pipeline().remove(LengthFieldBasedFrameDecoder.class);
+        String protocol = getBufStart(in);
+        if (protocol.startsWith(WEBSOCKET_PREFIX)) {
+            if (!config.isEnableWebSocket()) {
+                ctx.disconnect();
+                ctx.close();
+                throw new RuntimeException(ChannelUtil.ctxTostring(ctx) + " - 不支持 web socket or http ");
             }
-            in.resetReaderIndex();
+            websocketAdd(ctx);
+            // 对于 webSocket ，不设置超时断开
+            // ctx.pipeline().remove(IdleStateHandler.class);
+            // ctx.pipeline().remove(LengthFieldBasedFrameDecoder.class);
         }
+        in.resetReaderIndex();
         ctx.pipeline().remove(this.getClass());
     }
 

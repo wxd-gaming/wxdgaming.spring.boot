@@ -24,15 +24,13 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import wxdgaming.spring.boot.core.lang.Tuple2;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -61,13 +59,13 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         return o1.getName().compareTo(o2.getName());
     };
 
-    public static final Comparator<Method> METHOD_COMPARATOR = (o1, o2) -> {
-        int o1Annotation = Optional.ofNullable(o1.getAnnotation(Order.class)).map(Order::value).orElse(999999);
-        int o2Annotation = Optional.ofNullable(o2.getAnnotation(Order.class)).map(Order::value).orElse(999999);
+    public static final Comparator<Tuple2<Class<?>, Method>> METHOD_COMPARATOR = (o1, o2) -> {
+        int o1Annotation = Optional.ofNullable(o1.getRight().getAnnotation(Order.class)).map(Order::value).orElse(999999);
+        int o2Annotation = Optional.ofNullable(o2.getRight().getAnnotation(Order.class)).map(Order::value).orElse(999999);
         if (o1Annotation != o2Annotation) {
             return Integer.compare(o1Annotation, o2Annotation);
         }
-        return o1.getName().compareTo(o2.getName());
+        return o1.getRight().getName().compareTo(o2.getRight().getName());
     };
 
 
@@ -220,10 +218,24 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @author: wxd-gaming(無心道, 15388152619)
      * @version: 2024-08-12 13:40
      */
-    public Stream<Method> withMethodAnnotated(Class<? extends Annotation> annotationType) {
+    public Stream<Tuple2<Class<?>, Method>> withMethodAnnotated(Class<? extends Annotation> annotationType) {
         return reflectContext()
                 .withMethodAnnotated(annotationType)
                 .sorted(METHOD_COMPARATOR);
+    }
+
+    public void executor(Class<? extends Annotation> annotationType) {
+        withMethodAnnotated(annotationType)
+                .forEach(t -> {
+                    try {
+                        Object bean = ins.getBean(t.getLeft());
+                        t.getRight().setAccessible(true);
+                        Object[] array = Arrays.stream(t.getRight().getParameterTypes()).map(ins::getBean).toArray();
+                        t.getRight().invoke(bean, array);
+                    } catch (Exception e) {
+                        throw new RuntimeException(t.getLeft().getName() + "#" + t.getRight().getName(), e);
+                    }
+                });
     }
 
     /**

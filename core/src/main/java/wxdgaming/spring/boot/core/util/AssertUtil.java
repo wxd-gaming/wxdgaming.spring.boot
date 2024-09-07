@@ -66,7 +66,8 @@ public class AssertUtil {
         return object;
     }
 
-    public void assertNullEmpty(Object source, String message) {
+    /** null empty */
+    public static void assertNullEmpty(Object source, String message) {
         if (source == null
                 || (source instanceof String str && (str.isEmpty() || str.isBlank()))
                 || (source instanceof Collection && ((Collection<?>) source).isEmpty())) {

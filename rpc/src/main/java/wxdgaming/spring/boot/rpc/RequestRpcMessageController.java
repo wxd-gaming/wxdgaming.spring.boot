@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
+import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.MsgMapper;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.rpc.pojo.RpcMessage;
@@ -54,12 +55,27 @@ public class RequestRpcMessageController {
             if (type instanceof Class<?> clazz) {
                 if (clazz.isAssignableFrom(session.getClass())) {
                     params[i] = session;
-                } else if (clazz.getName().equals(JSONObject.class.getName())) {
-                    params[i] = FastJsonUtil.parse(remoteParams);
                 } else {
                     /*实现注入*/
-                    RequestParam annotation = parameter.getAnnotation(RequestParam.class);
-                    params[i] = FastJsonUtil.parse(remoteParams).getObject(annotation.name(), clazz);
+                    RequestParam requestParam = parameter.getAnnotation(RequestParam.class);
+                    if (requestParam != null) {
+                        String name = requestParam.name();
+                        if (StringsUtil.emptyOrNull(name)) {
+                            name = requestParam.value();
+                        }
+                        if (StringsUtil.emptyOrNull(name)) {
+                            throw new RuntimeException(rpcActionMapping.getBean().getClass().getName() + "#" + rpcActionMapping.getMethod().getName() + ", 无法识别 " + (i + 1) + " 参数 RequestParam 指定 name " + clazz);
+                        }
+                        params[i] = FastJsonUtil.parse(remoteParams).getObject(name, clazz);
+                        continue;
+                    }
+                    if (clazz.isAssignableFrom(String.class)) {
+                        params[i] = remoteParams;
+                    } else if (clazz.isAssignableFrom(JSONObject.class)) {
+                        params[i] = FastJsonUtil.parse(remoteParams);
+                    } else {
+                        throw new RuntimeException(rpcActionMapping.getBean().getClass().getName() + "#" + rpcActionMapping.getMethod().getName() + ", 无法识别 " + (i + 1) + " 参数 " + clazz);
+                    }
                 }
             }
         }
@@ -84,6 +100,7 @@ public class RequestRpcMessageController {
             res.setRpcToken(rpcService.getRPC_TOKEN());
             session.writeAndFlush(res);
         } catch (Throwable t) {
+            log.error("{}, rpcId={}, path={}, params={}", session, rpcId, path, remoteParams, t);
             rpcService.response(session, rpcId, 500, t.getMessage());
         }
     }

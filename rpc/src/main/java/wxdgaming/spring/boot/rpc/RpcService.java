@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Mono;
 import wxdgaming.spring.boot.core.InitPrint;
@@ -46,21 +47,29 @@ public class RpcService implements InitPrint {
     @Order(99999)
     public void start() {
         springUtil.withMethodAnnotated(RPC.class)
-                .forEach(method -> {
-                    method.setAccessible(true);
-                    Object bean = springUtil.getBean(method.getDeclaringClass());
-                    String value = method.getAnnotation(RPC.class).value();
-                    if (StringsUtil.emptyOrNull(value)) {
-                        value = method.getName();
+                .forEach(t -> {
+                    t.getRight().setAccessible(true);
+                    String value = "";
+                    RequestMapping requestMapping = t.getLeft().getAnnotation(RequestMapping.class);
+                    if (requestMapping != null && requestMapping.value().length > 0) {
+                        value = requestMapping.value()[0];
                     }
-                    if (rpcHandlerMap.putIfAbsent(value, new RpcActionMapping(method, bean)) != null) {
+                    Object bean = springUtil.getBean(t.getLeft());
+                    String mapping = t.getRight().getAnnotation(RPC.class).value();
+                    if (StringsUtil.emptyOrNull(mapping)) {
+                        value += "/" + t.getRight().getName();
+                    } else {
+                        value += mapping;
+                    }
+                    if (rpcHandlerMap.putIfAbsent(value, new RpcActionMapping(t.getRight(), bean)) != null) {
 
                     }
+                    log.debug("rpc register path={}, {}#{}", value, t.getLeft().getName(), t.getRight().getName());
                 });
     }
 
     /** rpc test */
-    @RPC
+    @RPC("rpcTest")
     public String rpcTest(SocketSession session, JSONObject jsonObject, @RequestParam(name = "type") int type) throws Exception {
         log.debug("rpc action rpcTest {}, {}, {}", session, jsonObject, type);
         return "ok";

@@ -3,10 +3,9 @@ package wxdgaming.spring.boot.net.client;
 
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
-import org.springframework.core.annotation.Order;
-import wxdgaming.spring.boot.core.ann.Start;
-import wxdgaming.spring.boot.net.BootstrapConfig;
-import wxdgaming.spring.boot.net.SocketSession;
+import wxdgaming.spring.boot.core.threading.DefaultExecutor;
+import wxdgaming.spring.boot.net.BootstrapBuilder;
+import wxdgaming.spring.boot.net.SessionHandler;
 
 /**
  * tcp socket client
@@ -17,26 +16,19 @@ import wxdgaming.spring.boot.net.SocketSession;
 @Getter
 public class TcpSocketClient extends SocketClient {
 
-    public TcpSocketClient(BootstrapConfig bootstrapConfig,
+    public TcpSocketClient(DefaultExecutor defaultExecutor,
+                           BootstrapBuilder bootstrapBuilder,
                            SocketClientBuilder socketClientBuilder,
                            SocketClientBuilder.Config config,
-                           SocketClientDeviceHandler socketClientDeviceHandler,
+                           SessionHandler sessionHandler,
                            ClientMessageDecode clientMessageDecode,
                            ClientMessageEncode clientMessageEncode) {
-        super(bootstrapConfig, socketClientBuilder, config, socketClientDeviceHandler, clientMessageDecode, clientMessageEncode);
+        super(defaultExecutor, bootstrapBuilder, socketClientBuilder, config, sessionHandler, clientMessageDecode, clientMessageEncode);
     }
 
     @PostConstruct
     @Override public void init() {
         super.init();
-    }
-
-    SocketSession session;
-
-    @Start
-    @Order(2000)
-    public void start() {
-        session = connect();
     }
 
 }

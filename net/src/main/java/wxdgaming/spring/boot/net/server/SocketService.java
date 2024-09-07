@@ -11,8 +11,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ann.Start;
+import wxdgaming.spring.boot.core.collection.concurrent.ConcurrentLoopList;
 import wxdgaming.spring.boot.core.system.BytesUnit;
-import wxdgaming.spring.boot.net.BootstrapConfig;
+import wxdgaming.spring.boot.net.BootstrapBuilder;
+import wxdgaming.spring.boot.net.ISession;
+import wxdgaming.spring.boot.net.SessionHandler;
+import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.ssl.WxdOptionalSslHandler;
 
 import java.io.Closeable;
@@ -27,9 +31,9 @@ import java.util.concurrent.TimeUnit;
  **/
 @Slf4j
 @Getter
-public class SocketService implements Closeable, InitPrint {
+public class SocketService implements InitPrint, Closeable, ISession {
 
-    private final BootstrapConfig bootstrapConfig;
+    private final BootstrapBuilder bootstrapBuilder;
     private final SocketServerBuilder socketServerBuilder;
     private final SocketServerBuilder.Config config;
     private final SocketServerDeviceHandler socketServerDeviceHandler;
@@ -37,17 +41,19 @@ public class SocketService implements Closeable, InitPrint {
     private final ServerMessageEncode serverMessageEncode;
     private ServerBootstrap bootstrap = null;
     private ChannelFuture future = null;
+    /** 所有的连接 */
+    protected final ConcurrentLoopList<SocketSession> sessions = new ConcurrentLoopList<>();
 
-    public SocketService(BootstrapConfig bootstrapConfig,
+    public SocketService(BootstrapBuilder bootstrapBuilder,
                          SocketServerBuilder socketServerBuilder,
                          SocketServerBuilder.Config config,
-                         SocketServerDeviceHandler socketServerDeviceHandler,
+                         SessionHandler sessionHandler,
                          ServerMessageDecode serverMessageDecode,
                          ServerMessageEncode serverMessageEncode) {
-        this.bootstrapConfig = bootstrapConfig;
+        this.bootstrapBuilder = bootstrapBuilder;
         this.socketServerBuilder = socketServerBuilder;
         this.config = config;
-        this.socketServerDeviceHandler = socketServerDeviceHandler;
+        this.socketServerDeviceHandler = new SocketServerDeviceHandler(sessionHandler, this);
         this.serverMessageDecode = serverMessageDecode;
         this.serverMessageEncode = serverMessageEncode;
     }
@@ -78,7 +84,7 @@ public class SocketService implements Closeable, InitPrint {
                     @Override
                     public void initChannel(SocketChannel socketChannel) throws Exception {
                         ChannelPipeline pipeline = socketChannel.pipeline();
-                        if (bootstrapConfig.isDebugLogger()) {
+                        if (bootstrapBuilder.isDebugLogger()) {
                             pipeline.addLast(new LoggingHandler("DEBUG"));// 设置log监听器，并且日志级别为debug，方便观察运行流程
                         }
 

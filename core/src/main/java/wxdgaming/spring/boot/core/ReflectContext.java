@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.slf4j.LoggerFactory;
 import wxdgaming.spring.boot.core.io.FileReadUtil;
+import wxdgaming.spring.boot.core.lang.Tuple2;
 import wxdgaming.spring.boot.core.loader.ClassDirLoader;
 import wxdgaming.spring.boot.core.loader.RemoteClassLoader;
 import wxdgaming.spring.boot.core.system.AnnUtil;
@@ -149,13 +150,13 @@ public class ReflectContext {
     }
 
     /** 所有bean里面的方法，添加了注解的 */
-    public Stream<Method> withMethodAnnotated(Class<? extends Annotation> annotation) {
+    public Stream<Tuple2<Class<?>, Method>> withMethodAnnotated(Class<? extends Annotation> annotation) {
         return withMethodAnnotated(annotation, null);
     }
 
     /** 所有添加了这个注解的类 */
-    public Stream<Method> withMethodAnnotated(Class<? extends Annotation> annotation, Predicate<Method> predicate) {
-        Stream<Method> methodStream = stream().flatMap(info -> info.methodsWithAnnotated(annotation));
+    public Stream<Tuple2<Class<?>, Method>> withMethodAnnotated(Class<? extends Annotation> annotation, Predicate<Tuple2<Class<?>, Method>> predicate) {
+        Stream<Tuple2<Class<?>, Method>> methodStream = stream().flatMap(info -> info.methodsWithAnnotated(annotation).map(m -> new Tuple2<>(info.cls, m)));
         if (predicate != null) {
             methodStream = methodStream.filter(predicate);
         }

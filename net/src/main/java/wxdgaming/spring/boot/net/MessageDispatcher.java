@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ReflectContext;
@@ -28,15 +29,16 @@ public class MessageDispatcher implements InitPrint {
     private final ConcurrentHashMap<String, Integer> messageName2Id = new ConcurrentHashMap<>();
 
     @Start
+    @Order(999)
     public void start(SpringUtil springUtil) {
         springUtil.withMethodAnnotated(MsgMapper.class)
-                .forEach(method -> {
-                    Class parameterType = method.getParameterTypes()[1];
+                .forEach(t -> {
+                    Class parameterType = t.getRight().getParameterTypes()[1];
                     if (PojoBase.class.isAssignableFrom(parameterType)) {
-                        DoMessageMapping messageMapping = new DoMessageMapping(springUtil.getBean(method.getDeclaringClass()), method, parameterType);
+                        DoMessageMapping messageMapping = new DoMessageMapping(springUtil.getBean(t.getLeft()), t.getRight(), parameterType);
                         int msgId = registerMessage(parameterType);
                         mappings.put(msgId, messageMapping);
-                        log.debug("扫描消息处理接口 {}#{} {}", method.getDeclaringClass().getName(), method.getName(), parameterType.getName());
+                        log.debug("扫描消息处理接口 {}#{} {}", t.getLeft().getName(), t.getRight().getName(), parameterType.getName());
                     }
                 });
     }
@@ -50,7 +52,7 @@ public class MessageDispatcher implements InitPrint {
         reflectContext
                 .withSuper(PojoBase.class)
                 .map(v -> (Class) v.getCls())
-                .forEach(pojo -> {registerMessage(pojo);});
+                .forEach(this::registerMessage);
     }
 
     public int registerMessage(Class<? extends PojoBase> pojoClass) {
