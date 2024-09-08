@@ -7,6 +7,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import wxdgaming.spring.boot.core.LogbackUtil;
 import wxdgaming.spring.boot.message.PojoBase;
 import wxdgaming.spring.boot.message.SerializerUtil;
@@ -23,13 +24,14 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
     public static final AttributeKey<ByteBuf> byteBufAttributeKey = AttributeKey.<ByteBuf>valueOf("__ctx_byteBuf__");
 
     protected final boolean autoRelease;
+    protected final BootstrapBuilder bootstrapBuilder;
     protected final MessageDispatcher dispatcher;
 
-    public MessageDecode(boolean autoRelease, MessageDispatcher dispatcher) {
+    public MessageDecode(boolean autoRelease, BootstrapBuilder bootstrapBuilder, MessageDispatcher dispatcher) {
         this.autoRelease = autoRelease;
+        this.bootstrapBuilder = bootstrapBuilder;
         this.dispatcher = dispatcher;
     }
-
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -138,28 +140,37 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
 
     protected void action(SocketSession socketSession, int messageId, byte[] messageBytes) throws Exception {
         DoMessageMapping doMessageMapping = dispatcher.getMappings().get(messageId);
+        Logger logger = LogbackUtil.logger();
         if (doMessageMapping != null) {
             PojoBase decode = (PojoBase) SerializerUtil.decode(messageBytes, doMessageMapping.getMessageType());
-            LogbackUtil.logger().debug(
-                    "收到消息：ctx={}, id={}, len={}, body={}",
-                    socketSession.toString(),
-                    messageId,
-                    messageBytes.length,
-                    decode
-            );
+            if (bootstrapBuilder.isPrintLogger() && logger.isInfoEnabled()) {
+                logger.info(
+                        "收到消息：ctx={}, id={}, len={}, body={}",
+                        socketSession.toString(),
+                        messageId,
+                        messageBytes.length,
+                        decode
+                );
+            }
             /* TODO 这里考虑如何线程规划 */
             doMessageMapping.getMethod().invoke(doMessageMapping.getBean(), socketSession, decode);
         } else {
-            LogbackUtil.logger().info(
-                    "收到消息：ctx={}, id={}, len={} (未知消息)",
-                    socketSession.toString(),
-                    messageId,
-                    messageBytes.length
-            );
+            if (logger.isInfoEnabled()) {
+                logger.info(
+                        "收到消息：ctx={}, id={}, len={} (未知消息)",
+                        socketSession.toString(),
+                        messageId,
+                        messageBytes.length
+                );
+            }
         }
     }
 
     protected void action(SocketSession socketSession, String message) throws Exception {
-        LogbackUtil.logger().info("收到消息：ctx={}, message={}", socketSession.toString(), message);
+        Logger logger = LogbackUtil.logger();
+        if (logger.isInfoEnabled()) {
+            logger.info("收到消息：ctx={}, message={}", socketSession.toString(), message);
+        }
     }
+
 }

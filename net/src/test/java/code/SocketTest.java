@@ -40,7 +40,7 @@ public class SocketTest {
         socketService = socketServerBuilder.socketService(
                 bootstrapBuilder,
                 new SessionHandler() {},
-                new ServerMessageDecode(messageDispatcher) {
+                new ServerMessageDecode(bootstrapBuilder, messageDispatcher) {
                     @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
                         super.action(session, messageId, messageBytes);
                         log.info("{}", new String(messageBytes, StandardCharsets.UTF_8));
@@ -68,7 +68,7 @@ public class SocketTest {
                 defaultExecutor,
                 bootstrapBuilder,
                 new SessionHandler() {},
-                new ClientMessageDecode(messageDispatcher) {
+                new ClientMessageDecode(bootstrapBuilder, messageDispatcher) {
                     @Override protected void action(SocketSession socketSession, int messageId, byte[] messageBytes) throws Exception {
                         super.action(socketSession, messageId, messageBytes);
                         log.info("{}", new String(messageBytes, StandardCharsets.UTF_8));
@@ -82,7 +82,7 @@ public class SocketTest {
                 defaultExecutor,
                 bootstrapBuilder,
                 new SessionHandler() {},
-                new ClientMessageDecode(messageDispatcher),
+                new ClientMessageDecode(bootstrapBuilder, messageDispatcher),
                 new ClientMessageEncode(messageDispatcher)
         );
 

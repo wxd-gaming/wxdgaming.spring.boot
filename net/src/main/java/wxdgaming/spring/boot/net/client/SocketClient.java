@@ -68,7 +68,7 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
         this.bootstrapBuilder = bootstrapBuilder;
         this.socketClientBuilder = socketClientBuilder;
         this.config = config;
-        this.socketClientDeviceHandler = new SocketClientDeviceHandler(sessionHandler);
+        this.socketClientDeviceHandler = new SocketClientDeviceHandler(bootstrapBuilder, sessionHandler);
         this.clientMessageDecode = clientMessageDecode;
         this.clientMessageEncode = clientMessageEncode;
         defaultExecutor.scheduleAtFixedRate(new Event() {

@@ -1,6 +1,7 @@
 package wxdgaming.spring.boot.net.server;
 
 import io.netty.channel.ChannelHandler;
+import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.MessageDecode;
 import wxdgaming.spring.boot.net.MessageDispatcher;
 
@@ -13,8 +14,8 @@ import wxdgaming.spring.boot.net.MessageDispatcher;
 @ChannelHandler.Sharable
 public class ServerMessageDecode extends MessageDecode {
 
-    public ServerMessageDecode(MessageDispatcher dispatcher) {
-        super(true, dispatcher);
+    public ServerMessageDecode(BootstrapBuilder bootstrapBuilder, MessageDispatcher dispatcher) {
+        super(true, bootstrapBuilder, dispatcher);
     }
 }
 

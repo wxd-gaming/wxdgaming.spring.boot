@@ -28,6 +28,8 @@ import wxdgaming.spring.boot.core.threading.ThreadNameFactory;
 public class BootstrapBuilder implements InitPrint {
 
     private boolean debugLogger = false;
+    /** 输出一些基本日志 */
+    private boolean printLogger = false;
 
     public static EventLoopGroup createGroup(int size, String prefix) {
         if (Epoll.isAvailable()) {

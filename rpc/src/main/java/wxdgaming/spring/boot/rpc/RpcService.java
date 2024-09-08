@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.ann.Start;
+import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.rpc.pojo.RpcMessage;
@@ -75,6 +76,20 @@ public class RpcService implements InitPrint {
         return "ok";
     }
 
+    /**
+     * 请求 rpc 执行
+     *
+     * @param session 链接
+     * @param path    路径
+     * @param params  参数
+     * @return
+     * @throws Exception
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2024-08-22 19:41
+     */
+    public Mono<String> request(SocketSession session, String path, JSONObject params) {
+        return request(session, path, FastJsonUtil.toJsonWriteType(params));
+    }
 
     /**
      * 请求 rpc 执行

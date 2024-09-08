@@ -18,24 +18,26 @@ import java.util.Optional;
 @Getter
 public abstract class SocketDeviceHandler extends ChannelInboundHandlerAdapter {
 
+    protected final BootstrapBuilder bootstrapBuilder;
     protected final SessionHandler sessionHandler;
 
-    public SocketDeviceHandler(SessionHandler sessionHandler) {
+    public SocketDeviceHandler(BootstrapBuilder bootstrapBuilder, SessionHandler sessionHandler) {
+        this.bootstrapBuilder = bootstrapBuilder;
         this.sessionHandler = sessionHandler;
     }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        if (log.isDebugEnabled())
-            log.debug("channel 接入 {} {}", ChannelUtil.ctxTostring(ctx), ctx);
+        if (bootstrapBuilder.isPrintLogger())
+            log.info("channel 接入 {} {}", ChannelUtil.ctxTostring(ctx), ctx);
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
-        if (log.isDebugEnabled())
-            log.debug("channel 关闭 {} {}", ChannelUtil.ctxTostring(ctx), ctx);
+        if (bootstrapBuilder.isPrintLogger())
+            log.info("channel 关闭 {} {}", ChannelUtil.ctxTostring(ctx), ctx);
         SocketSession session = ChannelUtil.session(ctx.channel());
         if (session != null) {
             sessionHandler.closeSession(session);

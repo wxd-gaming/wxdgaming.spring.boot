@@ -53,7 +53,7 @@ public class SocketService implements InitPrint, Closeable, ISession {
         this.bootstrapBuilder = bootstrapBuilder;
         this.socketServerBuilder = socketServerBuilder;
         this.config = config;
-        this.socketServerDeviceHandler = new SocketServerDeviceHandler(sessionHandler, this);
+        this.socketServerDeviceHandler = new SocketServerDeviceHandler(bootstrapBuilder, sessionHandler, this);
         this.serverMessageDecode = serverMessageDecode;
         this.serverMessageEncode = serverMessageEncode;
     }

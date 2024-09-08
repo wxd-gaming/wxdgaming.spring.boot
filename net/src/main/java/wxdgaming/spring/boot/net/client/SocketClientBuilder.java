@@ -66,8 +66,8 @@ public class SocketClientBuilder {
 
     @Bean
     @ConditionalOnMissingBean(ClientMessageDecode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public ClientMessageDecode clientMessageDecode(MessageDispatcher messageDispatcher) {
-        ClientMessageDecode decode = new ClientMessageDecode(messageDispatcher) {};
+    public ClientMessageDecode clientMessageDecode(BootstrapBuilder bootstrapBuilder, MessageDispatcher messageDispatcher) {
+        ClientMessageDecode decode = new ClientMessageDecode(bootstrapBuilder, messageDispatcher) {};
         log.debug("init default ClientMessageDecode = {}", decode.hashCode());
         return decode;
     }

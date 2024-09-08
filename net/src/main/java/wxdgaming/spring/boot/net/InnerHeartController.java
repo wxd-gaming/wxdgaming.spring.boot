@@ -1,6 +1,7 @@
 package wxdgaming.spring.boot.net;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import wxdgaming.spring.boot.message.pojo.inner.InnerMessage;
 
@@ -14,9 +15,12 @@ import wxdgaming.spring.boot.message.pojo.inner.InnerMessage;
 @Controller
 public class InnerHeartController {
 
+    @Autowired BootstrapBuilder bootstrapBuilder;
+
     @MsgMapper
     public void rpcReqSocketAction(SocketSession session, InnerMessage.ReqHeart reqHeart) throws Exception {
-        log.debug("{} {}", session, reqHeart.getMilli());
+        if (bootstrapBuilder.isPrintLogger())
+            log.info("{} {}", session, reqHeart.getMilli());
     }
 
 }

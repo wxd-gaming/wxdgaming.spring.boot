@@ -3,7 +3,7 @@ package wxdgaming.spring.boot.core.lang;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import wxdgaming.boot.core.timer.MyClock;
+import wxdgaming.spring.boot.core.timer.MyClock;
 
 import java.io.Serializable;
 

@@ -1,6 +1,7 @@
 package wxdgaming.spring.boot.net.client;
 
 import io.netty.channel.ChannelHandler;
+import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.SessionHandler;
 import wxdgaming.spring.boot.net.SocketDeviceHandler;
 
@@ -13,8 +14,7 @@ import wxdgaming.spring.boot.net.SocketDeviceHandler;
 @ChannelHandler.Sharable
 public class SocketClientDeviceHandler extends SocketDeviceHandler {
 
-    public SocketClientDeviceHandler(SessionHandler sessionHandler) {
-        super(sessionHandler);
+    public SocketClientDeviceHandler(BootstrapBuilder bootstrapBuilder, SessionHandler sessionHandler) {
+        super(bootstrapBuilder, sessionHandler);
     }
-
 }
