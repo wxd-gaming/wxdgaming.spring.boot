@@ -18,7 +18,7 @@ import wxdgaming.spring.boot.core.collection.concurrent.ConcurrentLoopList;
 import wxdgaming.spring.boot.core.threading.DefaultExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.timer.MyClock;
-import wxdgaming.spring.boot.message.inner.pojo.InnerMessage;
+import wxdgaming.spring.boot.message.pojo.inner.InnerMessage;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.ISession;
 import wxdgaming.spring.boot.net.SessionHandler;

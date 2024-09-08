@@ -29,6 +29,7 @@ public class ProtoTest {
         builder.setPath("ss");
         builder.setParams("1");
         builder.setRpcToken("1");
+        System.out.println(builder.toString());
         byte[] encode1 = SerializerUtil.encode(builder);
         Tq tq = new Tq();
         byte[] encode = SerializerUtil.encode(tq);

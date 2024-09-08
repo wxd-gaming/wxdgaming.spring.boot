@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.message.inner.pojo;
+package wxdgaming.spring.boot.message.pojo.inner;
 
 import io.protostuff.Tag;
 import java.util.List;
@@ -13,7 +13,7 @@ import wxdgaming.spring.boot.message.PojoBase;
  * rpc.proto
  *
  * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-09-07 11:38:08
+ * @version: 2024-09-07 21:11:44
  */
 public class InnerMessage {
 
@@ -26,6 +26,5 @@ public class InnerMessage {
        /** 当前毫秒 */
        @Tag(1)
        private long milli;
-
    }
 }
