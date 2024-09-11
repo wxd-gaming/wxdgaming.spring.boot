@@ -155,7 +155,7 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
             /* TODO 这里考虑如何线程规划 */
             doMessageMapping.getMethod().invoke(doMessageMapping.getBean(), socketSession, decode);
         } else {
-            if (logger.isInfoEnabled()) {
+            if (bootstrapBuilder.isPrintLogger() && logger.isInfoEnabled()) {
                 logger.info(
                         "收到消息：ctx={}, id={}, len={} (未知消息)",
                         socketSession.toString(),

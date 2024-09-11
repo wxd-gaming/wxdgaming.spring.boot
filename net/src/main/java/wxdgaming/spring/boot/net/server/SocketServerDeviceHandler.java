@@ -24,8 +24,8 @@ public class SocketServerDeviceHandler extends SocketDeviceHandler {
         super.channelRegistered(ctx);
         /*TODO 构造函数自动注册*/
         SocketSession socketSession = new SocketSession(SocketSession.Type.server, ctx.channel(), ChannelUtil.attr(ctx.channel(), ChannelUtil.WEB_SOCKET_SESSION_KEY));
-        socketService.getSessions().add(socketSession);
-        ctx.channel().closeFuture().addListener(future -> socketService.getSessions().remove(socketSession));
+        socketService.getSessionGroup().add(socketSession);
+        ctx.channel().closeFuture().addListener(future -> socketService.getSessionGroup().remove(socketSession));
         sessionHandler.openSession(socketSession);
     }
 

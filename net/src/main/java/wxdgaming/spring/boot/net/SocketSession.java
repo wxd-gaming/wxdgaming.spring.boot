@@ -10,8 +10,6 @@ import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.message.PojoBase;
 
-import java.io.Closeable;
-
 /**
  * socket session
  *
@@ -41,8 +39,8 @@ public class SocketSession {
         ChannelUtil.attr(this.channel, ChannelUtil.SOCKET_SESSION_KEY, this);
     }
 
-    public void writeAndFlush(Object message) {
-        channel.writeAndFlush(message);
+    public ChannelFuture writeAndFlush(Object message) {
+        return channel.writeAndFlush(message);
     }
 
     public ChannelFuture writeAndFlush(PojoBase pojoBase) {
@@ -56,6 +54,27 @@ public class SocketSession {
         } else {
             return channel.writeAndFlush(byteBuf);
         }
+    }
+
+    public ChannelFuture write(Object message) {
+        return channel.write(message);
+    }
+
+    public ChannelFuture write(PojoBase pojoBase) {
+        return channel.write(pojoBase);
+    }
+
+    public ChannelFuture write(ByteBuf byteBuf) {
+        if (webSocket) {
+            BinaryWebSocketFrame webSocketFrame = new BinaryWebSocketFrame(byteBuf);
+            return channel.write(webSocketFrame);
+        } else {
+            return channel.write(byteBuf);
+        }
+    }
+
+    public void flush() {
+        channel.flush();
     }
 
     /** 是否可用 */

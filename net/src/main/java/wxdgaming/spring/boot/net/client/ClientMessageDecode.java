@@ -15,6 +15,6 @@ import wxdgaming.spring.boot.net.MessageDispatcher;
 public class ClientMessageDecode extends MessageDecode {
 
     public ClientMessageDecode(BootstrapBuilder bootstrapBuilder, MessageDispatcher dispatcher) {
-        super(true, bootstrapBuilder, dispatcher);
+        super(false, bootstrapBuilder, dispatcher);
     }
 }

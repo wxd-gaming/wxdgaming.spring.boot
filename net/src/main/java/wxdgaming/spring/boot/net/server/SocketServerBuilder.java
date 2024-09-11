@@ -40,9 +40,9 @@ import javax.net.ssl.SSLContext;
 public class SocketServerBuilder {
 
     /** netty boss 线程 多个服务共享 */
-    private int bossThreadSize = 2;
+    private int bossThreadSize = 3;
     /** netty work 线程 多个服务共享 */
-    private int workerThreadSize = 10;
+    private int workerThreadSize = 20;
 
     private Config config;
 

@@ -3,9 +3,15 @@
     <!--关闭自身日志-->
     <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
     <property name="LOG_PATH" value="target/logs"/>
+    <!--    %logger#%M 全路径 -->
+    <!--    %C{0}#%M 只输出类名-->
     <!--    <property name="LOG_PATTERN" value="%red([%d{MM-dd HH:mm:ss:SSS}]) %green([%thread]) %highlight([%-5level]) %boldMagenta([%C{0}#%M:%-3L]) - %msg%n"/>-->
+
+    <!--    <property name="LOG_PATTERN"-->
+    <!--              value="%red([%d{MM-dd HH:mm:ss:SSS}]) %green([%thread]) %highlight([%-5level]) %boldMagenta([%logger#%M:%-3L]) - %msg%n"/>-->
+
     <property name="LOG_PATTERN"
-              value="%red([%d{MM-dd HH:mm:ss:SSS}]) %green([%thread]) %highlight([%-5level]) %boldMagenta([%logger#%M:%-3L]) - %msg%n"/>
+              value="[%d{MM-dd HH:mm:ss:SSS}][%thread][%-5level][%logger{3}#%M:%-3L] - %msg%n"/>
 
     <!-- 日志记录器，日期滚动记录 -->
     <appender name="file_error" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -56,6 +62,39 @@
         </encoder>
     </appender>
 
+    <appender name="ASYNC-CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 0表示不丢失日志 -->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- 设置日志事件的最大队列长度 -->
+        <queueSize>51200</queueSize>
+        <!-- 添加真正的日志appender -->
+        <appender-ref ref="console"/>
+        <!-- 如果为true，logback对日志封装的事件中将包含更多调用者和父线程的信息，将降低性能。默认为false -->
+        <includeCallerData>false</includeCallerData>
+    </appender>
+
+    <appender name="ASYNC-FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 0表示不丢失日志 -->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- 设置日志事件的最大队列长度 -->
+        <queueSize>512</queueSize>
+        <!-- 添加真正的日志appender -->
+        <appender-ref ref="file_info"/>
+        <!-- 如果为true，logback对日志封装的事件中将包含更多调用者和父线程的信息，将降低性能。默认为false -->
+        <includeCallerData>false</includeCallerData>
+    </appender>
+
+    <appender name="ASYNC-FILE-ERROR" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 0表示不丢失日志 -->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- 设置日志事件的最大队列长度 -->
+        <queueSize>51200</queueSize>
+        <!-- 添加真正的日志appender -->
+        <appender-ref ref="file_error"/>
+        <!-- 如果为true，logback对日志封装的事件中将包含更多调用者和父线程的信息，将降低性能。默认为false -->
+        <includeCallerData>false</includeCallerData>
+    </appender>
+
     <logger name="io.netty" level="INFO" additivity="true"/>
     <logger name="io.lettuce" level="INFO" additivity="true"/>
     <logger name="org.jboss" level="INFO" additivity="true"/>
@@ -65,11 +104,10 @@
     <!--    <logger name="_org.springframework" level="info" additivity="true"/>-->
 
     <!-- 生产环境下，将此级别配置为适合的级别，以免日志文件太多或影响程序性能 -->
-    <root level="DEBUG"> <!-- ERROR, WARN, INFO, DEBUG -->
-        <appender-ref ref="file_error"/>
-        <appender-ref ref="file_info"/>
-        <!-- 生产环境将请stdout,testfile去掉 -->
-        <appender-ref ref="console"/>
+    <root level="DEBUG">
+<!--        <appender-ref ref="file_info"/>-->
+        <appender-ref ref="ASYNC-FILE"/>
+<!--        <appender-ref ref="ASYNC-FILE-ERROR"/>-->
     </root>
 
 </configuration>

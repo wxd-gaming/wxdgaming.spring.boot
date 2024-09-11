@@ -12,27 +12,27 @@ import wxdgaming.spring.boot.message.PojoBase;
  */
 public interface ISession {
 
-    ConcurrentLoopList<SocketSession> getSessions();
+    ConcurrentLoopList<SocketSession> getSessionGroup();
 
     default SocketSession idleSession() {
-        return getSessions().loop();
+        return getSessionGroup().loop();
     }
 
     /** 循环获取 如果 null 则会引发异常 */
     default SocketSession idleSessionOrException() {
-        return getSessions().loopOrException();
+        return getSessionGroup().loopOrException();
     }
 
     default void writeAndFlush(PojoBase pojoBase) {
-        getSessions().forEach(session -> {session.writeAndFlush(pojoBase);});
+        getSessionGroup().forEach(session -> {session.writeAndFlush(pojoBase);});
     }
 
     default void writeAndFlush(ByteBuf byteBuf) {
-        getSessions().forEach(session -> {session.writeAndFlush(byteBuf);});
+        getSessionGroup().forEach(session -> {session.writeAndFlush(byteBuf);});
     }
 
     default void writeAndFlush(Object message) {
-        getSessions().forEach(session -> {session.writeAndFlush(message);});
+        getSessionGroup().forEach(session -> {session.writeAndFlush(message);});
     }
 
 

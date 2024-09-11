@@ -2,27 +2,20 @@ package wxdgaming.spring.boot.net.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
-import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.concurrent.GlobalEventExecutor;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ann.Start;
-import wxdgaming.spring.boot.core.collection.concurrent.ConcurrentLoopList;
 import wxdgaming.spring.boot.core.threading.DefaultExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.boot.message.pojo.inner.InnerMessage;
-import wxdgaming.spring.boot.net.BootstrapBuilder;
-import wxdgaming.spring.boot.net.ISession;
-import wxdgaming.spring.boot.net.SessionHandler;
-import wxdgaming.spring.boot.net.SocketSession;
+import wxdgaming.spring.boot.net.*;
 import wxdgaming.spring.boot.net.ssl.WxdSslHandler;
 
 import javax.net.ssl.SSLEngine;
@@ -53,9 +46,7 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
     protected final SocketClientBuilder socketClientBuilder;
     protected final SocketClientBuilder.Config config;
     /** 所有的连接 */
-    protected final ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    /** 所有的连接 */
-    protected final ConcurrentLoopList<SocketSession> sessions = new ConcurrentLoopList<>();
+    protected final SessionGroup sessionGroup = new SessionGroup();
 
     public SocketClient(DefaultExecutor defaultExecutor,
                         BootstrapBuilder bootstrapBuilder,
@@ -131,14 +122,14 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
     }
 
     @Override public void close() {
-        sessions.duplicate().forEach(session -> session.close("shutdown"));
+        sessionGroup.duplicate().forEach(session -> session.close("shutdown"));
     }
 
     public final SocketSession connect() {
         SocketSession socketSession = connect(null);
-        sessions.add(socketSession);
+        sessionGroup.add(socketSession);
         /*添加事件，如果链接关闭了触发*/
-        socketSession.getChannel().closeFuture().addListener(future -> sessions.remove(socketSession));
+        socketSession.getChannel().closeFuture().addListener(future -> sessionGroup.remove(socketSession));
         socketClientDeviceHandler.getSessionHandler().openSession(socketSession);
         return socketSession;
     }

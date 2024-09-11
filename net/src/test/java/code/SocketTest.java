@@ -43,14 +43,29 @@ public class SocketTest {
                 new ServerMessageDecode(bootstrapBuilder, messageDispatcher) {
                     @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
                         super.action(session, messageId, messageBytes);
-                        log.info("{}", new String(messageBytes, StandardCharsets.UTF_8));
-                        send(session, "socket server");
+                        // log.info("{}", new String(messageBytes, StandardCharsets.UTF_8));
+                        {
+                            long startTime = System.nanoTime();
+                            for (int i = 0; i < 10; i++) {
+                                final int t = i;
+                                writeAndFlush(socketService.getSessionGroup(), "socket server writeAndFlush " + t);
+                            }
+                            System.out.println("writeAndFlush cost: " + ((System.nanoTime() - startTime) / 10000 / 100f));
+                        }
+                        // {
+                        //     long startTime = System.nanoTime();
+                        //     for (int i = 0; i < 10; i++) {
+                        //         final int t = i;
+                        //         write(socketService.getSessionGroup(), "socket server write " + t);
+                        //     }
+                        //     System.out.println("write cost: " + ((System.nanoTime() - startTime) / 10000 / 100f));
+                        // }
                     }
 
                     @Override public void action(SocketSession session, String message) throws Exception {
                         super.action(session, message);
                         log.info("{}", message);
-                        session.writeAndFlush("socket server textWebSocketFrame");
+                        session.write("socket server textWebSocketFrame");
                     }
 
                 },
@@ -71,7 +86,7 @@ public class SocketTest {
                 new ClientMessageDecode(bootstrapBuilder, messageDispatcher) {
                     @Override protected void action(SocketSession socketSession, int messageId, byte[] messageBytes) throws Exception {
                         super.action(socketSession, messageId, messageBytes);
-                        log.info("{}", new String(messageBytes, StandardCharsets.UTF_8));
+                        // log.info("{}", new String(messageBytes, StandardCharsets.UTF_8));
                     }
                 },
                 new ClientMessageEncode(messageDispatcher)
@@ -98,28 +113,43 @@ public class SocketTest {
     @Test
     public void t0() throws Exception {
 
-        {
-            SocketSession session = tcpSocketClient.connect();
-            send(session, "tcp socket client");
+        for (int i = 0; i < 100; i++) {
+            tcpSocketClient.connect();
+            // webSocketClient.connect();
+            Thread.sleep(5);
         }
-        {
-            SocketSession session = webSocketClient.connect();
+        for (int i = 0; i < 2; i++) {
             System.in.read();
-            send(session, "web socket client");
-            session.writeAndFlush("TextWebSocketFrame");
-
+            writeAndFlush(tcpSocketClient.getSessionGroup(), "tcp socket client");
         }
-        // Thread.sleep(3000);
+        // {
+        //     System.in.read();
+        //     SocketSession session = webSocketClient.idleSession();
+        //     writeAndFlush(session, "web socket client");
+        //     writeAndFlush(session, "web socket client");
+        //     writeAndFlush(session, "web socket client");
+        //     session.writeAndFlush("TextWebSocketFrame");
+        // }
+        // // Thread.sleep(3000);
         System.in.read();
     }
 
-    public void send(SocketSession session, String message) throws IOException {
+    public void writeAndFlush(SessionGroup sessions, String message) {
         ByteBuf byteBuf = ByteBufUtil.pooledByteBuf(30);
         byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
         byteBuf.writeInt(bytes.length + 4);
         byteBuf.writeInt(1);
         byteBuf.writeBytes(bytes);
-        session.writeAndFlush(byteBuf);
+        sessions.writeAndFlush(byteBuf);
+    }
+
+    public void write(SessionGroup channels, String message) {
+        ByteBuf byteBuf = ByteBufUtil.pooledByteBuf(30);
+        byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
+        byteBuf.writeInt(bytes.length + 4);
+        byteBuf.writeInt(1);
+        byteBuf.writeBytes(bytes);
+        channels.write(byteBuf);
     }
 
 }

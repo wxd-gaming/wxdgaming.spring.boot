@@ -6,6 +6,7 @@ import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -23,6 +24,7 @@ import wxdgaming.spring.boot.core.threading.ThreadNameFactory;
 @Slf4j
 @Getter
 @Setter
+@Accessors(chain = true)
 @Configuration
 @ConfigurationProperties("socket")
 public class BootstrapBuilder implements InitPrint {

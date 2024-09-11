@@ -11,12 +11,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ann.Start;
-import wxdgaming.spring.boot.core.collection.concurrent.ConcurrentLoopList;
 import wxdgaming.spring.boot.core.system.BytesUnit;
+import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
+import wxdgaming.spring.boot.net.SessionGroup;
 import wxdgaming.spring.boot.net.ISession;
 import wxdgaming.spring.boot.net.SessionHandler;
-import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.ssl.WxdOptionalSslHandler;
 
 import java.io.Closeable;
@@ -42,7 +42,8 @@ public class SocketService implements InitPrint, Closeable, ISession {
     private ServerBootstrap bootstrap = null;
     private ChannelFuture future = null;
     /** 所有的连接 */
-    protected final ConcurrentLoopList<SocketSession> sessions = new ConcurrentLoopList<>();
+    protected final SessionGroup sessionGroup = new SessionGroup();
+
 
     public SocketService(BootstrapBuilder bootstrapBuilder,
                          SocketServerBuilder socketServerBuilder,
@@ -75,7 +76,7 @@ public class SocketService implements InitPrint, Closeable, ISession {
                 /*地址重用，socket链接断开后，立即可以被其他请求使用*/
                 .childOption(ChannelOption.SO_REUSEADDR, true)
                 /*发送缓冲区 影响 channel.isWritable()*/
-                .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(1, (int) BytesUnit.Mb.toBytes(12)))
+                .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(512, (int) BytesUnit.Mb.toBytes(12)))
                 /*接收缓冲区，使用内存池*/
                 .childOption(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(512, 2048, (int) BytesUnit.Mb.toBytes(12)))
                 /*为新链接到服务器的handler分配一个新的channel。ChannelInitializer用来配置新生成的channel。(如需其他的处理，继续ch.pipeline().addLast(新匿名handler对象)即可)*/
@@ -106,6 +107,20 @@ public class SocketService implements InitPrint, Closeable, ISession {
                     }
 
                 });
+
+        this.socketServerBuilder.getWorkerLoop().scheduleAtFixedRate(
+                new Event() {
+                    @Override public void onEvent() throws Throwable {
+                        sessionGroup.forEach(session -> {
+                            session.flush();
+                        });
+                    }
+                },
+                5,
+                5,
+                TimeUnit.MILLISECONDS
+        );
+
     }
 
     @Start()
