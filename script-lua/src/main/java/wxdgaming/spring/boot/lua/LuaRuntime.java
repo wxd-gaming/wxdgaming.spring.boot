@@ -63,7 +63,12 @@ public class LuaRuntime implements Closeable {
     }
 
     public LuaContext context() {
-        return threadLocal.computeIfAbsent(Thread.currentThread(), k -> newContext());
+        LuaContext luaContext = threadLocal.get(Thread.currentThread());
+        if (luaContext == null || luaContext.isClosed()) {
+            luaContext = newContext();
+            threadLocal.put(Thread.currentThread(), luaContext);
+        }
+        return luaContext;
     }
 
     /** 关闭资源 */

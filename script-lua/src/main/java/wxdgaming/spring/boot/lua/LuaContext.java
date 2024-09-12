@@ -31,6 +31,7 @@ public class LuaContext implements Closeable {
 
     private final Lua L;
     private final Path[] paths;
+    private volatile boolean closed = false;
 
     public LuaContext(ConcurrentHashMap<String, Object> globals, Path... paths) {
         this.L = new Lua54_Sub();
@@ -151,6 +152,9 @@ public class LuaContext implements Closeable {
     }
 
     @Override public void close() {
+        if (closed) return;
+        closed = true;
         L.close();
     }
+
 }
