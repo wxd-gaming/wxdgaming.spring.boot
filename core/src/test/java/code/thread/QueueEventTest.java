@@ -1,9 +1,15 @@
 package code.thread;
 
 import org.junit.Test;
+import reactor.core.Disposable;
+import reactor.core.publisher.Mono;
 import wxdgaming.spring.boot.core.threading.QueueEvent;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 队列测试
@@ -28,6 +34,106 @@ public class QueueEventTest {
         }, 1, 1, TimeUnit.SECONDS);
         Thread.sleep(6000);
         queueEvent.getExecutor().shutdown();
+    }
+
+    @Test
+    public void t2() throws Exception {
+        Executor executor = CompletableFuture.delayedExecutor(1, TimeUnit.SECONDS);
+        CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> {
+            System.out.println(" 1 " + Thread.currentThread());
+            return "hello";
+        }, executor);
+        Mono<String> mono = Mono.fromFuture(completableFuture);
+        mono.subscribe(str -> {
+            System.out.println(" 2 " + Thread.currentThread() + " - " + str);
+        });
+        mono.block();
+        Thread.sleep(500);
+    }
+
+    @Test
+    public void t3() throws Exception {
+        AtomicInteger counter = new AtomicInteger();
+        Mono<String> mono = Mono.fromSupplier(() -> {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println(" 1 " + Thread.currentThread() + " - " + System.currentTimeMillis());
+            return "hello " + counter.incrementAndGet();
+        });
+        mono = mono.map(str -> str + " world");
+        Disposable subscribe = mono.subscribe(str -> {
+            System.out.println(" 2 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
+        });
+        subscribe.dispose();
+        mono.subscribe(str -> {
+            System.out.println(" 2 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
+        });
+        mono.subscribe(str -> {
+            System.out.println(" 2 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
+        });
+        Thread.sleep(500);
+    }
+
+    @Test
+    public void t4() throws Exception {
+        AtomicInteger counter = new AtomicInteger();
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println(" 1 " + Thread.currentThread() + " - " + System.currentTimeMillis());
+            return "hello " + counter.incrementAndGet();
+        });
+        future = future.thenApplyAsync(str -> str + " world");
+        future.thenAccept(str -> {
+            System.out.println(" 2 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
+        });
+        future.thenAccept(str -> {
+            System.out.println(" 2 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
+        });
+        future.thenAccept(str -> {
+            System.out.println(" 2 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
+        });
+        Thread.sleep(500);
+    }
+
+    @Test
+    public void t5() throws Exception {
+
+        ArrayBlockingQueue<String> queue = new ArrayBlockingQueue<>(5000);
+
+        Mono<String> mono = Mono.fromSupplier(() -> {
+            return queue.poll();
+        });
+        mono.subscribe(str -> System.out.println(str));
+        Thread.sleep(500);
+        queue.add("e");
+        mono.subscribe(str -> System.out.println(str));
+        queue.add("e1");
+        mono.subscribe(str -> System.out.println(str));
+        Thread.sleep(500);
+    }
+
+    @Test
+    public void t6() throws Exception {
+
+        Mono<String> mono = Mono.fromSupplier(() -> {
+            System.out.println("1");
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException ignore) {}
+
+            return "d";
+        });
+        System.out.println("2");
+        mono.subscribe(str -> System.out.println(str));
+        System.out.println("3");
+        Thread.sleep(500);
     }
 
 }

@@ -21,8 +21,11 @@ public interface JavaFunction extends JFunction {
                 _args[_args.length - i - 1] = javaObject;
             }
             Object results = doAction(L, _args);
-            L.push(results, Lua.Conversion.FULL);
-            return 1;
+            if (results != null) {
+                L.push(results, Lua.Conversion.FULL);
+                return 1;
+            }
+            return 0;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
