@@ -26,7 +26,7 @@ import java.util.zip.ZipInputStream;
 @Getter
 public class RemoteClassLoader extends URLClassLoader {
 
-    public static void main(String[] args) {
+    public void t0(String[] args) {
         RemoteClassLoader remoteClassLoader = RemoteClassLoader.build(
                 RemoteClassLoader.class.getClassLoader(),
                 "http://localhost/qj5/a.jar",

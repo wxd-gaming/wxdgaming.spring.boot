@@ -412,7 +412,7 @@ public class ConvertUtil {
         return Math.round(souse * 10000) / 10000d;
     }
 
-    public static void main(String[] args) {
+    public void t0(String[] args) {
         Object ob = "1101217240600000009";
         Object str = changeType(ob, Long.class);
         System.out.println(str);

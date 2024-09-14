@@ -9,7 +9,7 @@ package wxdgaming.spring.boot.core.io;
 public class ResourcesUtil {
 
 
-    public static void main(String[] args) {
+    public void t0(String[] args) {
         FileUtil.resourceStreams(".").forEach(record -> System.out.println(record.t1()));
 
         FileUtil.resourceStreams("META-INF/LICENSE").forEach(record -> System.out.println(record.t1()));

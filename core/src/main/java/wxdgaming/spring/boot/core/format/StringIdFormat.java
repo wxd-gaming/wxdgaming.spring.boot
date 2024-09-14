@@ -17,7 +17,7 @@ public class StringIdFormat implements ILock {
 
     protected static final DecimalFormat DFT = new DecimalFormat("0000000");
 
-    public static void main(String[] args) throws Exception {
+    public void t0(String[] args) throws Exception {
         System.err.println(Long.MAX_VALUE);
         StringIdFormat idsUtil = new StringIdFormat();
         System.err.println(idsUtil.getId());

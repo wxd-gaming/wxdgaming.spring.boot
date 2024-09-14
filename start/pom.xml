@@ -9,64 +9,82 @@
         <version>1.0.1</version>
     </parent>
 
-    <artifactId>start</artifactId>
+    <artifactId>wxdgaming.spring.boot.start</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>wxdgaming.spring.boot.core</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>data-batis</artifactId>
+            <artifactId>wxdgaming.spring.boot.data-batis</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>data-batis</artifactId>
+            <artifactId>wxdgaming.spring.boot.data-batis</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>data-excel</artifactId>
+            <artifactId>wxdgaming.spring.boot.data-excel</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>data-redis</artifactId>
+            <artifactId>wxdgaming.spring.boot.data-redis</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>script-lua</artifactId>
+            <artifactId>wxdgaming.spring.boot.script-lua</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>web</artifactId>
+            <artifactId>wxdgaming.spring.boot.web</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>web-lua</artifactId>
+            <artifactId>wxdgaming.spring.boot.web-lua</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>net</artifactId>
+            <artifactId>wxdgaming.spring.boot.net</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>message</artifactId>
+            <artifactId>wxdgaming.spring.boot.message</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>rpc</artifactId>
+            <artifactId>wxdgaming.spring.boot.rpc</artifactId>
             <version>1.0.1</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>wxdgaming.spring.boot.start.ApplicationStart</mainClass>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

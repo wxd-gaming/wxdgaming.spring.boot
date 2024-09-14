@@ -113,7 +113,7 @@ public class StringsUtil {
     /** 空格，换行符，制表符 */
     public static final Pattern FilterLine1 = Pattern.compile("\n|\r|\t");
 
-    public static void main(String[] args) throws Exception {
+    public void t0(String[] args) throws Exception {
         //        System.out.println(padLeft("dd", 4, ' '));
         //        System.out.println(checkMatches("@ageagteyt", PATTERN_A_Z));
         //        String asStr = "伙伴资质";

@@ -155,7 +155,7 @@ public class GzipUtil {
         return Objects.toObject(bytes1);
     }
 
-    public static void main(String[] args) {
+    public void t0(String[] args) {
         try {
             String str = "sdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtfsdfsfsdfAgaeswgaseGds俺二哥我搜嘎上的狗sgwegtf";
             System.out.println("原字符串：" + str);
@@ -170,11 +170,11 @@ public class GzipUtil {
             System.out.println("gzip base64：" + gzip2Base64.length() + " -- " + gzip2Base64);
             System.out.println("解压缩后字符串：" + unGzipBase64(gzip2Base64));
 
-//            gzip2File("d:/com.test.txt.gz", str);
-//            String string = unGzip2String(compress);
-//            System.out.println("解压缩后字符串：" + string);
-//            System.out.println("解压缩后字符串：" + unGzip4File("d:/com.test.txt.gz"));
-//            System.out.println("解压缩后字符串：" + str);
+            //            gzip2File("d:/com.test.txt.gz", str);
+            //            String string = unGzip2String(compress);
+            //            System.out.println("解压缩后字符串：" + string);
+            //            System.out.println("解压缩后字符串：" + unGzip4File("d:/com.test.txt.gz"));
+            //            System.out.println("解压缩后字符串：" + str);
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }

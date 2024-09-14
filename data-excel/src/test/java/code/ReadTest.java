@@ -12,7 +12,7 @@ import java.io.File;
  **/
 public class ReadTest {
 
-    public static void main(String[] args) {
+    public void t0(String[] args) {
         ExcelRepository excelReader = new ExcelRepository();
         excelReader.readExcel(new File("data-excel/src/main/resources/范例.xlsx"));
         excelReader.getTableInfoMap().values().forEach(tableInfo -> {

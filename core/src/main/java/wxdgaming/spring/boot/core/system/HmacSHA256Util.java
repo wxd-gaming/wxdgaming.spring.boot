@@ -71,7 +71,7 @@ public class HmacSHA256Util implements Serializable {
         }
     }
 
-    public static void main(String[] args) {
+    public void t0(String[] args) {
         String appSecret = "b06c75b58d1701ff470119a4114f8b45";
         String appId = "10000001";
         String timestamp = "1529853639000";

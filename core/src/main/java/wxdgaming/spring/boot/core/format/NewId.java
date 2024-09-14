@@ -31,7 +31,7 @@ public class NewId implements Serializable {
     volatile long lastSecondByDay = 0;
     volatile long seed = 0;
 
-    public static void main(String[] args) throws InterruptedException {
+    public void t0(String[] args) throws InterruptedException {
 
         System.out.println(Long.MAX_VALUE);
         System.out.println(Offset32);

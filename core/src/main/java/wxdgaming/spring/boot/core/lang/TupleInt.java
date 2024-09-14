@@ -17,7 +17,7 @@ import java.io.Serializable;
 @Accessors(chain = true)
 public class TupleInt extends ObjectBase implements Serializable {
 
-    public static void main(String[] args) {
+    public void t0(String[] args) {
         TupleInt tuple2 = new TupleInt(1, 1);
         String s = FastJsonUtil.toJsonFmt(tuple2);
         System.out.println(s);

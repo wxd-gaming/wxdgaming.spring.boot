@@ -138,7 +138,7 @@ public class BitUtil {
         return v > max ? max : (Math.max(v, min));
     }
 
-    public static void main(String[] args) {
+    public void t0(String[] args) {
         System.out.println(merge64(300001, Integer.MAX_VALUE * 1L));
     }
 

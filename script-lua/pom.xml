@@ -9,12 +9,12 @@
         <version>1.0.1</version>
     </parent>
 
-    <artifactId>script-lua</artifactId>
+    <artifactId>wxdgaming.spring.boot.script-lua</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>wxdgaming.spring.boot.core</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
@@ -31,5 +31,27 @@
             <classifier>natives-desktop</classifier>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- 取消查找本项目下的Main方法：为了解决Unable to find main class的问题 -->
+                    <mainClass>none</mainClass>
+                    <!-- 解决maven-plugin插件打的Jar包可以运行，但依赖方打包找不到此模块中的类或属性的问题(程序包xxx不存在) -->
+                    <classifier>execute</classifier>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

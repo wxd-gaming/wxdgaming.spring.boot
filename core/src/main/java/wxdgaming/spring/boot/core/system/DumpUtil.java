@@ -31,7 +31,7 @@ public class DumpUtil {
     public static String Xmx = "";
     public static String HomeMx = "";
 
-    public static void main(String[] args) {
+    public void t0(String[] args) {
         System.out.println(dMonitor());
     }
 

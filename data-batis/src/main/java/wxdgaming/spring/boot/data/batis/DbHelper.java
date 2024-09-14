@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 @ConditionalOnProperty("spring.datasource.url")
 public class DbHelper implements InitPrint {
 
-    private final Pattern DB_NAME_REGEX = Pattern.compile("[^\\/]+(?=(\\?|$))");
+    private final Pattern DB_NAME_REGEX = Pattern.compile("[^/]+(?=(\\?|$))");
     /**
      * 默认utf8
      */

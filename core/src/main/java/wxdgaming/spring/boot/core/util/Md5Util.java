@@ -91,7 +91,7 @@ public class Md5Util {
         return md5Encode.equalsIgnoreCase(token);
     }
 
-    public static void main(String[] args) throws Exception {
+    public void t0(String[] args) throws Exception {
 
         MessageDigest md = MessageDigest.getInstance("MD5");
 

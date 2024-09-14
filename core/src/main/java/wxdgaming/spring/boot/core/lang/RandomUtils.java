@@ -9,7 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class RandomUtils {
 
-    public static void main(String[] args) {
+    public void t0(String[] args) {
         List<Integer> list = new ArrayList<>();
         list.add(1);
         list.add(2);

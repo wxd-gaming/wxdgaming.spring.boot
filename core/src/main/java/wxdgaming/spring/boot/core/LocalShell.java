@@ -34,7 +34,7 @@ public class LocalShell implements Serializable {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public void t0(String[] args) throws Exception {
         String cmd = String.join(" ", args);
         cmd = cmd.trim();
         final LocalShell localShell = exec(cmd);

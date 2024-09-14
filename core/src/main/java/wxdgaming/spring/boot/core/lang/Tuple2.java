@@ -19,7 +19,7 @@ public class Tuple2<L, R> extends ObjectBase implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static void main(String[] args) {
+    public void t0(String[] args) {
         Tuple2<Integer, Integer> tuple2 = new Tuple2<>(1, 1);
         String s = FastJsonUtil.toJsonFmt(tuple2);
         System.out.println(s);
