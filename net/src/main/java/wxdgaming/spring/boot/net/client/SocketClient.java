@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ann.Start;
-import wxdgaming.spring.boot.core.threading.DefaultExecutor;
+import wxdgaming.spring.boot.core.threading.BaseExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.boot.message.pojo.inner.InnerMessage;
@@ -22,6 +22,7 @@ import javax.net.ssl.SSLEngine;
 import java.io.Closeable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 /**
@@ -37,7 +38,7 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
 
     protected Bootstrap bootstrap;
 
-    protected final DefaultExecutor defaultExecutor;
+    protected final BaseExecutor executor;
     protected final BootstrapBuilder bootstrapBuilder;
     protected final SocketClientDeviceHandler socketClientDeviceHandler;
     protected final ClientMessageDecode clientMessageDecode;
@@ -47,27 +48,31 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
     protected final SocketClientBuilder.Config config;
     /** 所有的连接 */
     protected final SessionGroup sessionGroup = new SessionGroup();
+    protected volatile boolean closed = false;
 
-    public SocketClient(DefaultExecutor defaultExecutor,
+    public SocketClient(BaseExecutor executor,
                         BootstrapBuilder bootstrapBuilder,
                         SocketClientBuilder socketClientBuilder,
                         SocketClientBuilder.Config config,
                         SessionHandler sessionHandler,
                         ClientMessageDecode clientMessageDecode,
                         ClientMessageEncode clientMessageEncode) {
-        this.defaultExecutor = defaultExecutor;
+        this.executor = executor;
         this.bootstrapBuilder = bootstrapBuilder;
         this.socketClientBuilder = socketClientBuilder;
         this.config = config;
         this.socketClientDeviceHandler = new SocketClientDeviceHandler(bootstrapBuilder, sessionHandler);
         this.clientMessageDecode = clientMessageDecode;
         this.clientMessageEncode = clientMessageEncode;
-        defaultExecutor.scheduleAtFixedRate(new Event() {
-            @Override public void onEvent() throws Throwable {
-                InnerMessage.ReqHeart reqHeart = new InnerMessage.ReqHeart().setMilli(MyClock.millis());
-                writeAndFlush(reqHeart);
-            }
-        }, 5, 5, TimeUnit.SECONDS);
+
+        this.executor.scheduleAtFixedRate(
+                (Event) () -> {
+                    InnerMessage.ReqHeart reqHeart = new InnerMessage.ReqHeart().setMilli(MyClock.millis());
+                    writeAndFlush(reqHeart);
+                },
+                5, 5, TimeUnit.SECONDS
+        );
+
     }
 
     public void init() {
@@ -122,15 +127,22 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
     }
 
     @Override public void close() {
+        closed = true;
         sessionGroup.duplicate().forEach(session -> session.close("shutdown"));
+        log.info("shutdown tcp client：{}:{}", config.getHost(), config.getPort());
     }
 
     public final SocketSession connect() {
         SocketSession socketSession = connect(null);
-        sessionGroup.add(socketSession);
-        /*添加事件，如果链接关闭了触发*/
-        socketSession.getChannel().closeFuture().addListener(future -> sessionGroup.remove(socketSession));
-        socketClientDeviceHandler.getSessionHandler().openSession(socketSession);
+        if (socketSession != null) {
+            sessionGroup.add(socketSession);
+            /*添加事件，如果链接关闭了触发*/
+            socketSession.getChannel().closeFuture().addListener(future -> {
+                sessionGroup.remove(socketSession);
+                reconnection();
+            });
+            socketClientDeviceHandler.getSessionHandler().openSession(socketSession);
+        }
         return socketSession;
     }
 
@@ -140,7 +152,12 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
                 .addListener((ChannelFutureListener) future -> {
                     Throwable cause = future.cause();
                     if (cause != null) {
-                        completableFuture.completeExceptionally(cause);
+                        if (reconnection()) {
+                            /*当前可以重连不抛出异常*/
+                            completableFuture.complete(null);
+                        } else {
+                            completableFuture.completeExceptionally(cause);
+                        }
                         return;
                     }
                     Channel channel = future.channel();
@@ -152,12 +169,31 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
                         consumer.accept(channel);
                     }
                 });
-
         try {
             return completableFuture.get();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    AtomicLong atomicLong = new AtomicLong();
+
+    protected boolean reconnection() {
+
+        if (closed
+                || !config.isEnableReconnection()
+                || executor.isShutdown()
+                || executor.isTerminated()
+                || executor.isTerminating()) return false;
+
+        long l = atomicLong.incrementAndGet();
+
+        log.info("链接异常 {} 秒 重连", l);
+
+        executor.schedule(() -> {
+            connect();
+        }, l, TimeUnit.SECONDS);
+        return true;
     }
 
 }

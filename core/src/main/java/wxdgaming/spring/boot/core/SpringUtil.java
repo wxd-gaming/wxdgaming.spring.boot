@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.core;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -12,6 +13,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
@@ -45,10 +47,6 @@ import java.util.stream.Stream;
 public class SpringUtil implements InitPrint, ApplicationContextAware {
 
     @Getter private static SpringUtil ins;
-
-    public SpringUtil() {
-        ins = this;
-    }
 
     public static final Comparator<Class<?>> CLASS_COMPARATOR = (o1, o2) -> {
         int o1Annotation = Optional.ofNullable(o1.getAnnotation(Order.class)).map(Order::value).orElse(999999);
@@ -95,6 +93,7 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
                             clazz.getAnnotation(ConditionalOnProperty.class) != null ||
                             clazz.getAnnotation(Service.class) != null ||
                             clazz.getAnnotation(Component.class) != null ||
+                            clazz.getAnnotation(ComponentScan.class) != null ||
                             clazz.getAnnotation(Repository.class) != null ||
                             clazz.getAnnotation(Controller.class) != null ||
                             clazz.getAnnotation(RestController.class) != null
@@ -110,9 +109,21 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
     /** 上下文对象实例 */
     private ConfigurableApplicationContext applicationContext;
 
+    /** 上下文对象实例 */
+    @Setter protected ConfigurableApplicationContext childContext;
+
+    public SpringUtil() {
+        ins = this;
+    }
+
     @Override public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = (ConfigurableApplicationContext) applicationContext;
         log.info("register applicationContext");
+    }
+
+    public ConfigurableApplicationContext curApplicationContext() {
+        if (childContext != null) return childContext;
+        return applicationContext;
     }
 
     /**
@@ -121,7 +132,7 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @param name 参数传入要获取的实例的类名 首字母小写，这是默认的
      */
     public Object getBean(String name) {
-        return getApplicationContext().getBean(name);
+        return curApplicationContext().getBean(name);
     }
 
     /**
@@ -131,7 +142,7 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @param <T>
      */
     public <T> T getBean(Class<T> clazz) {
-        return getApplicationContext().getBean(clazz);
+        return curApplicationContext().getBean(clazz);
     }
 
     /**
@@ -142,14 +153,14 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @param <T>
      */
     public <T> T getBean(String name, Class<T> clazz) {
-        return getApplicationContext().getBean(name, clazz);
+        return curApplicationContext().getBean(name, clazz);
     }
 
     public List<Object> getBeans() {
-        String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
+        String[] beanDefinitionNames = curApplicationContext().getBeanDefinitionNames();
         List<Object> beans = new ArrayList<>();
         for (String beanDefinitionName : beanDefinitionNames) {
-            Object bean = applicationContext.getBean(beanDefinitionName);
+            Object bean = curApplicationContext().getBean(beanDefinitionName);
             beans.add(bean);
         }
         beans.sort((o1, o2) -> SpringUtil.CLASS_COMPARATOR.compare(o1.getClass(), o2.getClass()));
@@ -157,14 +168,14 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
     }
 
     public <T> Stream<T> getBeansOfType(@Nullable Class<T> type) {
-        return applicationContext
+        return curApplicationContext()
                 .getBeansOfType(type)
                 .values()
                 .stream();
     }
 
     public Stream<Object> getBeansWithAnnotation(Class<? extends Annotation> annotation) {
-        return applicationContext.getBeansWithAnnotation(annotation).values().stream();
+        return curApplicationContext().getBeansWithAnnotation(annotation).values().stream();
     }
 
     /**
@@ -175,10 +186,10 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @version: 2024-08-12 13:38
      */
     public ReflectContext reflectContext() {
-        String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
+        String[] beanDefinitionNames = curApplicationContext().getBeanDefinitionNames();
         List<Class<?>> clazzs = new ArrayList<>();
         for (String beanDefinitionName : beanDefinitionNames) {
-            Object bean = applicationContext.getBean(beanDefinitionName);
+            Object bean = curApplicationContext().getBean(beanDefinitionName);
             clazzs.add(bean.getClass());
         }
         clazzs.sort(SpringUtil.CLASS_COMPARATOR);
@@ -228,9 +239,9 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         withMethodAnnotated(annotationType)
                 .forEach(t -> {
                     try {
-                        Object bean = ins.getBean(t.getLeft());
+                        Object bean = curApplicationContext().getBean(t.getLeft());
                         t.getRight().setAccessible(true);
-                        Object[] array = Arrays.stream(t.getRight().getParameterTypes()).map(ins::getBean).toArray();
+                        Object[] array = Arrays.stream(t.getRight().getParameterTypes()).map(curApplicationContext()::getBean).toArray();
                         t.getRight().invoke(bean, array);
                     } catch (Exception e) {
                         throw new RuntimeException(t.getLeft().getName() + "#" + t.getRight().getName(), e);
@@ -245,8 +256,8 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @author: wxd-gaming(無心道, 15388152619)
      * @version: 2024-07-26 17:30
      */
-    public void registerBean(Class<?> beanClass) {
-        registerBean(beanClass.getName(), beanClass);
+    public void registerBean(ConfigurableApplicationContext context, Class<?> beanClass) {
+        registerBean(context, beanClass.getName(), beanClass);
     }
 
     /**
@@ -256,8 +267,8 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @author: wxd-gaming(無心道, 15388152619)
      * @version: 2024-07-26 17:30
      */
-    public void registerBean(String name, Class<?> beanClass) {
-        registerBean(name, beanClass, true);
+    public void registerBean(ConfigurableApplicationContext context, String name, Class<?> beanClass) {
+        registerBean(context, name, beanClass, true);
     }
 
     /**
@@ -269,7 +280,7 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @author: wxd-gaming(無心道, 15388152619)
      * @version: 2024-08-12 13:40
      */
-    public void registerBean(String name, Class<?> beanClass, boolean removeOld) {
+    public void registerBean(ConfigurableApplicationContext context, String name, Class<?> beanClass, boolean removeOld) {
 
         // 获取bean工厂并转换为DefaultListableBeanFactory
         DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory();
@@ -296,8 +307,8 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @author: wxd-gaming(無心道, 15388152619)
      * @version: 2024-07-26 17:30
      */
-    public void registerInstance(Object instance) {
-        registerInstance(instance.getClass().getName(), instance);
+    public void registerInstance(ConfigurableApplicationContext context, Object instance) {
+        registerInstance(context, instance.getClass().getName(), instance);
     }
 
     /**
@@ -308,13 +319,13 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @author: wxd-gaming(無心道, 15388152619)
      * @version: 2024-07-26 17:30
      */
-    public <T> void registerInstance(String name, T instance) {
-        registerInstance(name, instance, true);
+    public <T> void registerInstance(ConfigurableApplicationContext context, String name, T instance) {
+        registerInstance(context, name, instance, true);
     }
 
-    public <T> void registerInstance(String name, T instance, boolean removeOld) {
+    public <T> void registerInstance(ConfigurableApplicationContext context, String name, T instance, boolean removeOld) {
         // 获取bean工厂并转换为DefaultListableBeanFactory
-        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory();
+        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) context.getBeanFactory();
         if (removeOld && defaultListableBeanFactory.containsBean(name)) {
             defaultListableBeanFactory.removeBeanDefinition(name);
         }
@@ -324,51 +335,8 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
     }
 
 
-    /**
-     * 从 classLoader 入手 动态注入
-     *
-     * @param classLoader classLoader
-     * @param packages    需要加载的包名
-     * @author: wxd-gaming(無心道, 15388152619)
-     * @version: 2024-07-25 20:48
-     */
-    public void loadClassLoader(ClassLoader classLoader, String... packages) {
-        loadClassLoader(ReflectContext.Builder.of(classLoader, packages).build());
-    }
-
-    public void loadClassLoader(ReflectContext context) {
-        List<Class<?>> list = context.classStream()
-                .filter(SpringUtil::hasSpringAnnotation)
-                .sorted(CLASS_COMPARATOR)
-                .toList();
-        loadClassLoader(list);
-    }
-
-    /***
-     * 需要自动注入的
-     * @param list
-     * @author: wxd-gaming(無心道, 15388152619)
-     * @version: 2024-08-10 16:51
-     */
-    public void loadClassLoader(List<Class<?>> list) {
-
-        for (Class<?> clazz : list) {
-            registerBean(clazz);
-        }
-
-        initHandlerMethods();
-
-        for (Class<?> clazz : list) {
-            registerController(clazz.getName());
-        }
-
-    }
-
-    /**
-     *
-     */
-    public void initHandlerMethods() {
-        final RequestMappingHandlerMapping requestMappingHandlerMapping = applicationContext.getBean(RequestMappingHandlerMapping.class);
+    public void initHandlerMethods(ApplicationContext context) {
+        final RequestMappingHandlerMapping requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
         try {
             // 注册Controller
             Method method = requestMappingHandlerMapping
@@ -385,15 +353,10 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         }
     }
 
-    /**
-     * 注册Controller
-     *
-     * @param controllerBeanName 新注册的
-     */
-    public void registerController(String controllerBeanName) {
-        final RequestMappingHandlerMapping requestMappingHandlerMapping = applicationContext.getBean(RequestMappingHandlerMapping.class);
+    public void registerController(ApplicationContext context, String controllerBeanName) {
+        final RequestMappingHandlerMapping requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
         try {
-            unregisterController(controllerBeanName);
+            unregisterController(context, controllerBeanName);
         } catch (Throwable e) {
             log.debug("unregister controllerBeanName={}", controllerBeanName, e);
         }
@@ -418,9 +381,9 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      *
      * @param controllerBeanName 需要卸载的服务
      */
-    public void unregisterController(String controllerBeanName) {
-        final RequestMappingHandlerMapping requestMappingHandlerMapping = (RequestMappingHandlerMapping) applicationContext.getBean("requestMappingHandlerMapping");
-        final Object controller = applicationContext.getBean(controllerBeanName);
+    public void unregisterController(ApplicationContext context, String controllerBeanName) {
+        final RequestMappingHandlerMapping requestMappingHandlerMapping = (RequestMappingHandlerMapping) context.getBean("requestMappingHandlerMapping");
+        final Object controller = context.getBean(controllerBeanName);
         final Class<?> targetClass = controller.getClass();
         ReflectionUtils.doWithMethods(
                 targetClass,

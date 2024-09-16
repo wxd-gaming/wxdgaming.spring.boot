@@ -104,6 +104,8 @@ public class SocketService implements InitPrint, Closeable, ISession {
                         pipeline.addLast("decode", serverMessageDecode);
                         /*解码消息*/
                         pipeline.addLast("encode", serverMessageEncode);
+
+                        addChanelHandler(socketChannel, pipeline);
                     }
 
                 });
@@ -123,12 +125,14 @@ public class SocketService implements InitPrint, Closeable, ISession {
 
     }
 
+    protected void addChanelHandler(SocketChannel socketChannel, ChannelPipeline pipeline) {}
+
     @Start()
     @Order(1000)
     public void start() {
         this.future = bootstrap.bind(this.config.getPort());
         this.future.syncUninterruptibly();
-        log.info("开启 socket 服务 {}", this.config.getPort());
+        log.info("open socket service {}", this.config.getPort());
     }
 
     /**
@@ -138,6 +142,6 @@ public class SocketService implements InitPrint, Closeable, ISession {
         if (this.future != null) {
             this.future.channel().close();
         }
-        log.info("关闭 socket 服务 {}", this.config.getPort());
+        log.info("shutdown socket service {}", this.config.getPort());
     }
 }

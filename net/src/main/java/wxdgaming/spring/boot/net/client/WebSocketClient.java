@@ -80,8 +80,10 @@ public class WebSocketClient extends SocketClient {
 
     @Override public SocketSession connect(Consumer<Channel> consumer) {
         SocketSession socketSession = super.connect(consumer);
-        socketSession.setSsl(config.isEnableSsl());
-        socketSession.setWebSocket(true);
+        if (socketSession != null) {
+            socketSession.setSsl(config.isEnableSsl());
+            socketSession.setWebSocket(true);
+        }
         return socketSession;
     }
 

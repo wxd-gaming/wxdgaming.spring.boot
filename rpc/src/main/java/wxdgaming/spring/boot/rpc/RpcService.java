@@ -83,7 +83,6 @@ public class RpcService implements InitPrint {
      * @param path    路径
      * @param params  参数
      * @return
-     * @throws Exception
      * @author: wxd-gaming(無心道, 15388152619)
      * @version: 2024-08-22 19:41
      */
@@ -98,7 +97,6 @@ public class RpcService implements InitPrint {
      * @param path    路径
      * @param params  参数
      * @return
-     * @throws Exception
      * @author: wxd-gaming(無心道, 15388152619)
      * @version: 2024-08-22 19:41
      */
@@ -123,7 +121,6 @@ public class RpcService implements InitPrint {
      * @param rpcId   请求 id
      * @param code    执行状态
      * @param params  参数
-     * @throws Exception 异常
      * @author: wxd-gaming(無心道, 15388152619)
      * @version: 2024-08-22 19:41
      */

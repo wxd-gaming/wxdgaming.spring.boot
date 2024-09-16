@@ -38,7 +38,9 @@ import javax.net.ssl.SSLContext;
 @ConfigurationProperties("socket.client")
 public class SocketClientBuilder {
 
-    private int clientThreadSize = 2;
+    /** netty client work 线程数量 */
+    private int clientWorkSize = 2;
+
     private Config tcp;
     private Config web;
 
@@ -47,7 +49,7 @@ public class SocketClientBuilder {
 
     @PostConstruct
     public void init() {
-        clientLoop = BootstrapBuilder.createGroup(clientThreadSize, "client");
+        clientLoop = BootstrapBuilder.createGroup(clientWorkSize, "client");
 
         if (Epoll.isAvailable()) {
             Client_Socket_Channel_Class = EpollSocketChannel.class;
@@ -114,6 +116,7 @@ public class SocketClientBuilder {
         private int port = 18001;
         private int idleTimeout = 30;
         private int connectTimeout = 2000;
+        private boolean enableReconnection = false;
         private boolean enableSsl = false;
         private String prefix = "/wxd-gaming";
         /** 默认的 ssl 类型 */

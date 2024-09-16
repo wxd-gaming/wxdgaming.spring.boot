@@ -1,5 +1,6 @@
 socket:
   debugLogger: false
+  printLogger: true
   server:
     bossThreadSize: 2 #线程池的线程数量，共享
     workerThreadSize: 10 #线程池的线程数量，共享
@@ -13,10 +14,11 @@ socket:
       jks_pwd_path: "jks/wxdtest-1.8.jks.pwd"
 
   client:
-    clientThreadSize: 2 #client 线程池的线程数量，共享
+    client-work-size: 2 #netty client work 线程数量
     tcp:
       host: 127.0.0.1
       port: 18001
+      enable-reconnection: true
       idleTimeout: 30 # 单位秒
       connectTimeout: 500 # 单位毫秒
       enable-ssl: false
@@ -26,6 +28,7 @@ socket:
     web:
       host: 127.0.0.1
       port: 18001
+      enable-reconnection: true
       idleTimeout: 30 # 单位秒
       connectTimeout: 500 # 单位毫秒
       prefix: "/wxd-gaming"

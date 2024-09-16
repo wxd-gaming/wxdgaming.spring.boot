@@ -24,6 +24,7 @@ import wxdgaming.spring.boot.net.MessageDispatcher;
 import wxdgaming.spring.boot.net.SessionHandler;
 
 import javax.net.ssl.SSLContext;
+import java.lang.reflect.Constructor;
 
 /**
  * socket 服务器配置
@@ -84,8 +85,15 @@ public class SocketServerBuilder {
     public SocketService socketService(BootstrapBuilder bootstrapBuilder,
                                        SessionHandler sessionHandler,
                                        ServerMessageDecode serverMessageDecode,
-                                       ServerMessageEncode serverMessageEncode) {
-        return new SocketService(
+                                       ServerMessageEncode serverMessageEncode) throws Exception {
+
+        if (StringsUtil.emptyOrNull(config.getServiceClass())) {
+            config.setServiceClass(SocketService.class.getName());
+        }
+
+        Class aClass = Thread.currentThread().getContextClassLoader().loadClass(config.getServiceClass());
+        Constructor<SocketService> declaredConstructor = aClass.getDeclaredConstructors()[0];
+        return declaredConstructor.newInstance(
                 bootstrapBuilder,
                 this,
                 config, sessionHandler,
@@ -95,12 +103,13 @@ public class SocketServerBuilder {
 
     }
 
-
+    /** 配置 */
     @Getter
     @Setter
     @Accessors(chain = true)
     public static class Config {
 
+        private String serviceClass = SocketService.class.getName();
         private int port = 18001;
         private int idleTimeout = 30;
         /** 是否开启 ssl */

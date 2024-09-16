@@ -29,7 +29,7 @@ public class SocketTest {
     WebSocketClient webSocketClient;
 
     @Before
-    public void before() {
+    public void before() throws Exception {
         defaultExecutor = new ExecutorBuilder().defaultExecutor();
         bootstrapBuilder = new BootstrapBuilder();
         messageDispatcher = new MessageDispatcher();

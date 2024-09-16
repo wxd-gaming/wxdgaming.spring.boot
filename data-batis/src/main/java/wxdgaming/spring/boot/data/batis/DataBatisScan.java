@@ -13,8 +13,4 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan
 public class DataBatisScan {
 
-    public DataBatisScan() {
-        System.out.println("\n" + this.getClass().getName() + "\n");
-    }
-
 }

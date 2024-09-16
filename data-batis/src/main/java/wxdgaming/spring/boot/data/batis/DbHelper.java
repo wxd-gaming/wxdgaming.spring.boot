@@ -6,6 +6,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -55,6 +56,7 @@ public class DbHelper implements InitPrint {
 
     @Bean
     @Primary
+    @ConditionalOnMissingBean(DataSource.class)
     public DataSource datasource() {
         dataSource = DruidDataSourceBuilder.create().build();
         log.info("初始化DataSource：{}", url);
@@ -66,7 +68,9 @@ public class DbHelper implements InitPrint {
     }
 
     /**
-     * @param dbnameString
+     * 获取指定数据库的链接
+     *
+     * @param dbnameString 数据库名字
      * @return
      */
     public Connection getConnection(String dbnameString) {

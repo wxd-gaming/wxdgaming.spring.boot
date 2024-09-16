@@ -100,7 +100,12 @@ public class JavaCoderCompile {
      */
     public JavaCoderCompile compilerJava(String sourceDir, Iterable<? extends JavaFileObject> compilerFiles) throws Exception {
         JDKVersion jdkVersion = JDKVersion.runTimeJDKVersion();
-        LogbackUtil.logger().info("目录：{}/{}, compiler java file jdk_version：{}", System.getProperty("user.dir"), sourceDir, jdkVersion.getCurVersionString());
+        LogbackUtil.logger().info(
+                "目录：{}/{}, compiler java file jdk_version：{}",
+                System.getProperty("user.dir"),
+                sourceDir,
+                jdkVersion.getCurVersionString()
+        );
         /**
          * 编译选项，在编译java文件时，
          * <p>
@@ -135,7 +140,8 @@ public class JavaCoderCompile {
                 oDiagnosticCollector,
                 options,
                 null,
-                compilerFiles);
+                compilerFiles
+        );
         // 运行编译任务
         Boolean call = compilationTask.call();
         if (!call) {

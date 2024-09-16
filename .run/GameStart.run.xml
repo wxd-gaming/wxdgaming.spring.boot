@@ -1,10 +1,10 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="GameStart" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
     <module name="game" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="wxdgaming.spring.gamebase.GameStart" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="wxdgaming.spring.gamebase.game.server.GameStart" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="wxdgaming.spring.gamebase.*" />
+        <option name="PATTERN" value="wxdgaming.spring.gamebase.game.server.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

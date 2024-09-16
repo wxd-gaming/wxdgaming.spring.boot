@@ -38,17 +38,26 @@ public class QueueEventTest {
 
     @Test
     public void t2() throws Exception {
+        AtomicInteger counter = new AtomicInteger();
         Executor executor = CompletableFuture.delayedExecutor(1, TimeUnit.SECONDS);
         CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> {
-            System.out.println(" 1 " + Thread.currentThread());
-            return "hello";
+            System.out.println(" 0 " + Thread.currentThread());
+            return "hello " + counter.incrementAndGet();
         }, executor);
         Mono<String> mono = Mono.fromFuture(completableFuture);
+        System.out.println(1);
+        mono.subscribe(str -> {
+            System.out.println(" 1 " + Thread.currentThread() + " - " + str);
+        });
+        System.out.println(2);
         mono.subscribe(str -> {
             System.out.println(" 2 " + Thread.currentThread() + " - " + str);
         });
-        mono.block();
-        Thread.sleep(500);
+        System.out.println(3);
+        mono.subscribe(str -> {
+            System.out.println(" 3 " + Thread.currentThread() + " - " + str);
+        });
+        Thread.sleep(1500);
     }
 
     @Test
@@ -60,20 +69,23 @@ public class QueueEventTest {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println(" 1 " + Thread.currentThread() + " - " + System.currentTimeMillis());
+            System.out.println(" 0 " + Thread.currentThread() + " - " + System.currentTimeMillis());
             return "hello " + counter.incrementAndGet();
         });
         mono = mono.map(str -> str + " world");
-        Disposable subscribe = mono.subscribe(str -> {
-            System.out.println(" 2 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
+        System.out.println(1);
+        mono.subscribe(str -> {
+            System.out.println(" 1 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
         });
-        subscribe.dispose();
+        System.out.println(2);
         mono.subscribe(str -> {
             System.out.println(" 2 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
         });
+        System.out.println(3);
         mono.subscribe(str -> {
-            System.out.println(" 2 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
+            System.out.println(" 3 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
         });
+        System.out.println(4);
         Thread.sleep(500);
     }
 
@@ -86,20 +98,23 @@ public class QueueEventTest {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println(" 1 " + Thread.currentThread() + " - " + System.currentTimeMillis());
+            System.out.println(" 0 " + Thread.currentThread() + " - " + System.currentTimeMillis());
             return "hello " + counter.incrementAndGet();
         });
         future = future.thenApplyAsync(str -> str + " world");
+        System.out.println(1);
+        future.thenAccept(str -> {
+            System.out.println(" 1 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
+        });
+        System.out.println(2);
         future.thenAccept(str -> {
             System.out.println(" 2 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
         });
+        System.out.println(3);
         future.thenAccept(str -> {
-            System.out.println(" 2 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
+            System.out.println(" 3 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
         });
-        future.thenAccept(str -> {
-            System.out.println(" 2 " + Thread.currentThread() + " - " + System.currentTimeMillis() + " - " + str);
-        });
-        Thread.sleep(500);
+        Thread.sleep(1500);
     }
 
     @Test
@@ -123,16 +138,19 @@ public class QueueEventTest {
     public void t6() throws Exception {
 
         Mono<String> mono = Mono.fromSupplier(() -> {
-            System.out.println("1");
+            System.out.println("0");
             try {
                 Thread.sleep(1500);
             } catch (InterruptedException ignore) {}
 
             return "d";
         });
+        System.out.println("1");
+        mono.subscribe(str -> System.out.println(" 1 " + str));
         System.out.println("2");
-        mono.subscribe(str -> System.out.println(str));
+        mono.subscribe(str -> System.out.println(" 2 " + str));
         System.out.println("3");
+        mono.subscribe(str -> System.out.println(" 3 " + str));
         Thread.sleep(500);
     }
 
