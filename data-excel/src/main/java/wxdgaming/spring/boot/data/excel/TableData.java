@@ -8,6 +8,7 @@ import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.lang.ConvertUtil;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * excel sheet 数据
@@ -34,6 +35,10 @@ public class TableData {
         this.sheetName = sheetName;
         this.tableName = tableName;
         this.tableComment = tableComment;
+    }
+
+    public Optional<RowData> row(Object key) {
+        return Optional.ofNullable(rows.get(key));
     }
 
     @JSONField(serialize = false, deserialize = false)

@@ -21,7 +21,6 @@ import wxdgaming.spring.boot.core.threading.DefaultExecutor;
 import wxdgaming.spring.boot.core.timer.MyClock;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
@@ -161,8 +160,9 @@ public class Cache<K, V> implements Closeable {
 
     protected final ScheduledFuture<?> timerJob;
 
-    @Override public void close() throws IOException {
+    @Override public void close() {
         timerJob.cancel(false);
+        kv.clear();
     }
 
     /**

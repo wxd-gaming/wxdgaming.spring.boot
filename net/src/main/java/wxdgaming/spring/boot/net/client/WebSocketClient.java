@@ -1,6 +1,6 @@
 package wxdgaming.spring.boot.net.client;
 
-import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
@@ -78,13 +78,14 @@ public class WebSocketClient extends SocketClient {
         // handshaker.handshake(socketChannel);
     }
 
-    @Override public SocketSession connect(Consumer<Channel> consumer) {
-        SocketSession socketSession = super.connect(consumer);
-        if (socketSession != null) {
+    @Override public ChannelFuture connect(Consumer<SocketSession> consumer) {
+        return super.connect(socketSession -> {
             socketSession.setSsl(config.isEnableSsl());
             socketSession.setWebSocket(true);
-        }
-        return socketSession;
+            if (consumer != null) {
+                consumer.accept(socketSession);
+            }
+        });
     }
 
 }

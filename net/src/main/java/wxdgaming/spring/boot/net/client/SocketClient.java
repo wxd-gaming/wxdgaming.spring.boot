@@ -20,7 +20,6 @@ import wxdgaming.spring.boot.net.ssl.WxdSslHandler;
 
 import javax.net.ssl.SSLEngine;
 import java.io.Closeable;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -132,9 +131,8 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
         log.info("shutdown tcp client：{}:{}", config.getHost(), config.getPort());
     }
 
-    public final SocketSession connect() {
-        SocketSession socketSession = connect(null);
-        if (socketSession != null) {
+    public final ChannelFuture connect() {
+        return connect(socketSession -> {
             sessionGroup.add(socketSession);
             /*添加事件，如果链接关闭了触发*/
             socketSession.getChannel().closeFuture().addListener(future -> {
@@ -142,38 +140,24 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
                 reconnection();
             });
             socketClientDeviceHandler.getSessionHandler().openSession(socketSession);
-        }
-        return socketSession;
+        });
     }
 
-    public SocketSession connect(Consumer<Channel> consumer) {
-        CompletableFuture<SocketSession> completableFuture = new CompletableFuture<>();
-        bootstrap.connect(config.getHost(), config.getPort())
+    public ChannelFuture connect(Consumer<SocketSession> consumer) {
+        return bootstrap.connect(config.getHost(), config.getPort())
                 .addListener((ChannelFutureListener) future -> {
                     Throwable cause = future.cause();
                     if (cause != null) {
-                        if (reconnection()) {
-                            /*当前可以重连不抛出异常*/
-                            completableFuture.complete(null);
-                        } else {
-                            completableFuture.completeExceptionally(cause);
-                        }
                         return;
                     }
                     Channel channel = future.channel();
                     SocketSession socketSession = new SocketSession(SocketSession.Type.client, channel, false);
                     socketSession.setSsl(config.isEnableSsl());
-                    completableFuture.complete(socketSession);
-                    log.debug("{} connect success {}", SocketClient.this.getClass().getSimpleName(), channel);
+                    log.debug("{} connect success {}", this.getClass().getSimpleName(), channel);
                     if (consumer != null) {
-                        consumer.accept(channel);
+                        consumer.accept(socketSession);
                     }
                 });
-        try {
-            return completableFuture.get();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     AtomicLong atomicLong = new AtomicLong();
@@ -186,13 +170,14 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
                 || executor.isTerminated()
                 || executor.isTerminating()) return false;
 
-        long l = atomicLong.incrementAndGet();
+        long l = atomicLong.get();
+        if (l < 10) {
+            l = atomicLong.incrementAndGet();
+        }
 
         log.info("链接异常 {} 秒 重连", l);
 
-        executor.schedule(() -> {
-            connect();
-        }, l, TimeUnit.SECONDS);
+        executor.schedule(() -> {connect();}, l, TimeUnit.SECONDS);
         return true;
     }
 

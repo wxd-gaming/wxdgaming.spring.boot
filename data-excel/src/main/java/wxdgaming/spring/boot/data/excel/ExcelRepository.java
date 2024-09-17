@@ -39,6 +39,10 @@ public class ExcelRepository implements Serializable, InitPrint {
 
     private final Map<String, TableData> tableInfoMap = new ConcurrentHashMap<>();
 
+    public Optional<TableData> tableData(String tableName) {
+        return Optional.ofNullable(tableInfoMap.get(tableName));
+    }
+
     public final void readExcel(File file) {
         if (file == null || StringsUtil.emptyOrNull(file.getName()) || file.getName().contains("@") || file.getName().contains("$")) {
             log.info("Excel文件不能解析：{}", file);
