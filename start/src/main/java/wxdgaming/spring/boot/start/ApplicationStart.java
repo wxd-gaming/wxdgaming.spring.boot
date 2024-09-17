@@ -10,7 +10,9 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import reactor.core.publisher.Mono;
+import wxdgaming.spring.boot.broker.BrokerScan;
 import wxdgaming.spring.boot.core.CoreScan;
+import wxdgaming.spring.boot.core.SpringReflectContext;
 import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.Throw;
 import wxdgaming.spring.boot.core.ann.Start;
@@ -46,6 +48,7 @@ import java.util.Arrays;
                 DataRedisScan.class,
                 DataExcelScan.class,
                 NetScan.class,
+                BrokerScan.class,
                 RpcScan.class,
                 WebScan.class,
                 WebLuaScan.class,
@@ -59,6 +62,8 @@ public class ApplicationStart {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext run = SpringApplication.run(ApplicationStart.class, args);
+
+        SpringReflectContext.build(run);
 
         SpringUtil ins = SpringUtil.getIns();
         ins.executor(Start.class);
@@ -78,8 +83,8 @@ public class ApplicationStart {
             Mono<String> rpc = rpcService.request(session, "rpcTest", new JSONObject().fluentPut("type", 1).toString());
             rpc.subscribe(str -> log.debug("{}", str));
             rpc.block();
-        } catch (Exception ignore) {
-            log.error("{}", Throw.ofString(ignore, false));
+        } catch (Exception e) {
+            log.error("{}", Throw.ofString(e, false));
         }
 
         try {
@@ -88,8 +93,8 @@ public class ApplicationStart {
             rpc.subscribe(str -> log.debug("{}", str));
             rpc.block();
             session.writeAndFlush("string message");
-        } catch (Exception ignore) {
-            log.error("{}", Throw.ofString(ignore, false));
+        } catch (Exception e) {
+            log.error("{}", Throw.ofString(e, false));
         }
 
         // UserRepository userRepository = run.getBean(UserRepository.class);

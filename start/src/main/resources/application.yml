@@ -12,7 +12,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   profiles:
-    active: redis,mysql,socket
+    active: redis,mysql,socket,broker
   mvc:
     static-path-pattern: /**
   thymeleaf:

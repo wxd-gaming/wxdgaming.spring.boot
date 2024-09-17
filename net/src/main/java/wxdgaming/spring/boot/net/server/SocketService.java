@@ -42,7 +42,7 @@ public class SocketService implements InitPrint, Closeable, ISession {
     private ServerBootstrap bootstrap = null;
     private ChannelFuture future = null;
     /** 所有的连接 */
-    protected final SessionGroup sessionGroup = new SessionGroup();
+    protected final SessionGroup sessionGroup;
 
 
     public SocketService(BootstrapBuilder bootstrapBuilder,
@@ -51,12 +51,32 @@ public class SocketService implements InitPrint, Closeable, ISession {
                          SessionHandler sessionHandler,
                          ServerMessageDecode serverMessageDecode,
                          ServerMessageEncode serverMessageEncode) {
+        this(
+                bootstrapBuilder,
+                socketServerBuilder,
+                config,
+                sessionHandler,
+                new SessionGroup(),
+                serverMessageDecode,
+                serverMessageEncode
+        );
+    }
+
+    public SocketService(BootstrapBuilder bootstrapBuilder,
+                         SocketServerBuilder socketServerBuilder,
+                         SocketServerBuilder.Config config,
+                         SessionHandler sessionHandler,
+                         SessionGroup sessionGroup,
+                         ServerMessageDecode serverMessageDecode,
+                         ServerMessageEncode serverMessageEncode) {
+
         this.bootstrapBuilder = bootstrapBuilder;
         this.socketServerBuilder = socketServerBuilder;
         this.config = config;
         this.socketServerDeviceHandler = new SocketServerDeviceHandler(bootstrapBuilder, sessionHandler, this);
         this.serverMessageDecode = serverMessageDecode;
         this.serverMessageEncode = serverMessageEncode;
+        this.sessionGroup = sessionGroup;
     }
 
     @PostConstruct

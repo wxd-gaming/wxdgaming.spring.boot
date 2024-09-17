@@ -48,16 +48,16 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
 
     @Getter private static SpringUtil ins;
 
-    public static final Comparator<Class<?>> CLASS_COMPARATOR = (o1, o2) -> {
-        int o1Annotation = Optional.ofNullable(o1.getAnnotation(Order.class)).map(Order::value).orElse(999999);
-        int o2Annotation = Optional.ofNullable(o2.getAnnotation(Order.class)).map(Order::value).orElse(999999);
+    public static final Comparator<Object> OBJECT_COMPARATOR = (o1, o2) -> {
+        int o1Annotation = Optional.ofNullable(o1.getClass().getAnnotation(Order.class)).map(Order::value).orElse(999999);
+        int o2Annotation = Optional.ofNullable(o2.getClass().getAnnotation(Order.class)).map(Order::value).orElse(999999);
         if (o1Annotation != o2Annotation) {
             return Integer.compare(o1Annotation, o2Annotation);
         }
-        return o1.getName().compareTo(o2.getName());
+        return o1.getClass().getName().compareTo(o2.getClass().getName());
     };
 
-    public static final Comparator<Tuple2<Class<?>, Method>> METHOD_COMPARATOR = (o1, o2) -> {
+    public static final Comparator<Tuple2<?, Method>> METHOD_COMPARATOR = (o1, o2) -> {
         int o1Annotation = Optional.ofNullable(o1.getRight().getAnnotation(Order.class)).map(Order::value).orElse(999999);
         int o2Annotation = Optional.ofNullable(o2.getRight().getAnnotation(Order.class)).map(Order::value).orElse(999999);
         if (o1Annotation != o2Annotation) {
@@ -156,17 +156,6 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         return curApplicationContext().getBean(name, clazz);
     }
 
-    public List<Object> getBeans() {
-        String[] beanDefinitionNames = curApplicationContext().getBeanDefinitionNames();
-        List<Object> beans = new ArrayList<>();
-        for (String beanDefinitionName : beanDefinitionNames) {
-            Object bean = curApplicationContext().getBean(beanDefinitionName);
-            beans.add(bean);
-        }
-        beans.sort((o1, o2) -> SpringUtil.CLASS_COMPARATOR.compare(o1.getClass(), o2.getClass()));
-        return beans;
-    }
-
     public <T> Stream<T> getBeansOfType(@Nullable Class<T> type) {
         return curApplicationContext()
                 .getBeansOfType(type)
@@ -185,40 +174,15 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @author: wxd-gaming(無心道, 15388152619)
      * @version: 2024-08-12 13:38
      */
-    public ReflectContext reflectContext() {
+    public SpringReflectContext reflectContext() {
         String[] beanDefinitionNames = curApplicationContext().getBeanDefinitionNames();
-        List<Class<?>> clazzs = new ArrayList<>();
+        List<Object> clazzs = new ArrayList<>();
         for (String beanDefinitionName : beanDefinitionNames) {
             Object bean = curApplicationContext().getBean(beanDefinitionName);
-            clazzs.add(bean.getClass());
+            clazzs.add(bean);
         }
-        clazzs.sort(SpringUtil.CLASS_COMPARATOR);
-        return new ReflectContext(clazzs);
-    }
-
-    /**
-     * 返回当前 spring 容器所有的bean
-     *
-     * @param annotation 指定注解
-     * @return
-     * @author: wxd-gaming(無心道, 15388152619)
-     * @version: 2024-08-12 13:38
-     */
-    public Stream<Class<?>> classWithAnnotated(Class<? extends Annotation> annotation) {
-        return reflectContext().classWithAnnotated(annotation);
-    }
-
-    /**
-     * 实现或者继承指定类
-     *
-     * @param cls 接口或者父类
-     * @param <U>
-     * @return
-     * @author: wxd-gaming(無心道, 15388152619)
-     * @version: 2024-08-12 13:39
-     */
-    public <U> Stream<Class<U>> classWithSuper(Class<U> cls) {
-        return reflectContext().classWithSuper(cls);
+        clazzs.sort(SpringUtil.OBJECT_COMPARATOR);
+        return new SpringReflectContext(clazzs);
     }
 
     /**
@@ -229,7 +193,7 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @author: wxd-gaming(無心道, 15388152619)
      * @version: 2024-08-12 13:40
      */
-    public Stream<Tuple2<Class<?>, Method>> withMethodAnnotated(Class<? extends Annotation> annotationType) {
+    public Stream<Tuple2<Object, Method>> withMethodAnnotated(Class<? extends Annotation> annotationType) {
         return reflectContext()
                 .withMethodAnnotated(annotationType)
                 .sorted(METHOD_COMPARATOR);
@@ -239,12 +203,11 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         withMethodAnnotated(annotationType)
                 .forEach(t -> {
                     try {
-                        Object bean = curApplicationContext().getBean(t.getLeft());
                         t.getRight().setAccessible(true);
                         Object[] array = Arrays.stream(t.getRight().getParameterTypes()).map(curApplicationContext()::getBean).toArray();
-                        t.getRight().invoke(bean, array);
+                        t.getRight().invoke(t.getLeft(), array);
                     } catch (Exception e) {
-                        throw new RuntimeException(t.getLeft().getName() + "#" + t.getRight().getName(), e);
+                        throw new RuntimeException(t.getLeft().getClass().getName() + "#" + t.getRight().getName(), e);
                     }
                 });
     }

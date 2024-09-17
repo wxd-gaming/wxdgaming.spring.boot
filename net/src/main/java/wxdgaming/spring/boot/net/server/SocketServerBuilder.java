@@ -109,7 +109,7 @@ public class SocketServerBuilder {
     @Accessors(chain = true)
     public static class Config {
 
-        private String serviceClass = SocketService.class.getName();
+        private String serviceClass ;
         private int port = 18001;
         private int idleTimeout = 30;
         /** 是否开启 ssl */

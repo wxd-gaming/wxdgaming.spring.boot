@@ -22,9 +22,9 @@
         <module>data-batis</module>
         <module>data-excel</module>
         <module>data-redis</module>
-        <module>message</module>
         <module>net</module>
-        <module>rpc</module>
+        <module>net-broker</module>
+        <module>net-rpc</module>
         <module>script-lua</module>
         <module>start</module>
         <module>web</module>

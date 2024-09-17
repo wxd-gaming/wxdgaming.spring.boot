@@ -14,7 +14,7 @@ import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.threading.BaseExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.timer.MyClock;
-import wxdgaming.spring.boot.message.pojo.inner.InnerMessage;
+import wxdgaming.spring.boot.net.message.pojo.inner.InnerMessage;
 import wxdgaming.spring.boot.net.*;
 import wxdgaming.spring.boot.net.ssl.WxdSslHandler;
 

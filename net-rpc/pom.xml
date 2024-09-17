@@ -9,7 +9,7 @@
         <version>1.0.1</version>
     </parent>
 
-    <artifactId>wxdgaming.spring.boot.net</artifactId>
+    <artifactId>wxdgaming.spring.boot.net-rpc</artifactId>
 
     <dependencies>
         <dependency>
@@ -23,6 +23,11 @@
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
             <artifactId>wxdgaming.spring.boot.core</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>wxdgaming.spring.boot.net</artifactId>
             <version>1.0.1</version>
         </dependency>
     </dependencies>

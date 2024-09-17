@@ -9,8 +9,8 @@ import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import wxdgaming.spring.boot.core.LogbackUtil;
-import wxdgaming.spring.boot.message.PojoBase;
-import wxdgaming.spring.boot.message.SerializerUtil;
+import wxdgaming.spring.boot.net.message.PojoBase;
+import wxdgaming.spring.boot.net.message.SerializerUtil;
 
 /**
  * 消息解码，收到消息处理

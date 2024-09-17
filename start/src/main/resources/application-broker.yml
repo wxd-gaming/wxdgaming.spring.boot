@@ -1,0 +1,10 @@
+socket:
+  server:
+    broker:
+      port: 18201
+      idleTimeout: 30 # 单位秒
+      enable-web-socket: true
+      web-socket-prefix: "/wxd-gaming"
+      sslProtocolType: TLSV12 # TLSV12  TLSV1 SSLV3 SSL
+      jks_path: "jks/wxdtest-1.8.jks"
+      jks_pwd_path: "jks/wxdtest-1.8.jks.pwd"

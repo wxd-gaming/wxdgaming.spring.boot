@@ -7,8 +7,8 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
-import wxdgaming.spring.boot.message.PojoBase;
-import wxdgaming.spring.boot.message.SerializerUtil;
+import wxdgaming.spring.boot.net.message.PojoBase;
+import wxdgaming.spring.boot.net.message.SerializerUtil;
 
 /**
  * 消息编码
@@ -43,10 +43,7 @@ public abstract class MessageEncode extends ChannelOutboundHandlerAdapter {
                     return;
                 }
                 byte[] bytes = SerializerUtil.encode(pojoBase);
-                ByteBuf byteBuf = ByteBufUtil.pooledByteBuf(bytes.length + 10);
-                byteBuf.writeInt(bytes.length + 4);
-                byteBuf.writeInt(msgId);
-                byteBuf.writeBytes(bytes);
+                ByteBuf byteBuf = build(msgId, bytes);
                 if (session.isWebSocket()) {
                     super.write(ctx, new BinaryWebSocketFrame(byteBuf), promise);
                 } else {
@@ -60,6 +57,14 @@ public abstract class MessageEncode extends ChannelOutboundHandlerAdapter {
             }
             case null, default -> super.write(ctx, msg, promise);
         }
+    }
+
+    public static ByteBuf build(int messageId, byte[] bytes) {
+        ByteBuf byteBuf = ByteBufUtil.pooledByteBuf(bytes.length + 10);
+        byteBuf.writeInt(bytes.length + 4);
+        byteBuf.writeInt(messageId);
+        byteBuf.writeBytes(bytes);
+        return byteBuf;
     }
 
 }

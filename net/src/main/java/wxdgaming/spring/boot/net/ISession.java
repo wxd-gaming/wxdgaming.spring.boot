@@ -2,7 +2,7 @@ package wxdgaming.spring.boot.net;
 
 import io.netty.buffer.ByteBuf;
 import wxdgaming.spring.boot.core.collection.concurrent.ConcurrentLoopList;
-import wxdgaming.spring.boot.message.PojoBase;
+import wxdgaming.spring.boot.net.message.PojoBase;
 
 /**
  * session
