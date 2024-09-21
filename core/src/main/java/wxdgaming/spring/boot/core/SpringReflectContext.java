@@ -11,6 +11,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
@@ -25,15 +26,12 @@ import java.util.stream.Stream;
 @Getter
 public class SpringReflectContext {
 
-    public static List<Object> getBeans(ConfigurableApplicationContext applicationContext) {
+    public static Stream<Object> getBeans(ConfigurableApplicationContext applicationContext) {
         String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
-        List<Object> beans = new ArrayList<>();
-        for (String beanDefinitionName : beanDefinitionNames) {
-            Object bean = applicationContext.getBean(beanDefinitionName);
-            beans.add(bean);
-        }
-        beans.sort(SpringUtil.OBJECT_COMPARATOR);
-        return beans;
+        return Arrays.stream(beanDefinitionNames)
+                .map(applicationContext::getBean)
+                .sorted(SpringUtil.OBJECT_COMPARATOR);
+
     }
 
     public static SpringReflectContext build(ConfigurableApplicationContext applicationContext) {
@@ -43,15 +41,10 @@ public class SpringReflectContext {
     }
 
     /** 所有的类 */
-    private final List<Object> instanceList;
+    private final Stream<Object> instanceList;
 
-    public SpringReflectContext(Collection<Object> instanceList) {
-        this.instanceList = List.copyOf(instanceList);
-    }
-
-    /** 所有的类 */
-    public Stream<Object> classStream() {
-        return instanceList.stream();
+    public SpringReflectContext(Stream<Object> instanceList) {
+        this.instanceList = instanceList;
     }
 
     /** 父类或者接口 */
@@ -62,7 +55,7 @@ public class SpringReflectContext {
     /** 父类或者接口 */
     public <U> Stream<U> classWithSuper(Class<U> cls, Predicate<U> predicate) {
         @SuppressWarnings("unchecked")
-        Stream<U> tmp = classStream().filter(e -> cls.isAssignableFrom(e.getClass())).map(c -> (U) c);
+        Stream<U> tmp = instanceList.filter(e -> cls.isAssignableFrom(e.getClass())).map(c -> (U) c);
         if (predicate != null) tmp = tmp.filter(predicate);
         return tmp;
     }
@@ -74,13 +67,13 @@ public class SpringReflectContext {
 
     /** 所有添加了这个注解的类 */
     public Stream<Object> classWithAnnotated(Class<? extends Annotation> annotation, Predicate<Object> predicate) {
-        Stream<Object> tmp = classStream().filter(c -> AnnUtil.ann(c.getClass(), annotation) != null);
+        Stream<Object> tmp = instanceList.filter(c -> AnnUtil.ann(c.getClass(), annotation) != null);
         if (predicate != null) tmp = tmp.filter(predicate);
         return tmp;
     }
 
     public Stream<Content<Object>> stream() {
-        return instanceList.stream().map(Content::new);
+        return instanceList.map(Content::new);
     }
 
     /** 父类或者接口 */
@@ -110,7 +103,9 @@ public class SpringReflectContext {
 
     /** 所有添加了这个注解的类 */
     public Stream<Tuple2<Object, Method>> withMethodAnnotated(Class<? extends Annotation> annotation, Predicate<Tuple2<Object, Method>> predicate) {
-        Stream<Tuple2<Object, Method>> methodStream = stream().flatMap(info -> info.methodsWithAnnotated(annotation).map(m -> new Tuple2<>(info.instance, m)));
+        Stream<Tuple2<Object, Method>> methodStream = stream()
+                .flatMap(info -> info.methodsWithAnnotated(annotation)
+                .map(m -> new Tuple2<>(info.instance, m)));
         if (predicate != null) {
             methodStream = methodStream.filter(predicate);
         }

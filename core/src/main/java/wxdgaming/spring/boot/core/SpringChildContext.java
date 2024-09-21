@@ -74,4 +74,9 @@ public class SpringChildContext implements InitPrint {
         return childContext;
     }
 
+
+    public void unload(){
+
+    }
+
 }

@@ -163,6 +163,10 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
                 .stream();
     }
 
+    public Stream<Object> getBeans() {
+        return SpringReflectContext.getBeans(curApplicationContext());
+    }
+
     public Stream<Object> getBeansWithAnnotation(Class<? extends Annotation> annotation) {
         return curApplicationContext().getBeansWithAnnotation(annotation).values().stream();
     }
@@ -175,14 +179,7 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @version: 2024-08-12 13:38
      */
     public SpringReflectContext reflectContext() {
-        String[] beanDefinitionNames = curApplicationContext().getBeanDefinitionNames();
-        List<Object> clazzs = new ArrayList<>();
-        for (String beanDefinitionName : beanDefinitionNames) {
-            Object bean = curApplicationContext().getBean(beanDefinitionName);
-            clazzs.add(bean);
-        }
-        clazzs.sort(SpringUtil.OBJECT_COMPARATOR);
-        return new SpringReflectContext(clazzs);
+        return SpringReflectContext.build(curApplicationContext());
     }
 
     /**
@@ -244,9 +241,8 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @version: 2024-08-12 13:40
      */
     public void registerBean(ConfigurableApplicationContext context, String name, Class<?> beanClass, boolean removeOld) {
-
         // 获取bean工厂并转换为DefaultListableBeanFactory
-        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory();
+        DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) context.getBeanFactory();
         // 将有@spring注解的类交给spring管理
         BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(beanClass);
         BeanDefinition beanDefinition = beanDefinitionBuilder.getRawBeanDefinition();
