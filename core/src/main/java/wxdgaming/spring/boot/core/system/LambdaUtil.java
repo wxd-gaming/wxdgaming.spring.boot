@@ -6,6 +6,7 @@ import wxdgaming.spring.boot.core.GlobalUtil;
 import wxdgaming.spring.boot.core.Throw;
 import wxdgaming.spring.boot.core.function.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.*;
@@ -24,7 +25,7 @@ import java.util.function.Consumer;
 @Slf4j
 public class LambdaUtil implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /**
      * 获取实体类的字段名称
@@ -155,7 +156,7 @@ public class LambdaUtil implements Serializable {
      * @param serializableLambda 代理映射接口
      */
     public static <M> void findDelegate(Object object, SerializableLambda serializableLambda, Consumer1<Mapping<M>> call) {
-        Class inClass = serializableLambda.ofClass();
+        Class<M> inClass = (Class<M>) serializableLambda.ofClass();
         Method inMethod = serializableLambda.ofMethod();
         findDelegate(inClass, inMethod, object, call);
     }
@@ -178,7 +179,11 @@ public class LambdaUtil implements Serializable {
                 if (genericParameterTypes.length != gpt.length) continue;
                 boolean source = true;
                 for (int i = 0; i < gpt.length; i++) {
-                    if (!gpt[i].equals(genericParameterTypes[i])) {
+                    Type genericParameterType = genericParameterTypes[i];
+                    Type type = gpt[i];
+                    if (!genericParameterType.equals(type)
+                            /* && !((Class<?>) genericParameterType).isAssignableFrom((Class<?>) type)
+                            && !((Class<?>) type).isAssignableFrom((Class<?>) genericParameterType) */) {
                         source = false;
                         break;
                     }
@@ -187,7 +192,7 @@ public class LambdaUtil implements Serializable {
                     source = false;
                 }
                 if (source) {
-                    Mapping delegate = createDelegate(inClass, inMethod, object, method);
+                    Mapping<M> delegate = createDelegate(inClass, inMethod, object, method);
                     try {
                         call.accept(delegate);
                     } catch (Throwable throwable) {
@@ -208,7 +213,7 @@ public class LambdaUtil implements Serializable {
      * @param serializableLambda 代理映射接口
      */
     public static <M> Mapping<M> createDelegate(Object object, Method method, SerializableLambda serializableLambda) {
-        Class inClass = serializableLambda.ofClass();
+        Class<M> inClass = (Class<M>) serializableLambda.ofClass();
         Method inMethod = serializableLambda.ofMethod();
         return createDelegate(inClass, inMethod, object, method);
     }
@@ -235,8 +240,8 @@ public class LambdaUtil implements Serializable {
             type = type.dropParameterTypes(0, 1);
             /*获取代理对象，注意，第二个参数的字符串必须为函数式接口里的方法名*/
             CallSite metafactory = LambdaMetafactory.metafactory(lookup, inMethod.getName(), factoryType, type, mh, type);
-            Object invokeExact = metafactory.getTarget().bindTo(object).invoke();
-            return new Mapping(object, method, invokeExact);
+            M invokeExact = (M) metafactory.getTarget().bindTo(object).invoke();
+            return new Mapping<M>(object, method, invokeExact);
         } catch (Throwable throwable) {
             throw Throw.of(inClass + " - " + inMethod + " - " + object + " - " + method, throwable);
         }

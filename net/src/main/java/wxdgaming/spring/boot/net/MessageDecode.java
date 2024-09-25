@@ -142,18 +142,18 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
         DoMessageMapping doMessageMapping = dispatcher.getMappings().get(messageId);
         Logger logger = LogbackUtil.logger();
         if (doMessageMapping != null) {
-            PojoBase decode = (PojoBase) SerializerUtil.decode(messageBytes, doMessageMapping.getMessageType());
+            PojoBase message = (PojoBase) SerializerUtil.decode(messageBytes, doMessageMapping.getMessageType());
             if (bootstrapBuilder.isPrintLogger() && logger.isInfoEnabled()) {
                 logger.info(
                         "收到消息：ctx={}, id={}, len={}, body={}",
                         socketSession.toString(),
                         messageId,
                         messageBytes.length,
-                        decode
+                        message
                 );
             }
             /* TODO 这里考虑如何线程规划 */
-            doMessageMapping.getMethod().invoke(doMessageMapping.getBean(), socketSession, decode);
+            doMessageMapping.getMethod().invoke(doMessageMapping.getBean(), socketSession, message);
         } else {
             if (bootstrapBuilder.isPrintLogger() && logger.isInfoEnabled()) {
                 logger.info(

@@ -10,10 +10,8 @@ import wxdgaming.spring.boot.core.system.MethodUtil;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -35,8 +33,6 @@ public class SpringReflectContext {
     }
 
     public static SpringReflectContext build(ConfigurableApplicationContext applicationContext) {
-        String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
-        String[] beanDefinitionNames1 = applicationContext.getBeanFactory().getBeanDefinitionNames();
         return new SpringReflectContext(getBeans(applicationContext));
     }
 
@@ -105,7 +101,7 @@ public class SpringReflectContext {
     public Stream<Tuple2<Object, Method>> withMethodAnnotated(Class<? extends Annotation> annotation, Predicate<Tuple2<Object, Method>> predicate) {
         Stream<Tuple2<Object, Method>> methodStream = stream()
                 .flatMap(info -> info.methodsWithAnnotated(annotation)
-                .map(m -> new Tuple2<>(info.instance, m)));
+                        .map(m -> new Tuple2<>(info.instance, m)));
         if (predicate != null) {
             methodStream = methodStream.filter(predicate);
         }

@@ -44,6 +44,7 @@ public class FieldUtil {
             if (!readStatic && Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
+            field.setAccessible(true);
             mapf.put(field.getName(), field);
         }
     }

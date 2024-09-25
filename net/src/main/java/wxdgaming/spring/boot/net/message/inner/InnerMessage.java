@@ -1,6 +1,8 @@
-package wxdgaming.spring.boot.net.message.pojo.inner;
+package wxdgaming.spring.boot.net.message.inner;
 
 import io.protostuff.Tag;
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -11,7 +13,7 @@ import wxdgaming.spring.boot.net.message.PojoBase;
  * rpc.proto
  *
  * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-09-07 21:11:44
+ * @version: 2024-09-21 20:39:35
  */
 public class InnerMessage {
 
@@ -24,5 +26,18 @@ public class InnerMessage {
        /** 当前毫秒 */
        @Tag(1)
        private long milli;
+
+   }
+
+   /** 执行同步等待消息 */
+   @Getter
+   @Setter
+   @Accessors(chain = true)
+   public static class ResHeart extends PojoBase {
+
+       /** 当前毫秒 */
+       @Tag(1)
+       private long milli;
+
    }
 }

@@ -22,6 +22,11 @@
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>wxdgaming.spring.boot.assist</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
             <artifactId>wxdgaming.spring.boot.core</artifactId>
             <version>1.0.1</version>
         </dependency>

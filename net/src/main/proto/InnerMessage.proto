@@ -2,9 +2,14 @@ syntax = "proto3";
 //把文件拆分
 //option java_multiple_files = true;
 //导出包名
-option java_package = "wxdgaming.spring.boot.message.pojo.inner";
+option java_package = "wxdgaming.spring.boot.net.message.inner";
 
 //执行同步等待消息
 message ReqHeart {
+    int64 milli             = 1;//当前毫秒
+}
+
+//执行同步等待消息
+message ResHeart {
     int64 milli             = 1;//当前毫秒
 }
