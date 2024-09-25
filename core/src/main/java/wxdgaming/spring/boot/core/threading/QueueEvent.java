@@ -16,10 +16,11 @@ import java.util.concurrent.locks.ReentrantLock;
  * @version: 2024-08-12 15:04
  **/
 @Getter
-public class QueueEvent implements Event, Executor {
+public class QueueEvent extends Event implements Executor {
 
-    private final BaseExecutor executor;
-    private final BlockingQueue<Runnable> runnableBlockingQueue;
+    private final String queueName;
+    private final Executor executor;
+    private final BlockingQueue<Event> runnableBlockingQueue;
     private final ReentrantLock reentrantLock = new ReentrantLock();
     private final AtomicBoolean atomicBoolean = new AtomicBoolean(false);
 
@@ -28,8 +29,8 @@ public class QueueEvent implements Event, Executor {
      *
      * @param threadPrefix 线程名称
      */
-    public QueueEvent(String threadPrefix) {
-        this(threadPrefix, 3000);
+    public QueueEvent(String queueName, String threadPrefix) {
+        this(queueName, new BaseExecutor(threadPrefix, 1, 1, 1), 3000);
     }
 
     /**
@@ -38,29 +39,42 @@ public class QueueEvent implements Event, Executor {
      * @param threadPrefix 线程名称
      * @param queueMaxSize 队列最大长度
      */
-    public QueueEvent(String threadPrefix, int queueMaxSize) {
-        this(new BaseExecutor(threadPrefix, 1), queueMaxSize);
+    public QueueEvent(String queueName, String threadPrefix, int queueMaxSize) {
+        this(queueName, new BaseExecutor(threadPrefix, 1, 1, 1), queueMaxSize);
     }
 
-    public QueueEvent(BaseExecutor executor) {
-        this(executor, 3000);
+    public QueueEvent(String queueName, Executor executor) {
+        this(queueName, executor, 3000);
     }
 
-    public QueueEvent(BaseExecutor executor, int queueMaxSize) {
+    public QueueEvent(String queueName, Executor executor, int queueMaxSize) {
+        this.queueName = queueName;
         this.executor = executor;
         this.runnableBlockingQueue = new LinkedBlockingQueue<>(queueMaxSize);
     }
 
+    Event curPoll = null;
+
+    @Override void check(StringBuilder sb, Thread thread) {
+        Event event = curPoll;
+        if (event != null) {
+            event.check(sb, thread);
+        }
+    }
+
     @Override public void onEvent() throws Throwable {
-        Runnable poll = null;
+
         try {
-            poll = runnableBlockingQueue.poll();
-            if (poll != null) {
-                poll.run();
+            curPoll = runnableBlockingQueue.poll();
+            if (curPoll != null) {
+                curPoll.run0();
             }
         } catch (Throwable throwable) {
-            GlobalUtil.exception(poll.getClass().getName(), throwable);
+            GlobalUtil.exception(String.valueOf(curPoll), throwable);
+        } finally {
+            curPoll = null;
         }
+
         try {
             reentrantLock.lock();
             if (runnableBlockingQueue.isEmpty()) {
@@ -74,12 +88,8 @@ public class QueueEvent implements Event, Executor {
     }
 
     @Override public void execute(Runnable command) {
-        Event event;
-        if (!(command instanceof Event)) {
-            event = new RunEvent(command);
-        } else {
-            event = (Event) command;
-        }
+        Event event = RunEvent.of(command);
+        event.queueName = queueName;
         runnableBlockingQueue.add(event);
         try {
             reentrantLock.lock();

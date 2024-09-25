@@ -32,7 +32,9 @@ import wxdgaming.spring.boot.core.util.StringsUtil;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -131,8 +133,8 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      *
      * @param name 参数传入要获取的实例的类名 首字母小写，这是默认的
      */
-    public Object getBean(String name) {
-        return curApplicationContext().getBean(name);
+    public <T> T getBean(String name) {
+        return (T) curApplicationContext().getBean(name);
     }
 
     /**

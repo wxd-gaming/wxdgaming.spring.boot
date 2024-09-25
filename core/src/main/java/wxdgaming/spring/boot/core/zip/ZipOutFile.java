@@ -22,17 +22,17 @@ import java.util.zip.ZipOutputStream;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class OutZipFile implements Serializable, Closeable {
+public class ZipOutFile implements Serializable, Closeable {
 
     FileOutputStream outputStream;
     ZipOutputStream zos;
     BufferedOutputStream bufferedOutputStream;
 
-    public OutZipFile(String zipPath) {
+    public ZipOutFile(String zipPath) {
         this(zipPath, false);
     }
 
-    public OutZipFile(String zipPath, boolean append) {
+    public ZipOutFile(String zipPath, boolean append) {
         try {
             File file = FileUtil.createFile(zipPath);
             outputStream = new FileOutputStream(file, append);
@@ -49,7 +49,7 @@ public class OutZipFile implements Serializable, Closeable {
      * @param fileName
      * @return
      */
-    public OutZipFile newZipEntry(String fileName) {
+    public ZipOutFile newZipEntry(String fileName) {
         try {
             ZipEntry zipEntry = new ZipEntry(fileName);
             zos.putNextEntry(zipEntry);
@@ -59,12 +59,12 @@ public class OutZipFile implements Serializable, Closeable {
         }
     }
 
-    public OutZipFile write(String source) {
+    public ZipOutFile write(String source) {
         write(source.getBytes(StandardCharsets.UTF_8));
         return this;
     }
 
-    public OutZipFile write(byte[] bytes) {
+    public ZipOutFile write(byte[] bytes) {
         try {
             bufferedOutputStream.write(bytes);
             bufferedOutputStream.flush();
@@ -74,7 +74,7 @@ public class OutZipFile implements Serializable, Closeable {
         }
     }
 
-    public OutZipFile putZipEntry(String fileName, String source) {
+    public ZipOutFile putZipEntry(String fileName, String source) {
         putZipEntry(fileName, source.getBytes(StandardCharsets.UTF_8));
         return this;
     }
@@ -86,7 +86,7 @@ public class OutZipFile implements Serializable, Closeable {
      * @param bytes
      * @return
      */
-    public OutZipFile putZipEntry(String fileName, byte[] bytes) {
+    public ZipOutFile putZipEntry(String fileName, byte[] bytes) {
         newZipEntry(fileName);
         write(bytes);
         return this;

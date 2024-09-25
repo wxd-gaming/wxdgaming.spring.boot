@@ -244,8 +244,8 @@ public class ZipUtil {
 
     /** 读取文件内容 */
     public static byte[] unzipFile(String zipPath, String fileName) {
-        try (ReadZipFile readZipFile = new ReadZipFile(zipPath)) {
-            return readZipFile.find(fileName);
+        try (ZipReadFile zipReadFile = new ZipReadFile(zipPath)) {
+            return zipReadFile.find(fileName);
         }
     }
 

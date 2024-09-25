@@ -22,11 +22,11 @@ import java.util.zip.ZipFile;
  * @version: 2022-05-09 20:17
  **/
 @Slf4j
-public class ReadZipFile implements Serializable, Closeable {
+public class ZipReadFile implements Serializable, Closeable {
 
     final ZipFile zip;
 
-    public ReadZipFile(String zipPath) {
+    public ZipReadFile(String zipPath) {
         try {
             zip = new ZipFile(new File(zipPath));
         } catch (Exception e) {
@@ -34,7 +34,7 @@ public class ReadZipFile implements Serializable, Closeable {
         }
     }
 
-    public ReadZipFile(File zipPath) {
+    public ZipReadFile(File zipPath) {
         try {
             zip = new ZipFile(zipPath);
         } catch (Exception e) {

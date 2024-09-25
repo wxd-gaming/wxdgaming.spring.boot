@@ -107,11 +107,11 @@
                 <artifactId>fastjson</artifactId>
                 <version>2.0.52</version>
             </dependency>
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>8.0.33</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>mysql</groupId>-->
+<!--                <artifactId>mysql-connector-java</artifactId>-->
+<!--                <version>8.0.33</version>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
@@ -120,17 +120,17 @@
             <dependency>
                 <groupId>party.iroiro.luajava</groupId>
                 <artifactId>luajava</artifactId>
-                <version>4.0.1</version>
+                <version>4.0.2</version>
             </dependency>
             <dependency>
                 <groupId>party.iroiro.luajava</groupId>
                 <artifactId>lua54</artifactId>
-                <version>4.0.1</version>
+                <version>4.0.2</version>
             </dependency>
             <dependency>
                 <groupId>party.iroiro.luajava</groupId>
                 <artifactId>lua54-platform</artifactId>
-                <version>4.0.1</version>
+                <version>4.0.2</version>
                 <classifier>natives-desktop</classifier>
             </dependency>
             <!--计算对象占用内存大小-->

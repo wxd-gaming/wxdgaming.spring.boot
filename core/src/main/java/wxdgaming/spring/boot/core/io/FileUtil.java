@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import wxdgaming.spring.boot.core.Throw;
 import wxdgaming.spring.boot.core.lang.Record2;
-import wxdgaming.spring.boot.core.zip.ReadZipFile;
+import wxdgaming.spring.boot.core.zip.ZipReadFile;
 
 import java.io.*;
 import java.net.URI;
@@ -125,7 +125,7 @@ public class FileUtil implements Serializable {
                         findPath = URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8);
                         if (findPath.contains(".zip!") || findPath.contains(".jar!")) {
                             findPath = findPath.substring(5, findPath.indexOf("!/"));
-                            try (ReadZipFile zipFile = new ReadZipFile(findPath)) {
+                            try (ZipReadFile zipFile = new ZipReadFile(findPath)) {
                                 return zipFile.stream()
                                         .filter(z -> !z.isDirectory())
                                         .filter(p -> p.getName().startsWith(path))

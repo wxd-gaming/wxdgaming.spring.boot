@@ -1,7 +1,7 @@
 package wxdgaming.spring.boot.core.format;
 
-import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.core.timer.MyClock;
+import wxdgaming.spring.boot.core.util.AssertUtil;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -10,24 +10,21 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * id算法
+ * <p>因为无符号 所以每一秒的id最大值是52万
+ * <p>hexId 取值范围 1 ~ 16500
+ *
  * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2022-07-02 14:36
- **/
-@Slf4j
-public class NewId implements Serializable {
+ * @version: 2024-09-24 15:08
+ */
+public class LogId implements Serializable {
+
     /** 相当于1970年1月1日，到2024年9月24日 经过了这么多天 */
     public static final int OffSetDays = 19990;
-
-    /** 8位 */
-    public static final long Offset8 = 0xFF;
-    /** 20位 */
-    public static final long Offset20 = 0xFFFFF;
-    public static final long Offset32 = 0xFFFFFFFFL;
-    public static final long Offset35 = 0x7FFFFFFFFL;
+    /** 19位的最大值 */
+    public int ID_MAX = 524287;
 
     final long hexId;
-    final long type;
-
     volatile long lastDays = 0;
     volatile long lastSecondByDay = 0;
     volatile long seed = 0;
@@ -37,21 +34,18 @@ public class NewId implements Serializable {
         System.out.println(TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis()));
 
         System.out.println(Long.MAX_VALUE);
-        System.out.println(Offset32);
         System.out.println((4000 << 17 | 86400));
 
-        final NewId newId = new NewId(80001, 120);
+        final LogId newId = new LogId(1500);
         {
             final long id = newId.newId();
             System.out.println(id);
-            System.out.println("serverId=" + newId.hexId(id));
-            System.out.println("type=" + newId.type(id));
-            System.out.println("idValue=" + newId.idValue(id));
         }
 
         Set<Long> ids = new HashSet<>();
-        while (true) {
-            for (int i = 0; i < 16000; i++) {
+        for (int k = 0; k < 6; k++) {
+
+            for (int i = 0; i < 50_0000; i++) {
                 final long id = newId.newId();
                 if (!ids.add(id)) {
                     System.out.println("重复id " + id + " " + new Date());
@@ -60,18 +54,13 @@ public class NewId implements Serializable {
                 }
                 //                log.debug("{}", id);
             }
-            Thread.sleep(900);
+            Thread.sleep(1000);
         }
     }
 
-    public NewId(int hexId, int type) {
-
-        if (hexId > Offset20) throw new RuntimeException("hexId 不能大于 " + Offset20);
-        if (type > Offset8) throw new RuntimeException("type 不能大于 " + Offset8);
-
+    public LogId(long hexId) {
+        AssertUtil.assertTrue(0 < hexId && hexId < 16501, "取值范围 1 ~ 16500");
         this.hexId = hexId;
-        this.type = type;
-
     }
 
     public synchronized long newId() {
@@ -82,23 +71,16 @@ public class NewId implements Serializable {
             lastDays = days;
             lastSecondByDay = secondByDay;
         }
-        long id = (days << 17 | secondByDay) << 18;
+
+        /*因为无符号 所以每一秒的id最大值是52万*/
         seed++;
-        id += seed;
-        //        System.out.println("idValue=" + id);
-        return type << 55 | hexId << 35 | id;
+
+        if (seed > ID_MAX) {
+            throw new RuntimeException("每秒钟生成的最大值 " + ID_MAX);
+        }
+        //   hexId 占15位     day 占用12位  second 占17位       seed 占用19位
+        return hexId << 48 | days << 36 | secondByDay << 19 | seed;
     }
 
-    public int hexId(long value) {
-        return (int) (value >> 35 & Offset20);
-    }
-
-    public int type(long value) {
-        return (int) (value >> 55 & Offset8);
-    }
-
-    public long idValue(long value) {
-        return (value & Offset35);
-    }
 
 }

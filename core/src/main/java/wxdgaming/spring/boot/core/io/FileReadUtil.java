@@ -6,7 +6,7 @@ import wxdgaming.spring.boot.core.Throw;
 import wxdgaming.spring.boot.core.function.Consumer2;
 import wxdgaming.spring.boot.core.function.ConsumerE1;
 import wxdgaming.spring.boot.core.lang.Record2;
-import wxdgaming.spring.boot.core.zip.ReadZipFile;
+import wxdgaming.spring.boot.core.zip.ZipReadFile;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -187,8 +187,8 @@ public class FileReadUtil implements Serializable {
     }
 
     public static void readJarClass(HashMap<String, byte[]> maps, String jarPath, String... names) {
-        try (ReadZipFile readZipFile = new ReadZipFile(jarPath)) {
-            readZipFile.forEach((fileName, bytes) -> {
+        try (ZipReadFile zipReadFile = new ZipReadFile(jarPath)) {
+            zipReadFile.forEach((fileName, bytes) -> {
                 String lowerCase = fileName.toLowerCase();
                 for (String name : names) {
                     if (lowerCase.contains(name.toLowerCase())) {

@@ -6,16 +6,22 @@ package wxdgaming.spring.boot.core.threading;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-12 16:12
  **/
-class RunEvent implements Event {
+class RunEvent extends Event {
+
+    static Event of(Runnable runnable) {
+        Event event;
+        if (!(runnable instanceof Event)) {
+            event = new RunEvent(runnable);
+        } else {
+            event = (Event) runnable;
+        }
+        return event;
+    }
 
     private final Runnable runnable;
 
     public RunEvent(Runnable runnable) {
         this.runnable = runnable;
-    }
-
-    @Override public final void run() {
-        Event.super.run();
     }
 
     @Override public void onEvent() throws Throwable {
