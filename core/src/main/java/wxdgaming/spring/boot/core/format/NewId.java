@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: wxd-gaming(無心道, 15388152619)
@@ -14,8 +15,8 @@ import java.util.Set;
  **/
 @Slf4j
 public class NewId implements Serializable {
-    /** 相当于1970年1月1日，到2022年7月1日 经过了这么多天 */
-    public static final int OffSetDays = 19174;
+    /** 相当于1970年1月1日，到2024年9月24日 经过了这么多天 */
+    public static final int OffSetDays = 19990;
 
     /** 8位 */
     public static final long Offset8 = 0xFF;
@@ -31,7 +32,9 @@ public class NewId implements Serializable {
     volatile long lastSecondByDay = 0;
     volatile long seed = 0;
 
-    public void t0(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
+
+        System.out.println(TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis()));
 
         System.out.println(Long.MAX_VALUE);
         System.out.println(Offset32);
@@ -55,7 +58,7 @@ public class NewId implements Serializable {
                     System.out.println("结束 " + ids.size());
                     return;
                 }
-//                log.debug("{}", id);
+                //                log.debug("{}", id);
             }
             Thread.sleep(900);
         }
@@ -71,7 +74,7 @@ public class NewId implements Serializable {
 
     }
 
-    public long newId() {
+    public synchronized long newId() {
         final long days = MyClock.days() - OffSetDays;
         final long secondByDay = MyClock.dayOfSecond();
         if (lastDays != days || secondByDay != lastSecondByDay) {
@@ -82,9 +85,8 @@ public class NewId implements Serializable {
         long id = (days << 17 | secondByDay) << 18;
         seed++;
         id += seed;
-//        System.out.println("idValue=" + id);
-        long newId = type << 55 | hexId << 35 | id;
-        return newId;
+        //        System.out.println("idValue=" + id);
+        return type << 55 | hexId << 35 | id;
     }
 
     public int hexId(long value) {

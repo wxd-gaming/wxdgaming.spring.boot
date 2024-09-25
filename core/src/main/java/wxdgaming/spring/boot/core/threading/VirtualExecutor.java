@@ -59,7 +59,7 @@ public class VirtualExecutor extends LockBase implements Executor {
         return future;
     }
 
-    class VirtualEvent implements Event {
+    class VirtualEvent extends Event {
 
         final Runnable command;
 

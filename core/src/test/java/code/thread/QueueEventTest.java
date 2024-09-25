@@ -1,10 +1,13 @@
 package code.thread;
 
 import org.junit.Test;
-import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
+import wxdgaming.spring.boot.core.threading.BaseExecutor;
+import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.threading.QueueEvent;
+import wxdgaming.spring.boot.core.threading.ThreadContext;
 
+import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -20,20 +23,56 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class QueueEventTest {
 
     @Test
-    public void t1() throws InterruptedException {
-        QueueEvent queueEvent = new QueueEvent("test");
+    public void t0() throws IOException {
+        BaseExecutor test = new BaseExecutor("test", 5, 5, 3000);
         long start = System.currentTimeMillis();
         for (int i = 0; i < 10; i++) {
             final int index = i + 1;
-            queueEvent.execute(() -> {
-                System.out.println(Thread.currentThread().getName() + " - " + index + " -" + start + " -" + System.currentTimeMillis());
+            ThreadContext.putContent("1", index);
+            test.execute(new Event() {
+                @Override public void onEvent() throws Throwable {
+                    Thread.sleep(3000);
+                    System.out.println(Thread.currentThread().getName()
+                            + " - " + index
+                            + " -" + start
+                            + " -" + System.currentTimeMillis()
+                            + " - " + ThreadContext.context("1")
+                    );
+                }
             });
         }
-        queueEvent.getExecutor().scheduleWithFixedDelay(() -> {
-            System.out.println(Thread.currentThread().getName() + " - schedule -" + start + " -" + System.currentTimeMillis());
-        }, 1, 1, TimeUnit.SECONDS);
-        Thread.sleep(6000);
-        queueEvent.getExecutor().shutdown();
+        // queueEvent.getExecutor().scheduleWithFixedDelay(() -> {
+        //     System.out.println(Thread.currentThread().getName() + " - schedule -" + start + " -" + System.currentTimeMillis());
+        // }, 1, 1, TimeUnit.SECONDS);
+        // Thread.sleep(6000);
+        System.in.read();
+    }
+
+
+    @Test
+    public void t1() throws IOException {
+        QueueEvent queueEvent = new QueueEvent("测试队列", "test");
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 10; i++) {
+            final int index = i + 1;
+            ThreadContext.putContent("1", index);
+            queueEvent.execute(new Event() {
+                @Override public void onEvent() throws Throwable {
+                    Thread.sleep(3000);
+                    System.out.println(Thread.currentThread().getName()
+                            + " - " + index
+                            + " -" + start
+                            + " -" + System.currentTimeMillis()
+                            + " - " + ThreadContext.context("1")
+                    );
+                }
+            });
+        }
+        // queueEvent.getExecutor().scheduleWithFixedDelay(() -> {
+        //     System.out.println(Thread.currentThread().getName() + " - schedule -" + start + " -" + System.currentTimeMillis());
+        // }, 1, 1, TimeUnit.SECONDS);
+        // Thread.sleep(6000);
+        System.in.read();
     }
 
     @Test

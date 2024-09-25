@@ -11,11 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ann.Start;
-import wxdgaming.spring.boot.core.threading.BaseExecutor;
+import wxdgaming.spring.boot.core.threading.BaseScheduledExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.timer.MyClock;
-import wxdgaming.spring.boot.net.message.pojo.inner.InnerMessage;
 import wxdgaming.spring.boot.net.*;
+import wxdgaming.spring.boot.net.message.pojo.inner.InnerMessage;
 import wxdgaming.spring.boot.net.ssl.WxdSslHandler;
 
 import javax.net.ssl.SSLEngine;
@@ -37,7 +37,7 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
 
     protected Bootstrap bootstrap;
 
-    protected final BaseExecutor executor;
+    protected final BaseScheduledExecutor executor;
     protected final BootstrapBuilder bootstrapBuilder;
     protected final SocketClientDeviceHandler socketClientDeviceHandler;
     protected final ClientMessageDecode clientMessageDecode;
@@ -49,7 +49,7 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
     protected final SessionGroup sessionGroup = new SessionGroup();
     protected volatile boolean closed = false;
 
-    public SocketClient(BaseExecutor executor,
+    public SocketClient(BaseScheduledExecutor executor,
                         BootstrapBuilder bootstrapBuilder,
                         SocketClientBuilder socketClientBuilder,
                         SocketClientBuilder.Config config,
@@ -65,9 +65,11 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
         this.clientMessageEncode = clientMessageEncode;
 
         this.executor.scheduleAtFixedRate(
-                (Event) () -> {
-                    InnerMessage.ReqHeart reqHeart = new InnerMessage.ReqHeart().setMilli(MyClock.millis());
-                    writeAndFlush(reqHeart);
+                new Event() {
+                    @Override public void onEvent() throws Throwable {
+                        InnerMessage.ReqHeart reqHeart = new InnerMessage.ReqHeart().setMilli(MyClock.millis());
+                        writeAndFlush(reqHeart);
+                    }
                 },
                 5, 5, TimeUnit.SECONDS
         );
