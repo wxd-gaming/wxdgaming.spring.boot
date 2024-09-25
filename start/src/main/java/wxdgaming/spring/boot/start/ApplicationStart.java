@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.start;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -9,6 +10,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.redis.core.RedisTemplate;
 import reactor.core.publisher.Mono;
 import wxdgaming.spring.boot.broker.BrokerScan;
 import wxdgaming.spring.boot.core.CoreScan;
@@ -26,10 +28,13 @@ import wxdgaming.spring.boot.net.client.WebSocketClient;
 import wxdgaming.spring.boot.rpc.RpcScan;
 import wxdgaming.spring.boot.rpc.RpcService;
 import wxdgaming.spring.boot.rpc.pojo.RpcMessage;
+import wxdgaming.spring.boot.start.bean.entity.User;
+import wxdgaming.spring.boot.start.bean.repository.UserRepository;
 import wxdgaming.spring.boot.web.WebScan;
 import wxdgaming.spring.boot.weblua.WebLuaScan;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 启动器
@@ -68,6 +73,11 @@ public class ApplicationStart {
         SpringUtil ins = SpringUtil.getIns();
         ins.executor(Start.class);
 
+        RedisTemplate<String, Object> redisTemplate = ins.getBean(RedisTemplate.class);
+        redisTemplate.opsForValue().setIfAbsent("1", "1");
+        RedisTemplate<String, Object> secondRedisTemplate = ins.getBean("secondRedisTemplate");
+        secondRedisTemplate.opsForValue().set("2", "2");
+
         RpcService rpcService = ins.getBean(RpcService.class);
 
         RpcMessage.ReqRemote rpcMessage = new RpcMessage.ReqRemote();
@@ -97,22 +107,22 @@ public class ApplicationStart {
             log.error("{}", Throw.ofString(e, false));
         }
 
-        // UserRepository userRepository = run.getBean(UserRepository.class);
-        //
-        // for (int i = 0; i < 100; i++) {
-        //     long nanoTime = System.nanoTime();
-        //     userRepository.saveAndFlush(new User().setUid(System.nanoTime()).setUserName(RandomStringUtils.randomAlphanumeric(32)));
-        //     log.info("插入 耗时：{} ms", (System.nanoTime() - nanoTime) / 10000 / 100f);
-        // }
-        // {
-        //     List<User> users = new ArrayList<>();
-        //     for (int i = 0; i < 100; i++) {
-        //         users.add(new User().setUid(System.nanoTime()).setUserName(RandomStringUtils.randomAlphanumeric(32)));
-        //     }
-        //     long nanoTime = System.nanoTime();
-        //     userRepository.saveAllAndFlush(users);
-        //     log.info("插入 耗时：{} ms", (System.nanoTime() - nanoTime) / 10000 / 100f);
-        // }
+        UserRepository userRepository = run.getBean(UserRepository.class);
+
+        for (int i = 0; i < 100; i++) {
+            long nanoTime = System.nanoTime();
+            userRepository.saveAndFlush(new User().setUid(System.nanoTime()).setUserName(RandomStringUtils.randomAlphanumeric(32)));
+            log.info("插入 耗时：{} ms", (System.nanoTime() - nanoTime) / 10000 / 100f);
+        }
+        {
+            List<User> users = new ArrayList<>();
+            for (int i = 0; i < 100; i++) {
+                users.add(new User().setUid(System.nanoTime()).setUserName(RandomStringUtils.randomAlphanumeric(32)));
+            }
+            long nanoTime = System.nanoTime();
+            userRepository.saveAllAndFlush(users);
+            log.info("插入 耗时：{} ms", (System.nanoTime() - nanoTime) / 10000 / 100f);
+        }
     }
 
 }
