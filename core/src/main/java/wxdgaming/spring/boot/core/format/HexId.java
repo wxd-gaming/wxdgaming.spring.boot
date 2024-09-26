@@ -15,6 +15,9 @@ import java.io.Serializable;
  */
 public class HexId implements Serializable {
 
+    static final String max_exception_format = "每秒钟生成的最大值 %d";
+    static final String exception_format = "id=%d, hexId=%d, secondByDay=%d, seed=%d";
+
     /** 相当于1970年1月1日，到2024年9月24日 经过了这么多天 */
     public static final int OffSetDays = 19990;
     /** 19位的最大值 */
@@ -29,9 +32,10 @@ public class HexId implements Serializable {
     volatile long seed = 0;
 
     public HexId(long hexId) {
-        AssertUtil.assertTrue(0 < hexId && hexId < Offset14, "取值范围 1 ~ " + Offset14);
+        AssertUtil.assertTrue(0 < hexId && hexId < Offset14, "取值范围 1 ~ %s", Offset14);
         this.hexId = hexId;
     }
+
 
     public synchronized long newId() {
         final long days = MyClock.days() - OffSetDays;
@@ -44,10 +48,11 @@ public class HexId implements Serializable {
 
         /*因为无符号 所以每一秒的id最大值是52万*/
         seed++;
-
-        if (seed > Offset20) {
-            throw new RuntimeException("每秒钟生成的最大值 " + Offset20);
-        }
+        AssertUtil.assertTrue(
+                seed < Offset20,
+                max_exception_format,
+                Offset20
+        );
         //   hexId 占14位     day 占用12位  second 占17位       seed 占用19位
         long lid = hexId << 49;
         lid |= days << 37;
@@ -55,9 +60,12 @@ public class HexId implements Serializable {
         lid |= seed;
         int i = secondByDay(lid);
         long idValue = idValue(lid);
-        if (i != secondByDay || idValue != seed) {
-            throw new RuntimeException("id=" + lid + ", hexId=" + hexId + ", secondByDay=" + secondByDay + ", seed=" + seed);
-        }
+
+        AssertUtil.assertTrue(
+                i == secondByDay && idValue == seed,
+                exception_format,
+                lid, hexId, secondByDay, seed
+        );
         return lid;
     }
 

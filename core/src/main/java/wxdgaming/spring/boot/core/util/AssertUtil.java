@@ -25,6 +25,10 @@ public class AssertUtil {
         return assertException(4, message);
     }
 
+    public static AssertException assertException(String format, Object... args) {
+        return assertException(4, String.format(format, args));
+    }
+
     public static AssertException assertException(int stackIndex, String message) {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         stackTrace = Arrays.copyOfRange(stackTrace, stackIndex, stackTrace.length);
@@ -42,6 +46,11 @@ public class AssertUtil {
     }
 
     /** 条件如果是false 抛出异常 */
+    public static void assertTrue(boolean success, String format, Object... args) {
+        if (!success) throw assertException(format, args);
+    }
+
+    /** 条件如果是false 抛出异常 */
     public static void assertEquals(Object o1, Object o2, String message) {
         if (Objects.equals(o1, o2)) throw assertException(message);
     }
@@ -55,6 +64,13 @@ public class AssertUtil {
     public static void assertNull(Object object) {
         if (object == null) {
             throw assertException("参数 null");
+        }
+    }
+
+    /** 参数是 null 抛出异常 */
+    public static void assertNull(Object object, String format, Object... args) {
+        if (object == null) {
+            throw assertException(format, args);
         }
     }
 

@@ -28,7 +28,7 @@ public class HexIdTest {
         Set<Long> ids = new HashSet<>();
         for (int k = 0; k < 6; k++) {
 
-            for (int i = 0; i < 50_0000; i++) {
+            for (int i = 0; i < 500_0000; i++) {
                 final long id = newId.newId();
                 if (!ids.add(id)) {
                     System.out.println("重复id " + id + " " + new Date());
