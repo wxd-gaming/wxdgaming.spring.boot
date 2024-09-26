@@ -817,7 +817,7 @@ public class MyClock {
     public static int dayOfSecond(long millis) {
         LocalDateTime localDateTime = localDateTime(millis);
         return (int) (TimeUnit.HOURS.toSeconds(localDateTime.getHour())
-                + TimeUnit.HOURS.toSeconds(localDateTime.getMinute())
+                + TimeUnit.MINUTES.toSeconds(localDateTime.getMinute())
                 + localDateTime.getSecond());
     }
 
