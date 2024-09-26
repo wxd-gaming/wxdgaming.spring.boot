@@ -4,6 +4,7 @@ import io.protostuff.Tag;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import wxdgaming.spring.boot.core.collection.MapOf;
 import wxdgaming.spring.boot.core.io.FileReadUtil;
 import wxdgaming.spring.boot.core.io.FileUtil;
 import wxdgaming.spring.boot.core.io.FileWriteUtil;
@@ -42,10 +43,12 @@ public class ProtoBuf2Pojo {
                     imports.add(Accessors.class.getName());
                     imports.add(List.class.getName());
                     imports.add(Map.class.getName());
+                    imports.add(MapOf.class.getName());
 
                     StringBuilder stringBuilder = new StringBuilder();
 
                     FileReadUtil.readLine(file, StandardCharsets.UTF_8, line -> {
+                        line = line.trim();
                         if (StringsUtil.emptyOrNull(line)) return;
                         if (line.contains("java_multiple_files") && line.contains("true")) {
 
@@ -56,13 +59,16 @@ public class ProtoBuf2Pojo {
                             packageName.set(trim);
                         } else if (line.startsWith("//")) {
                             comment.get().comment = line.substring(2);
-                        } else if (line.startsWith("message")) {
+                        } else if (line.startsWith("message") || line.startsWith("enum")) {
                             String[] split = line.split(" ");
                             System.out.println("【" + split[1] + "】");
+
+                            comment.get().classType = line.startsWith("message") ? "class" : "enum";
                             comment.get().className = split[1];
+
                             start.set(true);
                         } else if (line.contains("}")) {
-                            stringBuilder.append(comment.get().classString());
+                            stringBuilder.append(comment.get().string());
                             comment.set(new BeanInfo());
                             start.set(false);
                         } else {
@@ -81,11 +87,11 @@ public class ProtoBuf2Pojo {
                     to += "\n";
                     to += "\n";
                     to += "/**\n" +
-                            " * rpc.proto\n" +
-                            " *\n" +
-                            " * @author: wxd-gaming(無心道, 15388152619)\n" +
-                            " * @version: " + MyClock.nowString() + "\n" +
-                            " */";
+                          " * rpc.proto\n" +
+                          " *\n" +
+                          " * @author: wxd-gaming(無心道, 15388152619)\n" +
+                          " * @version: " + MyClock.nowString() + "\n" +
+                          " */";
                     String className = file.getName().replace(".proto", "");
                     to += "\npublic class " + className + " {";
                     to += stringBuilder.toString();
@@ -99,13 +105,13 @@ public class ProtoBuf2Pojo {
     @Getter
     public static class BeanInfo {
 
-
+        private String classType;
         private String className;
         private String comment;
         private final List<FiledInfo> filedInfos = new ArrayList<>();
 
         public void addField(String line) {
-            FiledInfo filedInfo = new FiledInfo(line);
+            FiledInfo filedInfo = new FiledInfo(classType, line);
             addField(filedInfo);
         }
 
@@ -123,6 +129,13 @@ public class ProtoBuf2Pojo {
             }
         }
 
+        public String string() {
+            if ("class".equals(classType)) {
+                return classString();
+            }
+            return enumString();
+        }
+
         public String classString() {
 
             String to = "";
@@ -131,12 +144,46 @@ public class ProtoBuf2Pojo {
             to += "\n   @Getter";
             to += "\n   @Setter";
             to += "\n   @Accessors(chain = true)";
-            to += "\n   public static class " + className + " extends " + PojoBase.class.getSimpleName() + " {\n";
+            to += "\n   public static " + classType + " " + className + " extends " + PojoBase.class.getSimpleName() + " {\n";
             for (FiledInfo filedInfo : filedInfos) {
-                to += "\n" + filedInfo.toString();
+                to += "\n" + filedInfo.classFiled();
             }
             to += "\n";
             to += "\n   }";
+            return to;
+        }
+
+        public String enumString() {
+            String f = "\n";
+            for (FiledInfo filedInfo : filedInfos) {
+                f += filedInfo.enumFiled();
+            }
+            String to = """
+                    
+                    
+                        /** %s */
+                        @Getter
+                        public enum %s {
+                        %s
+                            ;
+                    
+                            private static final Map<Integer, %s> static_map = MapOf.asMap(%s::getCode, %s.values());
+                    
+                            public static %s valueOf(int code) {
+                                return static_map.get(code);
+                            }
+                    
+                            /** code */
+                            private final int code;
+                            /** 备注 */
+                            private final String command;
+                    
+                            %s(int code, String command) {
+                                this.code = code;
+                                this.command = command;
+                            }
+                        }
+                    """.formatted(comment, className, f, className, className, className, className, className);
             return to;
         }
 
@@ -151,7 +198,7 @@ public class ProtoBuf2Pojo {
         private String field;
         private String comment = "";
 
-        public FiledInfo(String line) {
+        public FiledInfo(String classType, String line) {
             if (StringsUtil.emptyOrNull(line)) {
                 return;
             }
@@ -162,6 +209,9 @@ public class ProtoBuf2Pojo {
             }
             List<String> split1 = List.of(split[0].split(" "));
             ArrayList<String> tmp = new ArrayList<>();
+            if ("enum".equals(classType)) {
+                tmp.add("enum");
+            }
             for (String string : split1) {
                 if (StringsUtil.emptyOrNull(string)) continue;
                 tmp.add(string.trim());
@@ -203,6 +253,10 @@ public class ProtoBuf2Pojo {
                         field = String.class.getSimpleName();
                     }
                     break;
+                case "enum": {
+                    field = "";
+                }
+                break;
                 default: {
                     if (string.startsWith("map<") && string.endsWith(">")) {
                         field = String.class.getSimpleName();
@@ -214,22 +268,29 @@ public class ProtoBuf2Pojo {
                                 .replace("string", String.class.getSimpleName())
                         ;
                     } else {
-                        throw new RuntimeException("解析失败 " + string);
+                        field = string;
                     }
                 }
             }
             fieldName = tmp.get(1);
             field += " " + tmp.get(1);
-            field += ";";
             tag = Integer.parseInt(tmp.get(3));
         }
 
-        @Override public String toString() {
-            String to = "";
-            to += "       /** " + comment + " */";
-            to += "\n       @Tag(" + tag + ")";
-            to += "\n       private " + field;
-            return to;
+        public String classFiled() {
+            return """
+                           /** %s */
+                           @Tag(%s)
+                           private %s;
+                    """.formatted(comment, tag, field);
+        }
+
+        public String enumFiled() {
+            return """
+                           /** %s */
+                           @Tag(%s)
+                           %s(%s, "%s"),
+                    """.formatted(comment, tag, field.trim(), tag, comment);
         }
     }
 
