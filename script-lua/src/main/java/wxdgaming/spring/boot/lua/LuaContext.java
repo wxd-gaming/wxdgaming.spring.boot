@@ -8,14 +8,19 @@ import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.value.LuaValue;
 import wxdgaming.spring.boot.core.io.FileReadUtil;
 import wxdgaming.spring.boot.core.io.FileUtil;
+import wxdgaming.spring.boot.core.lang.Record2;
 
 import java.io.Closeable;
+import java.io.InputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,25 +54,25 @@ public class LuaContext implements Closeable {
 
     /** 加载一个lua文件 */
     public void loadDir(Path dir) {
+        List<Record2<String, InputStream>> errors = new ArrayList<>();
         try {
             FileUtil
                     .resourceStreams(this.getClass().getClassLoader(), dir.toString())
                     .filter(item -> item.t1().endsWith(".lua") || item.t1().endsWith(".LUA"))
+                    .sorted(Comparator.comparing(o -> o.t1().toLowerCase()))
                     .forEach(item -> {
                         try {
                             String string = FileReadUtil.readString(item.t2());
                             this.load(item.t1(), string);
                         } catch (Exception e) {
-                            log.error("load lua error {}", item.t1(), e);
+                            log.error("load lua error {} {}", item.t1(), e.toString());
+                            errors.add(item);
                         }
                     });
-            // Files.walk(dir, 99)
-            //         .filter(p -> {
-            //             String string = p.toString();
-            //             return string.endsWith(".lua") || string.endsWith(".LUA");
-            //         })
-            //         .filter(Files::isRegularFile)
-            //         .forEach(this::loadfile);
+            for (Record2<String, InputStream> file : errors) {
+                String string = FileReadUtil.readString(file.t2());
+                this.load(file.t1(), string);
+            }
             log.info("{}", dir);
         } catch (Exception e) {
             throw new RuntimeException("dir: " + dir, e);
@@ -96,7 +101,7 @@ public class LuaContext implements Closeable {
     public void load(String filePath, byte[] bytes) {
         filePath = filePath.replace("\\", "/");
         String name = FilenameUtils.getName(filePath);
-        log.info("load lua name={}, path={}", name, filePath);
+        log.debug("load lua name={}, path={}", name, filePath);
         Buffer flip = ByteBuffer.allocateDirect(bytes.length).put(bytes).flip();
         L.run(flip, name);
     }
