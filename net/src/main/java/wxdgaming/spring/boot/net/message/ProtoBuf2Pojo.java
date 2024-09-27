@@ -137,19 +137,20 @@ public class ProtoBuf2Pojo {
         }
 
         public String classString() {
-
-            String to = "";
-            to += "\n";
-            to += "\n   /** " + comment + " */";
-            to += "\n   @Getter";
-            to += "\n   @Setter";
-            to += "\n   @Accessors(chain = true)";
-            to += "\n   public static " + classType + " " + className + " extends " + PojoBase.class.getSimpleName() + " {\n";
+            String f = "\n";
             for (FiledInfo filedInfo : filedInfos) {
-                to += "\n" + filedInfo.classFiled();
+                f += filedInfo.classFiled();
             }
-            to += "\n";
-            to += "\n   }";
+            String to = """
+                    
+                       /** %s */
+                       @Getter
+                       @Setter
+                       @Accessors(chain = true)
+                       public static class %s extends PojoBase {
+                       %s
+                       }
+                    """.formatted(comment, className, f);
             return to;
         }
 
