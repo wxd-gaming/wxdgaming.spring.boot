@@ -27,8 +27,7 @@ public class LuaTest {
         File script_path = new File(path + "/script");
         FileUtil.walkDirs(script_path.getPath(), 1).forEach(dir -> {
             if (dir.equals(script_path)) return;
-
-            System.out.println(dir + " - " + dir.getName());
+            System.out.println(dir + " - " + dir.getFileName());
         });
 
         System.out.println("========================================================");

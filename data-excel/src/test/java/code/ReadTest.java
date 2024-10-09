@@ -11,6 +11,7 @@ import wxdgaming.spring.boot.data.excel.store.CreateJavaCode;
 import wxdgaming.spring.boot.data.excel.store.DataRepository;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class ReadTest {
     @Test
     public void t10() {
         ExcelRepository excelReader = new ExcelRepository();
-        excelReader.readExcel(new File("src/main/resources/范例.xlsx"), "");
+        excelReader.readExcel(Paths.get("src/main/resources/范例.xlsx"), "");
         excelReader.outJsonFile("target/out/json");
         excelReader.getTableInfoMap().values().forEach(tableInfo -> {
             System.out.println(tableInfo.showData());
@@ -57,7 +58,7 @@ public class ReadTest {
     public void createExcelCode() {
         System.out.println(JvmUtil.userHome());
         ExcelRepository excelReader = new ExcelRepository();
-        excelReader.readExcel(new File("src/main/resources/范例.xlsx"), "");
+        excelReader.readExcel(Paths.get("src/main/resources/范例.xlsx"), "");
         excelReader.getTableInfoMap().values().forEach(tableInfo -> {
             CreateJavaCode.getIns().createCode(tableInfo, "src/test/java", "wxdgaming.entity", "");
         });

@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import wxdgaming.spring.boot.core.io.FileUtil;
 import wxdgaming.spring.boot.core.lang.Record2;
 
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Path;
 
 /**
  * 测试logback动态配置
@@ -49,11 +49,12 @@ public class LogbackUtil {
     public static void setLogbackConfig() {
         String key = "logback.configurationFile";
         if (System.getProperty(key) == null) {
-            File path = FileUtil.findFile("logback.xml");
-            if (path != null && !(path.getPath().contains("jar") && path.getPath().contains("!"))) {
+            Path path = FileUtil.findPath("logback.xml");
+            if (path != null && !(path.toString().contains("jar") && path.toString().contains("!"))) {
                 /*强制设置logback的目录位置*/
-                System.setProperty(key, FileUtil.getCanonicalPath(path));
-                System.out.println("logback configuration " + FileUtil.getCanonicalPath(path));
+                String canonicalPath = FileUtil.getCanonicalPath(path.toFile());
+                System.setProperty(key, canonicalPath);
+                System.out.println("logback configuration " + canonicalPath);
             }
         }
     }

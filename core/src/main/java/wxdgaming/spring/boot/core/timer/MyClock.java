@@ -652,6 +652,7 @@ public class MyClock {
         try {
             FileUtil.walkFiles(filePath, names)
                     .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
                     .forEach((checkFile) -> {
                         if (countDays(millis(), checkFile.lastModified()) > fileDays) {
                             checkFile.delete();

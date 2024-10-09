@@ -29,7 +29,7 @@ public class ProtoBuf2Pojo {
 
         FileUtil
                 .walkFiles(readPath, ".proto")
-                .forEach(file -> {
+                .forEach(filePath -> {
 
                     AtomicReference<BeanInfo> comment = new AtomicReference<>(new BeanInfo());
                     AtomicBoolean start = new AtomicBoolean();
@@ -47,7 +47,7 @@ public class ProtoBuf2Pojo {
 
                     StringBuilder stringBuilder = new StringBuilder();
 
-                    FileReadUtil.readLine(file, StandardCharsets.UTF_8, line -> {
+                    FileReadUtil.readLine(filePath, StandardCharsets.UTF_8, line -> {
                         line = line.trim();
                         if (StringsUtil.emptyOrNull(line)) return;
                         if (line.contains("java_multiple_files") && line.contains("true")) {
@@ -92,7 +92,7 @@ public class ProtoBuf2Pojo {
                           " * @author: wxd-gaming(無心道, 15388152619)\n" +
                           " * @version: " + MyClock.nowString() + "\n" +
                           " */";
-                    String className = file.getName().replace(".proto", "");
+                    String className = filePath.getFileName().toString().replace(".proto", "");
                     to += "\npublic class " + className + " {";
                     to += stringBuilder.toString();
                     to += "\n}";

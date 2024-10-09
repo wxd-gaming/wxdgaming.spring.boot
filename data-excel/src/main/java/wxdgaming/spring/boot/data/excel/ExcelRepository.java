@@ -8,14 +8,20 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.Throw;
+import wxdgaming.spring.boot.core.io.FileUtil;
 import wxdgaming.spring.boot.core.io.FileWriteUtil;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.lang.ConvertUtil;
 import wxdgaming.spring.boot.core.util.StringsUtil;
+import wxdgaming.spring.boot.data.excel.store.ICreateCode;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,25 +54,48 @@ public class ExcelRepository implements Serializable, InitPrint {
         return this;
     }
 
-    public final ExcelRepository readExcel(File file, String belong) {
-        if (file == null || StringsUtil.emptyOrNull(file.getName()) || file.getName().contains("@") || file.getName().contains("$")) {
-            log.info("Excel文件不能解析：{}", file);
+    public ExcelRepository createCode(ICreateCode iCreateCode, String outPath, String packageName, String belong) {
+        tableInfoMap.values().forEach(tableData -> {
+            iCreateCode.createCode(tableData, outPath, packageName, belong);
+        });
+        return this;
+    }
+
+    public ExcelRepository createCode(ICreateCode iCreateCode, TableData tableData, String outPath, String packageName, String belong) {
+        iCreateCode.createCode(tableData, outPath, packageName, belong);
+        return this;
+    }
+
+    public final ExcelRepository readExcel(Path path, String belong) {
+        FileUtil.walkFiles(path)
+                .forEach(filePath -> readExcel0(filePath, belong));
+        return this;
+    }
+
+    public final ExcelRepository readExcel0(Path path, String belong) {
+        if (path == null) {
+            log.info("Excel文件不能解析：{}", path);
+            return this;
+        }
+        String pathString = path.toString();
+        if (StringsUtil.emptyOrNull(pathString) || pathString.contains("@") || pathString.contains("$")) {
+            log.info("Excel文件不能解析：{}", pathString);
             return this;
         }
         try {
-            String fileName = file.getName().toLowerCase();
+            String fileName = path.getFileName().toString().toLowerCase();
             Workbook workbook;
-            InputStream is = new FileInputStream(file.getPath());
+            InputStream is = Files.newInputStream(path);
             if (fileName.endsWith(".xls")) {
                 workbook = new HSSFWorkbook(is);
             } else if (fileName.endsWith(".xlsx")) {
                 workbook = new XSSFWorkbook(is);
             } else {
-                log.info("无法识别的文件：{}", file.getPath());
+                log.info("无法识别的文件：{}", path);
                 return this;
             }
             if (workbook.getNumberOfSheets() < 1) {
-                log.info("文件空的：{}", file.getPath());
+                log.info("文件空的：{}", path);
                 return this;
             }
             /*多少页签*/
@@ -79,14 +108,14 @@ public class ExcelRepository implements Serializable, InitPrint {
                     || sheetName.contains("@")
                     || sheetName.contains("$")
                     || !sheetName.startsWith("q_")) {
-                    log.debug("Excel文件不能解析：{}, sheetName={} - 需要是 q_ 开头 sheet name 才能解析", file, sheetName);
+                    log.debug("Excel文件不能解析：{}, sheetName={} - 需要是 q_ 开头 sheet name 才能解析", path, sheetName);
                     continue;
                 }
 
                 Cell tableCommentCall = sheet.getRow(0).getCell(0);
                 String tableComment = readCellString(tableCommentCall, false);
 
-                TableData tableData = new TableData(file.getPath().replace("\\", "/"), file.getName(), sheet.getSheetName(), sheetName, tableComment);
+                TableData tableData = new TableData(path.toString().replace("\\", "/"), path.getFileName().toString(), sheet.getSheetName(), sheetName, tableComment);
 
                 Row fieldBelongRow = sheet.getRow(1);/*归属*/
                 Row fieldNameRow = sheet.getRow(2);/*字段名字*/
@@ -121,7 +150,7 @@ public class ExcelRepository implements Serializable, InitPrint {
                         continue;
 
                     if (cellInfoMap.put(cellIndex, cellInfo) != null) {
-                        throw new RuntimeException("Excel文件不能解析：" + file + ", sheetName=" + sheetName + " 存在重复的字段：" + cellInfo.getFieldName());
+                        throw new RuntimeException("Excel文件不能解析：" + path + ", sheetName=" + sheetName + " 存在重复的字段：" + cellInfo.getFieldName());
                     }
                 }
 
@@ -144,11 +173,11 @@ public class ExcelRepository implements Serializable, InitPrint {
                     }
                     Object row_id = rowData.getOrDefault("q_id", rowData.get("id"));
                     if (row_id == null) {
-                        throw new RuntimeException("Excel文件不能解析：" + file + ", sheetName=" + sheetName + " 字段内容异常：" + rowIndex);
+                        throw new RuntimeException("Excel文件不能解析：" + path + ", sheetName=" + sheetName + " 字段内容异常：" + rowIndex);
                     }
                     RowData oldData = rows.put(row_id, rowData);
                     if (oldData != null) {
-                        throw new RuntimeException("Excel文件不能解析：" + file + ", sheetName=" + sheetName + " 行: " + rowIndex + " id重复: " + row_id);
+                        throw new RuntimeException("Excel文件不能解析：" + path + ", sheetName=" + sheetName + " 行: " + rowIndex + " id重复: " + row_id);
                     }
                 }
 
@@ -158,7 +187,7 @@ public class ExcelRepository implements Serializable, InitPrint {
             }
             return this;
         } catch (Throwable throwable) {
-            throw Throw.of(file.getPath(), throwable);
+            throw Throw.of(path.toString(), throwable);
         }
     }
 

@@ -46,8 +46,8 @@ public class LuaEventBus {
 
         FileUtil.walkDirs(script_path.getPath(), 1).forEach(dir -> {
             if (dir.equals(script_path)) return;
-            log.info("load lua module：{} - {}", dir, dir.getName());
-            LuaRuntime luaRuntime = new LuaRuntime(dir.getName(), new Path[]{dir.toPath(), Paths.get(base_dir + "/util")});
+            log.info("load lua module：{} - {}", dir, dir.getFileName());
+            LuaRuntime luaRuntime = new LuaRuntime(dir.getFileName().toString(), new Path[]{dir, Paths.get(base_dir + "/util")});
             luaRuntime.getGlobals().put("jlog", LuaLogger.getIns());
             luaRuntime.getGlobals().put("globalArgs", lua_data);
             luaEventBus.put(luaRuntime);
