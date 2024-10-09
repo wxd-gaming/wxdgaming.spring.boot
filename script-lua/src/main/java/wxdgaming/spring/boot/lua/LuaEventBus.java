@@ -66,7 +66,7 @@ public class LuaEventBus {
         luaRuntimeMap = stringLuaRuntimeLinkedHashMap;
     }
 
-    public void set(String key, JavaFunction value) {
+    public void set(String key, LuaFunction value) {
         luaRuntimeMap.values().forEach(v -> v.getGlobals().put(key, value));
     }
 
@@ -81,7 +81,7 @@ public class LuaEventBus {
 
     /** 把一个方法转化成函数传递给lua */
     public void pushJavaFunction(final Object bean, String key, Method method) {
-        JavaFunction jFunction = new JavaFunction() {
+        LuaFunction jFunction = new LuaFunction() {
             @Override public Object doAction(Lua L, Object[] args) {
                 try {
                     return method.invoke(bean, args);
@@ -113,7 +113,7 @@ public class LuaEventBus {
     public void pCall(String key, Object... args) {
         luaRuntimeMap.values().forEach(globalPool -> {
             try (LuaContext lua = globalPool.newContext()) {
-                lua.pCall(key, args);
+                lua.pcall(key, args);
             }
         });
     }

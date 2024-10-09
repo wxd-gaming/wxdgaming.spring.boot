@@ -2,14 +2,9 @@ package wxdgaming.spring.boot.lua;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import party.iroiro.luajava.Lua;
-import party.iroiro.luajava.value.LuaTableValue;
-import party.iroiro.luajava.value.LuaValue;
 
 import java.io.Closeable;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -21,31 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Getter
 public class LuaRuntime implements Closeable {
-
-    public static Object luaValue2Object(LuaValue luaValue) {
-        if (luaValue.type() == Lua.LuaType.NUMBER) {
-            long integer = luaValue.toInteger();
-            if (integer == (int) integer) {
-                return (int) integer;
-            }
-            double number = luaValue.toNumber();
-            if (integer == number) {
-                return integer;
-            }
-            return number;
-
-        } else if (luaValue.type() == Lua.LuaType.TABLE) {
-            LuaTableValue luaTableValue = (LuaTableValue) luaValue;
-            Map<Object, Object> map = new HashMap<>();
-            for (Map.Entry<LuaValue, LuaValue> entry : luaTableValue.entrySet()) {
-                map.put(luaValue2Object(entry.getKey()), luaValue2Object(entry.getValue()));
-            }
-            return map;
-        } else if (luaValue.type() == Lua.LuaType.NONE || luaValue.type() == Lua.LuaType.NIL) {
-            return null;
-        }
-        return luaValue.toJavaObject();
-    }
 
     final String name;
     final Path[] paths;

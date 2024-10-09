@@ -56,7 +56,7 @@ public class LuaService implements InitPrint {
         }
         luaRuntime = main;
         try (LuaContext luaContext = luaRuntime.newContext()) {
-            luaContext.pCall("root");
+            luaContext.pcall("root");
         }
     }
 

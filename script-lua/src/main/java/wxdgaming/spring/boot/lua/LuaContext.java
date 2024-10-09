@@ -1,26 +1,21 @@
 package wxdgaming.spring.boot.lua;
 
+import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
 import party.iroiro.luajava.Consts;
+import party.iroiro.luajava.JuaAPI;
 import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.value.LuaValue;
-import wxdgaming.spring.boot.core.io.FileReadUtil;
-import wxdgaming.spring.boot.core.io.FileUtil;
-import wxdgaming.spring.boot.core.lang.Record2;
 
 import java.io.Closeable;
-import java.io.InputStream;
 import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,9 +32,10 @@ public class LuaContext implements Closeable {
     private final Lua L;
     private final Path[] paths;
     private volatile boolean closed = false;
+    private Map<String, LuaValue> funcCache = Maps.newHashMap();
 
     public LuaContext(ConcurrentHashMap<String, Object> globals, Path... paths) {
-        this.L = new Lua54_Sub();
+        this.L = new Lua54_Sub("");
         this.L.openLibraries();
         this.paths = paths;
         for (Map.Entry<String, Object> entry : globals.entrySet()) {
@@ -53,74 +49,70 @@ public class LuaContext implements Closeable {
     }
 
     /** 加载一个lua文件 */
+    public void loadDir(String dir) {
+        loadDir(Paths.get(dir));
+    }
+
     public void loadDir(Path dir) {
-        List<Record2<String, InputStream>> errors = new ArrayList<>();
+        ArrayList<String> modules = new ArrayList<>();
+        ArrayList<Path> errorPaths = new ArrayList<>();
         try {
-            FileUtil
-                    .resourceStreams(this.getClass().getClassLoader(), dir.toString())
-                    .filter(item -> item.t1().endsWith(".lua") || item.t1().endsWith(".LUA"))
-                    .sorted(Comparator.comparing(o -> o.t1().toLowerCase()))
-                    .forEach(item -> {
+            Files.walk(dir, 99)
+                    .filter(p -> {
+                        String string = p.toString();
+                        return string.endsWith(".lua") || string.endsWith(".LUA");
+                    })
+                    .filter(Files::isRegularFile)
+                    .sorted(Comparator.comparing(o -> o.toString().toLowerCase()))
+                    .forEach(filePath -> {
                         try {
-                            String string = FileReadUtil.readString(item.t2());
-                            this.load(item.t1(), string);
+                            String module = loadfile(filePath);
+                            modules.add(module);
                         } catch (Exception e) {
-                            log.error("load lua error {} {}", item.t1(), e.toString());
-                            errors.add(item);
+                            errorPaths.add(filePath);
                         }
                     });
-            for (Record2<String, InputStream> file : errors) {
-                String string = FileReadUtil.readString(file.t2());
-                this.load(file.t1(), string);
+            if (!errorPaths.isEmpty()) {
+                for (Path errorPath : errorPaths) {
+                    log.warn("lua file load error: {}", errorPath);
+                    loadfile(errorPath);
+                }
             }
-            log.info("{}", dir);
         } catch (Exception e) {
-            throw new RuntimeException("dir: " + dir, e);
+            throw new RuntimeException(e);
         }
+        log.info("{} {}", dir, modules);
     }
 
     /** 加载一个lua文件 */
-    public void loadfile(String filePath) {
-        loadfile(Paths.get(filePath));
+    public String loadfile(String filePath) {
+        return loadfile(Paths.get(filePath));
     }
 
     /** 加载一个lua文件 */
-    public void loadfile(Path filePath) {
+    public String loadfile(Path filePath) {
         try {
             byte[] bytes = Files.readAllBytes(filePath);
-            load(filePath.toString(), bytes);
+            return load(filePath.getFileName().toString(), bytes);
         } catch (Exception e) {
             throw new RuntimeException(filePath.toString(), e);
         }
     }
 
-    public void load(String filePath, String script) {
-        load(filePath, script.getBytes(StandardCharsets.UTF_8));
+    public String load(String filePath, String script) {
+        return load(filePath, script.getBytes(StandardCharsets.UTF_8));
     }
 
-    public void load(String filePath, byte[] bytes) {
+    public String load(String filePath, byte[] bytes) {
         filePath = filePath.replace("\\", "/");
-        String name = FilenameUtils.getName(filePath);
-        log.debug("load lua name={}, path={}", name, filePath);
-        Buffer flip = ByteBuffer.allocateDirect(bytes.length).put(bytes).flip();
-        L.run(flip, name);
+        log.debug("load lua {}", filePath);
+        Buffer flip = JuaAPI.allocateDirect(bytes.length).put(bytes).flip();
+        L.run(flip, filePath);
+        return filePath;
     }
 
-    public boolean has(String key) {
-        LuaValue luaValue = L.get(key);
-        return has(luaValue);
-    }
-
-    public boolean has(LuaValue luaValue) {
-        return luaValue != null && luaValue.type() != Lua.LuaType.NIL;
-    }
-
-    public LuaValue find(String key) {
-        return L.get(key);
-    }
-
-    /** 设置全局变量，全局函数会有线程共享问题 */
-    public void set(String key, JavaFunction value) {
+    /** 设置全局变量 */
+    public void set(String key, LuaFunction value) {
         L.set(key, value);
     }
 
@@ -129,37 +121,59 @@ public class LuaContext implements Closeable {
         L.set(key, value);
     }
 
-    public LuaValue pCall(String key, Object... args) {
+    public boolean has(String key) {
         LuaValue luaValue = find(key);
-        return pCall(luaValue, args);
+        return has(luaValue);
     }
 
-    public LuaValue pCall(LuaValue luaValue, Object... args) {
-        int top = L.getTop();
+    public boolean has(LuaValue luaValue) {
+        return luaValue != null && luaValue.type() != Lua.LuaType.NIL;
+    }
+
+    public LuaValue find(String key) {
+        return funcCache.computeIfAbsent(key, L::get);
+    }
+
+    public Object pcall(String name, Object... args) {
+        LuaValue luaValue = find(name);
+        return pcall(luaValue, args);
+    }
+
+    public Object pcall(LuaValue luaValue, Object... args) {
+        int oldTop = L.getTop();
         luaValue.push(L);
         for (Object o : args) {
-            L.push(o, Lua.Conversion.FULL);
+            LuaUtils.push(L, o);
         }
-        L.pCall(args.length, Consts.LUA_MULTRET);
-        int returnCount = L.getTop() - top;
-        if (returnCount == 0) {
-            return null;
+        try {
+            L.pCall(args.length, Consts.LUA_MULTRET);
+            int returnCount = L.getTop() - oldTop;
+            if (returnCount == 0) {
+                return null;
+            }
+            LuaValue[] call = new LuaValue[returnCount];
+            for (int i = 0; i < returnCount; i++) {
+                call[returnCount - i - 1] = L.get();
+            }
+            LuaValue returnValue = call[0];
+            return LuaUtils.luaValue2Object(returnValue);
+        } catch (Throwable e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            L.setTop(oldTop);
         }
-        LuaValue[] call = new LuaValue[returnCount];
-        for (int i = 0; i < returnCount; i++) {
-            call[returnCount - i - 1] = L.get();
-        }
-        LuaValue value = call[0];
-        if (value.type() == Lua.LuaType.NONE || value.type() == Lua.LuaType.NIL) {
-            return null;
-        }
-        return value;
     }
 
     @Override public void close() {
-        if (closed) return;
-        closed = true;
-        L.close();
+        synchronized (this) {
+            if (closed) return;
+            closed = true;
+            funcCache.clear();
+            L.close();
+        }
     }
 
+    @Override public String toString() {
+        return "LuacContext{" + "lua=" + L + ", isClosed=" + closed + '}';
+    }
 }
