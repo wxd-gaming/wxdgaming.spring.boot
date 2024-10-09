@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.data.excel.code;
+package wxdgaming.spring.boot.data.excel.store;
 
 import wxdgaming.spring.boot.data.excel.TableData;
 

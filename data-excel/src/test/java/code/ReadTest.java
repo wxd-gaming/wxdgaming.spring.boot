@@ -1,12 +1,14 @@
 package code;
 
 import org.junit.Test;
+import wxdgaming.entity.QItemshopVipTable;
 import wxdgaming.entity.bean.QItemshopVip;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.lang.ConfigString;
 import wxdgaming.spring.boot.core.system.JvmUtil;
 import wxdgaming.spring.boot.data.excel.ExcelRepository;
-import wxdgaming.spring.boot.data.excel.code.CreateJavaCode;
+import wxdgaming.spring.boot.data.excel.store.CreateJavaCode;
+import wxdgaming.spring.boot.data.excel.store.DataRepository;
 
 import java.io.File;
 import java.util.Arrays;
@@ -59,6 +61,17 @@ public class ReadTest {
         excelReader.getTableInfoMap().values().forEach(tableInfo -> {
             CreateJavaCode.getIns().createCode(tableInfo, "src/test/java", "wxdgaming.entity", "");
         });
+    }
+
+    @Test
+    public void loadExcelCode() {
+        DataRepository dataRepository = new DataRepository()
+                .setClassLoader(this.getClass().getClassLoader())
+                .setScanPackageName("wxdgaming.entity")
+                .setJsonPath("target/out/json");
+        dataRepository.load();
+        QItemshopVipTable qItemshopVipTable = dataRepository.dataTable(QItemshopVipTable.class);
+        System.out.println(qItemshopVipTable.get(1));
     }
 
 }

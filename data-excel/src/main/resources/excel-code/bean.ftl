@@ -2,7 +2,7 @@ package ${packageName}.bean;
 
 
 import lombok.Getter;
-import wxdgaming.spring.boot.data.excel.code.DataChecked;
+import wxdgaming.spring.boot.data.excel.store.DataChecked;
 import ${packageName}.bean.mapping.${codeClassName}Mapping;
 
 import java.io.Serializable;

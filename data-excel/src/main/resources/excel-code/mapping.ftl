@@ -4,8 +4,8 @@ package ${packageName}.bean.mapping;
 import lombok.Getter;
 import lombok.Setter;
 import wxdgaming.spring.boot.core.lang.ObjectBase;
-import wxdgaming.spring.boot.data.excel.code.DataKey;
-import wxdgaming.spring.boot.data.excel.code.DataMapping;
+import wxdgaming.spring.boot.data.excel.store.DataKey;
+import wxdgaming.spring.boot.data.excel.store.DataMapping;
 
 import java.io.Serializable;
 

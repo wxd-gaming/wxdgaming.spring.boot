@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.data.excel.code;
+package wxdgaming.spring.boot.data.excel.store;
 
 /**
  * 用于配置的检测和初始化

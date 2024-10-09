@@ -1,10 +1,11 @@
-package wxdgaming.spring.boot.data.excel.code;
+package wxdgaming.spring.boot.data.excel.store;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Getter;
 import wxdgaming.spring.boot.core.ReflectContext;
 import wxdgaming.spring.boot.core.Throw;
 import wxdgaming.spring.boot.core.format.StreamWriter;
+import wxdgaming.spring.boot.core.io.FileReadUtil;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.lang.ConvertUtil;
 import wxdgaming.spring.boot.core.lang.ObjectBase;
@@ -28,50 +29,67 @@ import java.util.Map;
 public abstract class DataTable<E extends DataKey> extends ObjectBase implements Serializable {
 
     @Serial private static final long serialVersionUID = 1L;
-    final Class<?> tClass;
+    final Class<E> tClass;
+    final DataMapping dataMapping;
     final Map<String, Field> fieldMap;
-    private List<E> dataList = null;
-    private Map<Object, E> dataMap = null;
+    private List<E> dataList;
+    private Map<Object, E> dataMap;
 
     public DataTable() {
         tClass = ReflectContext.getTClass(this.getClass());
         fieldMap = FieldUtil.getFields(false, tClass);
+        dataMapping = AnnUtil.ann(tClass, DataMapping.class, true);
     }
 
-    public DataTable setModelList(List<E> modelList) {
-        if (modelList != null) {
-            /*不可变列表*/
-            this.dataList = List.copyOf(modelList);
-            this.dataMap = new LinkedHashMap<>();
-            this.dataList.forEach((dbModel) -> {
-                try {
-                    Object keyValue = dbModel.key();
-                    if (this.dataMap.put(keyValue, dbModel) != null) {
-                        throw new RuntimeException("数据 主键 【" + keyValue + "】 重复");
-                    }
-                    Keys keys = AnnUtil.ann(DataTable.this.getClass(), Keys.class);
-                    if (keys != null) {
-                        for (String s : keys.value()) {
-                            String index = "";
-                            String[] split = s.split(keys.split());
-                            for (String filedName : split) {
-                                Object fv = fieldMap.get(filedName).get(dbModel);
-                                if (!index.isEmpty()) index += keys.split();
-                                index += fv;
-                            }
-                            /*添加自定义索引*/
-                            if (this.dataMap.put(index, dbModel) != null) {
-                                throw new Throw("数据 自定义索引 【" + s + "】 【" + keyValue + "】 重复 ");
-                            }
+    public DataTable<E> loadJson(String jsonPath) {
+        if (!jsonPath.endsWith("/")) {
+            jsonPath += "/";
+        }
+        jsonPath += dataMapping.name() + ".json";
+        String json = FileReadUtil.readString(jsonPath);
+        return setModelList(FastJsonUtil.parseArray(json, tClass));
+    }
+
+    public DataTable<E> setModelList(List<E> modelList) {
+        if (modelList == null || modelList.isEmpty()) {
+            dataList = List.of();
+            dataMap = Map.of();
+            return this;
+        }
+        /*不可变列表*/
+        final Map<Object, E> modeMap = new LinkedHashMap<>();
+        modelList.forEach((dbModel) -> {
+            try {
+                Object keyValue = dbModel.key();
+                if (modeMap.put(keyValue, dbModel) != null) {
+                    throw new RuntimeException("数据 主键 【" + keyValue + "】 重复");
+                }
+                if (dbModel instanceof DataChecked dataChecked) {
+                    dataChecked.initAndCheck();
+                }
+                Keys keys = AnnUtil.ann(DataTable.this.getClass(), Keys.class);
+                if (keys != null) {
+                    for (String s : keys.value()) {
+                        String index = "";
+                        String[] split = s.split(keys.split());
+                        for (String filedName : split) {
+                            Object fv = fieldMap.get(filedName).get(dbModel);
+                            if (!index.isEmpty()) index += keys.split();
+                            index += fv;
+                        }
+                        /*添加自定义索引*/
+                        if (modeMap.put(index, dbModel) != null) {
+                            throw new Throw("数据 自定义索引 【" + s + "】 【" + keyValue + "】 重复 ");
                         }
                     }
-                } catch (Throwable e) {
-                    throw Throw.of("数据：" + FastJsonUtil.toJson(dbModel), e);
                 }
-            });
-            /*不可变的列表*/
-            this.dataMap = Map.copyOf(this.dataMap);
-        }
+            } catch (Throwable e) {
+                throw Throw.of("数据：" + FastJsonUtil.toJson(dbModel), e);
+            }
+        });
+        /*不可变的列表*/
+        this.dataList = List.copyOf(modelList);
+        this.dataMap = Map.copyOf(modeMap);
         return this;
     }
 
@@ -100,9 +118,10 @@ public abstract class DataTable<E extends DataKey> extends ObjectBase implements
     }
 
     /** 检查数据合法性 */
-    // @JSONField(serialize = false, deserialize = false)
-    // public void checkDb(S dataRepository) {
-    // }
+    @JSONField(serialize = false, deserialize = false)
+    public void checkData(Map<Class<?>, DataTable<?>> store) {
+    }
+
     public String toDataString() {
         return toDataString(50);
     }
@@ -118,7 +137,6 @@ public abstract class DataTable<E extends DataKey> extends ObjectBase implements
     }
 
     public void toDataString(StreamWriter streamWriter, int len) {
-        DataMapping dataMapping = AnnUtil.ann(tClass, DataMapping.class, true);
         streamWriter.write("解析：").write(tClass.getName()).write("\n");
         streamWriter.write("表名：").write(dataMapping.name()).write("\n");
 
@@ -133,6 +151,7 @@ public abstract class DataTable<E extends DataKey> extends ObjectBase implements
         for (E row : dataList) {
             streamWriter.write("\n");
             for (Field entityField : fieldMap.values()) {
+                entityField.setAccessible(true);
                 Object value = null;
                 try {
                     value = entityField.get(row);
