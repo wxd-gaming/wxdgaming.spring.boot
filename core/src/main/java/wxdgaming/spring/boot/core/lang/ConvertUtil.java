@@ -120,7 +120,7 @@ public class ConvertUtil {
                 for (TypeCode value : values) {
                     for (Class<?> tmpClass : value.getClazzs()) {
                         if (tmpClass.getName().equalsIgnoreCase(clazz)
-                                || tmpClass.getSimpleName().equalsIgnoreCase(clazz)) {
+                            || tmpClass.getSimpleName().equalsIgnoreCase(clazz)) {
                             return value;
                         }
                     }
@@ -147,6 +147,9 @@ public class ConvertUtil {
         }
         if (clazz.isInstance(obj) || clazz.isAssignableFrom(obj.getClass())) {
             return obj;
+        }
+        if (ConfigString.class.isAssignableFrom(clazz)) {
+            return new ConfigString(obj.toString());
         }
         final TypeCode typeCode = TypeCode.getTypeCode(clazz);
         /*如果等于，或者所与继承关系*/

@@ -1,5 +1,6 @@
 package wxdgaming.spring.boot.core.timer;
 
+import com.alibaba.fastjson.annotation.JSONCreator;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +64,11 @@ public class CronExpress extends ObjectBase {
      * <p> 星期 1-7 Mon Tues Wed Thur Fri Sat Sun
      * <p> 年 1970 - 2199
      */
-    public CronExpress(String cron, TimeUnit timeUnit, long duration) {
+    @JSONCreator
+    public CronExpress(
+            @JSONField(name = "cron") String cron,
+            @JSONField(name = "timeUnit") TimeUnit timeUnit,
+            @JSONField(name = "duration") long duration) {
         this.cron = cron;
         this.timeUnit = timeUnit;
         this.duration = duration;

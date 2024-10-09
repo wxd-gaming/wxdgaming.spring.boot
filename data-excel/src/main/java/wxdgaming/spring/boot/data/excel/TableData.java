@@ -5,7 +5,9 @@ import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
+import wxdgaming.spring.boot.core.lang.ConfigString;
 import wxdgaming.spring.boot.core.lang.ConvertUtil;
+import wxdgaming.spring.boot.core.util.StringsUtil;
 
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +41,20 @@ public class TableData {
 
     public Optional<RowData> row(Object key) {
         return Optional.ofNullable(rows.get(key));
+    }
+
+    /** 生成代码文件的名字 */
+    @JSONField(serialize = true)
+    public String getCodeClassName() {
+
+        String[] split = tableName.split("_|-");
+        if (split.length > 1) {
+            for (int i = 1; i < split.length; i++) {
+                split[i] = StringsUtil.upperFirst(split[i]);
+            }
+        }
+        String codeName = String.join("", split);
+        return StringsUtil.upperFirst(codeName);
     }
 
     @JSONField(serialize = false, deserialize = false)
@@ -123,6 +139,35 @@ public class TableData {
     }
 
     @JSONField(serialize = false, deserialize = false)
+    public ConfigString getConfigString(Object key, String field) {
+        RowData jsonObject = rows.get(key);
+        if (jsonObject == null) {
+            return null;
+        }
+        return (ConfigString) jsonObject.get(field);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public int[] getIntArray(Object key, String field) {
+        return getT(key, field, int[].class);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public int[][] getInt2Array(Object key, String field) {
+        return getT(key, field, int[][].class);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public long[] getLongArray(Object key, String field) {
+        return getT(key, field, long[].class);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    public long[][] getLong2Array(Object key, String field) {
+        return getT(key, field, long[][].class);
+    }
+
+    @JSONField(serialize = false, deserialize = false)
     public <R> R getT(Object key, String field, Class<R> clazz) {
         RowData jsonObject = rows.get(key);
         if (jsonObject == null) {
@@ -161,12 +206,12 @@ public class TableData {
             format += "|%-40s\t";
         }
         {
-            Object[] array = cellInfo4IndexMap.values().stream().map(v -> v.getFieldBelong()).toArray();
+            Object[] array = cellInfo4IndexMap.values().stream().map(CellInfo::getFieldBelong).toArray();
             String formatted = String.format(format, array);
             stringBuilder.append(formatted).append("\n");
         }
         {
-            Object[] array = cellInfo4IndexMap.values().stream().map(v -> v.getFieldName()).toArray();
+            Object[] array = cellInfo4IndexMap.values().stream().map(CellInfo::getFieldName).toArray();
             String formatted = String.format(format, array);
             stringBuilder.append(formatted).append("\n");
         }
@@ -176,7 +221,7 @@ public class TableData {
             stringBuilder.append(formatted).append("\n");
         }
         {
-            Object[] array = cellInfo4IndexMap.values().stream().map(v -> v.getCellType()).toArray();
+            Object[] array = cellInfo4IndexMap.values().stream().map(CellInfo::getCellType).toArray();
             String formatted = String.format(format, array);
             stringBuilder.append(formatted).append("\n");
         }
@@ -205,11 +250,11 @@ public class TableData {
 
     @Override public String toString() {
         return "TableInfo{" +
-                "tableComment='" + tableComment + '\'' +
-                ", tableName='" + tableName + '\'' +
-                ", sheetName='" + sheetName + '\'' +
-                ", fileName='" + fileName + '\'' +
-                ", filePath='" + filePath + '\'' +
-                '}';
+               "tableComment='" + tableComment + '\'' +
+               ", tableName='" + tableName + '\'' +
+               ", sheetName='" + sheetName + '\'' +
+               ", fileName='" + fileName + '\'' +
+               ", filePath='" + filePath + '\'' +
+               '}';
     }
 }

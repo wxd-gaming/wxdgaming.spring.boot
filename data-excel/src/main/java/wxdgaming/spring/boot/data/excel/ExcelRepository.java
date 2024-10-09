@@ -8,14 +8,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.Throw;
+import wxdgaming.spring.boot.core.io.FileWriteUtil;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.lang.ConvertUtil;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
@@ -33,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class ExcelRepository implements Serializable, InitPrint {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     private final String[] String_Split = {"[,，]", "[:：]"};
 
@@ -43,10 +41,17 @@ public class ExcelRepository implements Serializable, InitPrint {
         return Optional.ofNullable(tableInfoMap.get(tableName));
     }
 
-    public final void readExcel(File file) {
+    public ExcelRepository outJsonFile(String outPath) {
+        tableInfoMap.values().forEach(tableData -> {
+            FileWriteUtil.writeString(outPath + "/" + tableData.getTableName() + ".json", tableData.data2Json());
+        });
+        return this;
+    }
+
+    public final ExcelRepository readExcel(File file, String belong) {
         if (file == null || StringsUtil.emptyOrNull(file.getName()) || file.getName().contains("@") || file.getName().contains("$")) {
             log.info("Excel文件不能解析：{}", file);
-            return;
+            return this;
         }
         try {
             String fileName = file.getName().toLowerCase();
@@ -58,11 +63,11 @@ public class ExcelRepository implements Serializable, InitPrint {
                 workbook = new XSSFWorkbook(is);
             } else {
                 log.info("无法识别的文件：{}", file.getPath());
-                return;
+                return this;
             }
             if (workbook.getNumberOfSheets() < 1) {
                 log.info("文件空的：{}", file.getPath());
-                return;
+                return this;
             }
             /*多少页签*/
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
@@ -70,10 +75,10 @@ public class ExcelRepository implements Serializable, InitPrint {
                 String sheetName = sheet.getSheetName().trim().toLowerCase();
 
                 if (StringsUtil.emptyOrNull(sheetName)
-                        || sheetName.startsWith("sheet")
-                        || sheetName.contains("@")
-                        || sheetName.contains("$")
-                        || !sheetName.startsWith("q_")) {
+                    || sheetName.startsWith("sheet")
+                    || sheetName.contains("@")
+                    || sheetName.contains("$")
+                    || !sheetName.startsWith("q_")) {
                     log.debug("Excel文件不能解析：{}, sheetName={} - 需要是 q_ 开头 sheet name 才能解析", file, sheetName);
                     continue;
                 }
@@ -81,7 +86,7 @@ public class ExcelRepository implements Serializable, InitPrint {
                 Cell tableCommentCall = sheet.getRow(0).getCell(0);
                 String tableComment = readCellString(tableCommentCall, false);
 
-                TableData tableData = new TableData(file.getPath(), file.getName(), sheet.getSheetName(), sheetName, tableComment);
+                TableData tableData = new TableData(file.getPath().replace("\\", "/"), file.getName(), sheet.getSheetName(), sheetName, tableComment);
 
                 Row fieldBelongRow = sheet.getRow(1);/*归属*/
                 Row fieldNameRow = sheet.getRow(2);/*字段名字*/
@@ -92,10 +97,11 @@ public class ExcelRepository implements Serializable, InitPrint {
 
                 short lastCellNum = fieldNameRow.getLastCellNum();
                 for (int cellIndex = 0; cellIndex < lastCellNum; cellIndex++) {
-                    String fieldBelongCell = readCellString(fieldBelongRow.getCell(cellIndex), false);
+                    String fieldBelongCell = readCellString(fieldBelongRow.getCell(cellIndex), false);/*字段归属*/
                     String fieldNameCell = readCellString(fieldNameRow.getCell(cellIndex), true);/*字段名字*/
                     String fieldTypeCell = readCellString(fieldTypeRow.getCell(cellIndex), false);/*字段类型*/
                     String fieldCommentCell = readCellString(fieldCommentRow.getCell(cellIndex), false);/*字段含义*/
+                    if (!StringsUtil.emptyOrNull(belong) && !Objects.equals(fieldBelongCell, belong)) continue;/*排除的归属*/
                     CellInfo cellInfo = new CellInfo()
                             .setCellIndex(cellIndex)
                             .setFieldBelong(fieldBelongCell)
@@ -106,8 +112,8 @@ public class ExcelRepository implements Serializable, InitPrint {
                     buildFieldType(cellInfo, fieldTypeCell);
 
                     if (StringsUtil.emptyOrNull(fieldBelongCell)
-                            && StringsUtil.emptyOrNull(fieldNameCell)
-                            && StringsUtil.emptyOrNull(fieldTypeCell)) {
+                        && StringsUtil.emptyOrNull(fieldNameCell)
+                        && StringsUtil.emptyOrNull(fieldTypeCell)) {
                         break;
                     }
 
@@ -119,7 +125,7 @@ public class ExcelRepository implements Serializable, InitPrint {
                     }
                 }
 
-                tableData.cellInfo4IndexMap = Map.copyOf(cellInfoMap);
+                tableData.cellInfo4IndexMap = cellInfoMap;
 
                 final Map<Object, RowData> rows = new LinkedHashMap<>();
                 int lastRowNum = sheet.getLastRowNum();
@@ -136,17 +142,21 @@ public class ExcelRepository implements Serializable, InitPrint {
                     if (rowData.values().stream().allMatch(v -> v == null || (v instanceof String && StringsUtil.emptyOrNull(String.valueOf(v))))) {
                         continue;
                     }
-                    Object object = rowData.getOrDefault("q_id", rowData.get("id"));
-                    if (object == null) {
+                    Object row_id = rowData.getOrDefault("q_id", rowData.get("id"));
+                    if (row_id == null) {
                         throw new RuntimeException("Excel文件不能解析：" + file + ", sheetName=" + sheetName + " 字段内容异常：" + rowIndex);
                     }
-                    rows.put(object, rowData);
+                    RowData oldData = rows.put(row_id, rowData);
+                    if (oldData != null) {
+                        throw new RuntimeException("Excel文件不能解析：" + file + ", sheetName=" + sheetName + " 行: " + rowIndex + " id重复: " + row_id);
+                    }
                 }
 
-                tableData.rows = Map.copyOf(rows);
+                tableData.rows = rows;
 
                 tableInfoMap.put(tableData.getTableName(), tableData);
             }
+            return this;
         } catch (Throwable throwable) {
             throw Throw.of(file.getPath(), throwable);
         }
@@ -490,12 +500,12 @@ public class ExcelRepository implements Serializable, InitPrint {
         } catch (Exception ex) {
             final RuntimeException runtimeException = new RuntimeException(
                     ex.getMessage()
-                            + "\n文件：" + tableData.getTableComment()
-                            + ";\nsheet：" + tableData.getTableName()
-                            + ";\n列：" + entityField.getFieldName()
-                            + ";\n行：" + rowNumber
-                            + ";\n数据类型：" + entityField.getFieldTypeString().toLowerCase()
-                            + ";\n数据：" + trim + "----无法转换");
+                    + "\n文件：" + tableData.getTableComment()
+                    + ";\nsheet：" + tableData.getTableName()
+                    + ";\n列：" + entityField.getFieldName()
+                    + ";\n行：" + rowNumber
+                    + ";\n数据类型：" + entityField.getFieldTypeString().toLowerCase()
+                    + ";\n数据：" + trim + "----无法转换");
             runtimeException.setStackTrace(ex.getStackTrace());
             throw runtimeException;
         }
@@ -519,7 +529,7 @@ public class ExcelRepository implements Serializable, InitPrint {
             /*空白的话，根据传入的类型返回默认值*/
             /*默认类型*/
             if (data.getCellType() == CellType.STRING
-                    || (data.getCellType() == CellType.FORMULA && data.getCachedFormulaResultType() == CellType.STRING)) {
+                || (data.getCellType() == CellType.FORMULA && data.getCachedFormulaResultType() == CellType.STRING)) {
                 /*字符类型*/
                 trim = data.getStringCellValue().trim();
             }
@@ -538,7 +548,8 @@ public class ExcelRepository implements Serializable, InitPrint {
         return trim.trim();
     }
 
-    private void buildFieldType(CellInfo entityField, String fieldTypeName) {
+    private void buildFieldType(CellInfo entityField, String fieldTypeName) throws Exception {
+        if (StringsUtil.emptyOrNull(fieldTypeName)) return;
         final String typeString = typeString(fieldTypeName);
         switch (typeString.toLowerCase()) {
             case "bool":
@@ -773,9 +784,12 @@ public class ExcelRepository implements Serializable, InitPrint {
                 break;
             case "string":
             case "java.lang.string":
-            default:
                 entityField.setFieldType(String.class);
                 entityField.setFieldTypeString("String");
+                break;
+            default:
+                entityField.setFieldType(Class.forName(fieldTypeName));
+                entityField.setFieldTypeString(fieldTypeName);
                 break;
         }
     }

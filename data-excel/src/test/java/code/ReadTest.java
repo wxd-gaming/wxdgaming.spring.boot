@@ -1,8 +1,16 @@
 package code;
 
+import org.junit.Test;
+import wxdgaming.entity.bean.QItemshopVip;
+import wxdgaming.spring.boot.core.json.FastJsonUtil;
+import wxdgaming.spring.boot.core.lang.ConfigString;
+import wxdgaming.spring.boot.core.system.JvmUtil;
 import wxdgaming.spring.boot.data.excel.ExcelRepository;
+import wxdgaming.spring.boot.data.excel.code.CreateJavaCode;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 读取测试
@@ -12,17 +20,44 @@ import java.io.File;
  **/
 public class ReadTest {
 
-    public void t0(String[] args) {
+    @Test
+    public void t10() {
         ExcelRepository excelReader = new ExcelRepository();
-        excelReader.readExcel(new File("data-excel/src/main/resources/范例.xlsx"));
+        excelReader.readExcel(new File("src/main/resources/范例.xlsx"), "");
+        excelReader.outJsonFile("target/out/json");
         excelReader.getTableInfoMap().values().forEach(tableInfo -> {
             System.out.println(tableInfo.showData());
             Object shopItem = tableInfo.getObject(2, "shop_item");
             System.out.println(tableInfo.getString(2, "shop_item"));
-            System.out.println(tableInfo.getString(2, "show_time"));
+            System.out.println(Arrays.toString(tableInfo.getIntArray(2, "price")));
 
-            System.out.println(tableInfo.data2Json());
+            String x = tableInfo.data2Json();
+            System.out.println(x);
+            List<QItemshopVip> qItemshopVipMappings = FastJsonUtil.parseArray(x, QItemshopVip.class);
+            System.out.println(qItemshopVipMappings);
 
+        });
+    }
+
+    @Test
+    public void t11() {
+        String json = "{\"value\":\"2:102010001:1,2:102112503:2,2:102011001:2,2:102011005:2\"}";
+        System.out.println(FastJsonUtil.parse(json, ConfigString.class));
+    }
+
+    @Test
+    public void t12() {
+        String json = "{\"id\":2,\"shop_item\":{\"value\":\"2:102010001:1,2:102111011:1,2:102011001:5,2:102011005:5\"},\"name_1\":\"VIP1级礼包\",\"gift_name\":\"VIP1级礼包\",\"show_viplv\":0,\"show_time\":{\"cron\":\"0 0\",\"timeUnit\":\"SECONDS\",\"duration\":500},\"conditions_viplv\":false,\"limit_num\":1.0,\"price\":[1,101011001,500]}";
+        System.out.println(FastJsonUtil.parse(json, QItemshopVip.class).toJsonFmt());
+    }
+
+    @Test
+    public void createExcelCode() {
+        System.out.println(JvmUtil.userHome());
+        ExcelRepository excelReader = new ExcelRepository();
+        excelReader.readExcel(new File("src/main/resources/范例.xlsx"), "");
+        excelReader.getTableInfoMap().values().forEach(tableInfo -> {
+            CreateJavaCode.getIns().createCode(tableInfo, "src/test/java", "wxdgaming.entity", "");
         });
     }
 
