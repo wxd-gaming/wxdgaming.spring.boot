@@ -3,6 +3,8 @@ package wxdgaming.spring.boot.lua;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import party.iroiro.luajava.Lua;
+import party.iroiro.luajava.value.LuaValue;
+import wxdgaming.spring.boot.core.function.Consumer2;
 import wxdgaming.spring.boot.core.io.FileUtil;
 
 import java.io.File;
@@ -99,23 +101,19 @@ public class LuaEventBus {
     }
 
     /** 当前线程上下文 */
-    public LuaContext context(String key) {
+    public void context(String key, Consumer2<LuaContext, LuaValue> func) {
         for (LuaRuntime luaRuntime : luaRuntimeMap.values()) {
             LuaContext context = luaRuntime.context();
-            if (context.has(key)) {
-                return context;
+            LuaValue value = context.find(key);
+            if (context.has(value)) {
+                func.accept(context, value);
             }
         }
-        return null;
     }
 
     /** 自动释放资源 */
     public void pCall(String key, Object... args) {
-        luaRuntimeMap.values().forEach(globalPool -> {
-            try (LuaContext lua = globalPool.newContext()) {
-                lua.pcall(key, args);
-            }
-        });
+        context(key, (context, value) -> context.pCall(value, args));
     }
 
 }

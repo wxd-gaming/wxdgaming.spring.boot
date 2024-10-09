@@ -32,7 +32,7 @@ public class LuaContext implements Closeable {
     private final Lua L;
     private final Path[] paths;
     private volatile boolean closed = false;
-    private Map<String, LuaValue> funcCache = Maps.newHashMap();
+    private final Map<String, LuaValue> funcCache = Maps.newHashMap();
 
     public LuaContext(ConcurrentHashMap<String, Object> globals, Path... paths) {
         this.L = new Lua54_Sub("");
@@ -134,12 +134,15 @@ public class LuaContext implements Closeable {
         return funcCache.computeIfAbsent(key, L::get);
     }
 
-    public Object pcall(String name, Object... args) {
+    public Object pCall(String name, Object... args) {
         LuaValue luaValue = find(name);
-        return pcall(luaValue, args);
+        if (!has(luaValue)) {
+            return null;
+        }
+        return pCall(luaValue, args);
     }
 
-    public Object pcall(LuaValue luaValue, Object... args) {
+    public Object pCall(LuaValue luaValue, Object... args) {
         int oldTop = L.getTop();
         luaValue.push(L);
         for (Object o : args) {
