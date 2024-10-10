@@ -57,6 +57,7 @@ public class LuaContext implements Closeable {
         ArrayList<String> modules = new ArrayList<>();
         ArrayList<Path> errorPaths = new ArrayList<>();
         try {
+            if (!Files.exists(dir)) return;
             Files.walk(dir, 99)
                     .filter(p -> {
                         String string = p.toString();
