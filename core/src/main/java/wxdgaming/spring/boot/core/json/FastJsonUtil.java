@@ -176,6 +176,10 @@ public class FastJsonUtil {
         return JSON.parseObject(str, tTypeReference, Reader_Features);
     }
 
+    public static <T> T parse(byte[] str, TypeReference<T> tTypeReference) {
+        return JSON.parseObject(str, tTypeReference.getType(), Reader_Features);
+    }
+
     /**
      * 多重泛型  数据结构
      * List<R>
