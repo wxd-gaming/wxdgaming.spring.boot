@@ -64,15 +64,15 @@ public class FileUtil implements Serializable {
 
         fileName = fileName.replace("\\", "/");
 
-        Path file = Paths.get(fileName);
-        if (exists(file)) {
-            return file;
+        Path filePath = Paths.get(fileName);
+        if (exists(filePath)) {
+            return filePath;
         }
 
         if (!fileName.startsWith("config")) {
-            file = Paths.get("config/" + fileName);
-            if (exists(file)) {
-                return file;
+            filePath = Paths.get("config/" + fileName);
+            if (exists(filePath)) {
+                return filePath;
             }
         }
 
@@ -143,11 +143,11 @@ public class FileUtil implements Serializable {
                     findPath = findPath.substring(1);
                 }
             }
-            return walkFiles(findPath).map(file -> {
+            return walkFiles(findPath).map(filePath -> {
                 try {
-                    return new Record2<>(file.toString(), Files.newInputStream(file));
+                    return new Record2<>(filePath.toString(), Files.newInputStream(filePath));
                 } catch (Exception e) {
-                    throw Throw.of("resources:" + file, e);
+                    throw Throw.of("resources:" + filePath, e);
                 }
             });
         } catch (Exception e) {
