@@ -151,7 +151,7 @@ public class SocketService implements InitPrint, Closeable, ISession {
 
     @Start()
     @Order(1000)
-    public void start(SpringUtil springUtil) {
+    public void start() {
         this.future = bootstrap.bind(this.config.getPort());
         this.future.syncUninterruptibly();
         log.info("open socket service {}", this.config.getPort());

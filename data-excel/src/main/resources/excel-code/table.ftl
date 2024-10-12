@@ -6,6 +6,7 @@ import wxdgaming.spring.boot.data.excel.store.DataTable;
 import ${packageName}.bean.${codeClassName};
 
 import java.io.Serializable;
+import java.util.Map;
 
 
 /**

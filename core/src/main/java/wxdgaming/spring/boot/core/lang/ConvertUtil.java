@@ -173,7 +173,14 @@ public class ConvertUtil {
             case String:
                 return String.valueOf(obj);
             default: {
-                return FastJsonUtil.parse(String.valueOf(obj), clazz);
+                String str = String.valueOf(obj);
+                if (clazz.isEnum()) {
+                    if (!str.startsWith("\""))
+                        str = "\"" + str;
+                    if (!str.endsWith("\""))
+                        str = str + "\"";
+                }
+                return FastJsonUtil.parse(str, clazz);
             }
         }
     }

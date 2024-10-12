@@ -57,7 +57,7 @@ public class DataRepository {
     DataTable<?> buildDataTable(Class<?> dataTableClass) throws Exception {
         DataTable<?> dataTable = (DataTable<?>) dataTableClass.getDeclaredConstructor().newInstance();
         dataTable.loadJson(jsonPath);
-        log.info("load data table \n{}", dataTable.toDataString());
+        log.info("load data table 文件：{}, 数据：{}, 行数：{}", dataTable.getDataMapping().excelPath(), dataTable.getDataMapping().name(), dataTable.dbSize());
         return dataTable;
     }
 
