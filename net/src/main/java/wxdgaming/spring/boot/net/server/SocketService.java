@@ -8,8 +8,10 @@ import io.netty.handler.timeout.IdleStateHandler;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
+import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.system.BytesUnit;
 import wxdgaming.spring.boot.core.threading.Event;
@@ -149,7 +151,7 @@ public class SocketService implements InitPrint, Closeable, ISession {
 
     @Start()
     @Order(1000)
-    public void start() {
+    public void start(SpringUtil springUtil) {
         this.future = bootstrap.bind(this.config.getPort());
         this.future.syncUninterruptibly();
         log.info("open socket service {}", this.config.getPort());

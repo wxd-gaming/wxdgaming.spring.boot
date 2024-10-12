@@ -44,6 +44,9 @@ public class SpringChildContext implements InitPrint {
     }
 
     public ConfigurableApplicationContext newChild(Class<?> scan, ClassDirLoader classLoader) {
+        if (SpringUtil.getIns().getChildContext() != null) {
+            SpringUtil.getIns().getChildContext().close();
+        }
         Collection<Class<?>> values = classLoader.getLoadClassMap().values();
         // 创建子容器
         AnnotationConfigServletWebApplicationContext childContext = new AnnotationConfigServletWebApplicationContext();
@@ -73,7 +76,7 @@ public class SpringChildContext implements InitPrint {
     }
 
 
-    public void unload(){
+    public void unload() {
 
     }
 

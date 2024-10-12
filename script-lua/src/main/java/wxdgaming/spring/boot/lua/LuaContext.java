@@ -7,6 +7,7 @@ import party.iroiro.luajava.Consts;
 import party.iroiro.luajava.JuaAPI;
 import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.value.LuaValue;
+import wxdgaming.spring.boot.core.Throw;
 
 import java.io.Closeable;
 import java.nio.Buffer;
@@ -162,7 +163,7 @@ public class LuaContext implements Closeable {
             LuaValue returnValue = call[0];
             return LuaUtils.luaValue2Object(returnValue);
         } catch (Throwable e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw Throw.of(e);
         } finally {
             L.setTop(oldTop);
         }

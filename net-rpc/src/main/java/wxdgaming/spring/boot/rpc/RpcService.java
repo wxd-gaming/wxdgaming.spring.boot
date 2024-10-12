@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Mono;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.SpringUtil;
+import wxdgaming.spring.boot.core.ann.ReLoad;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.util.StringsUtil;
@@ -45,8 +46,9 @@ public class RpcService implements InitPrint {
     }
 
     @Start
+    @ReLoad
     @Order(99999)
-    public void start() {
+    public void initMapping(SpringUtil springUtil) {
         springUtil.withMethodAnnotated(RPC.class)
                 .forEach(t -> {
                     t.getRight().setAccessible(true);
@@ -61,8 +63,11 @@ public class RpcService implements InitPrint {
                     } else {
                         value += mapping;
                     }
-                    if (rpcHandlerMap.putIfAbsent(value, new RpcActionMapping(t.getRight(), t.getLeft())) != null) {
-
+                    RpcActionMapping oldMapping = rpcHandlerMap.put(value, new RpcActionMapping(t.getRight(), t.getLeft()));
+                    if (oldMapping != null) {
+                        if (!oldMapping.getBean().getClass().getName().endsWith(t.getLeft().getClass().getName())) {
+                            throw new RuntimeException("处理器重复：" + oldMapping.getBean().getClass().getName() + " - " + t.getLeft().getClass().getName());
+                        }
                     }
                     log.debug("rpc register path={}, {}#{}", value, t.getLeft().getClass().getName(), t.getRight().getName());
                 });
