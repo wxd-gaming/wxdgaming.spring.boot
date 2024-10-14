@@ -29,8 +29,8 @@ public abstract class Event implements Runnable {
         if (StringsUtil.emptyOrNull(runName())) {
             StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[stackTrace];
             this.runName = stackTraceElement.getClassName()
-                    + "." + stackTraceElement.getMethodName()
-                    + "():line：" + stackTraceElement.getLineNumber();
+                           + "." + stackTraceElement.getMethodName()
+                           + "():line：" + stackTraceElement.getLineNumber();
         } else {
             this.runName = runName();
         }
@@ -51,7 +51,7 @@ public abstract class Event implements Runnable {
                     sb.append("队列：").append(queueName).append("\n");
                 }
                 sb.append("任务：").append(runName).append("\n");
-                sb.append("耗时：").append(diff).append("\n");
+                sb.append("耗时：").append(String.format("%3f", diff)).append(" ms\n");
                 Throw.ofString(sb, thread.getStackTrace(), true);
             }
         }

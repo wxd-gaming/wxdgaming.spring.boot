@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
+import wxdgaming.spring.boot.core.json.FastJsonUtil;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +32,10 @@ public class ResponseService implements InitPrint {
             outputStream.write(bytes);
             outputStream.flush();
         }
+    }
+
+    public void responseObject2Json(HttpServletResponse response, Object object) throws Exception {
+        response(response, MediaType.APPLICATION_JSON.toString(), FastJsonUtil.toJson(object));
     }
 
     public void responseJson(HttpServletResponse response, String json) throws Exception {

@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.core;
 
 import com.alibaba.fastjson.JSONObject;
 import io.netty.handler.codec.http.HttpHeaderValues;
+import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.Setter;
@@ -398,7 +399,8 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         if (Objects.equals(request.getMethod(), "GET")) {
             return request.getQueryString();
         } else {
-            return StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
+            ServletInputStream inputStream = request.getInputStream();
+            return StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
         }
     }
 
@@ -433,7 +435,7 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
             if (header != null) {
                 stringBuilder.append("content-type: ").append(header).append("\n");
             }
-            stringBuilder.append("param data: ").append(getRequestBody(request)).append("\n");
+            // stringBuilder.append("param data: ").append(getRequestBody(request)).append("\n");
             log.debug(stringBuilder.toString());
         }
     }
