@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @Setter
 @Configuration
-public class HttpClientConfig {
+public class HttpClientBuild {
 
     private int maxTotal = 200;
     private int defaultMaxPerRoute = 100;

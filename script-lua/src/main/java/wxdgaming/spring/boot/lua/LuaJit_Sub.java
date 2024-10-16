@@ -3,7 +3,7 @@ package wxdgaming.spring.boot.lua;
 import party.iroiro.luajava.AbstractLua;
 import party.iroiro.luajava.LuaException;
 import party.iroiro.luajava.cleaner.LuaReference;
-import party.iroiro.luajava.lua54.Lua54;
+import party.iroiro.luajava.luajit.LuaJit;
 import party.iroiro.luajava.value.LuaValue;
 
 /**
@@ -12,20 +12,20 @@ import party.iroiro.luajava.value.LuaValue;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-28 20:29
  */
-public class Lua54_Sub extends Lua54 {
+public class LuaJit_Sub extends LuaJit {
 
     private final String name;
     private boolean closed = false;
 
-    public Lua54_Sub() throws LinkageError {
+    public LuaJit_Sub() throws LinkageError {
         this.name = Thread.currentThread().getName();
     }
 
-    @Override public Lua54_Sub newThread() {
+    @Override public LuaJit_Sub newThread() {
         throw new UnsupportedOperationException("不允许");
     }
 
-    @Override protected Lua54_Sub newThread(long L, int id, AbstractLua mainThread) {
+    @Override protected LuaJit_Sub newThread(long L, int id, AbstractLua mainThread) {
         throw new UnsupportedOperationException("不允许");
     }
 
@@ -64,6 +64,6 @@ public class Lua54_Sub extends Lua54 {
     }
 
     @Override public String toString() {
-        return "Lua54{" + "name='" + name + '\'' + ", closed=" + closed + '}';
+        return "Luajit{" + "name='" + name + '\'' + ", closed=" + closed + '}';
     }
 }

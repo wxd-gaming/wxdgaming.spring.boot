@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
+import wxdgaming.spring.boot.core.SpringUtil;
+import wxdgaming.spring.boot.lua.LuaContext;
 import wxdgaming.spring.boot.lua.LuaLogger;
 import wxdgaming.spring.boot.lua.LuaRuntime;
 
@@ -39,8 +41,10 @@ public class LuaService implements InitPrint {
         LuaRuntime main = new LuaRuntime("main", new Path[]{Paths.get("lua")});
         main.getGlobals().put("responseUtil", luaResponseService);
         main.getGlobals().put("jlog", LuaLogger.getIns());
-        main.getGlobals().put("opsForValue", redisTemplate.opsForValue());
-        log.debug("redisTemplate hashCode: {}", redisTemplate.hashCode());
+        SpringUtil.getIns().getBeansOfType(LuaFunctionSpi.class)
+                .forEach(spi -> {
+                    main.getGlobals().put(spi.getName(), spi);
+                });
         LuaRuntime tmp = luaRuntime.get();
         if (tmp != null) {
             CompletableFuture.runAsync(() -> {
@@ -55,7 +59,9 @@ public class LuaService implements InitPrint {
                     });
         }
         luaRuntime.set(main);
-        luaRuntime.get().context().pCall("root");
+        try (LuaContext luaContext = luaRuntime.get().newContext()) {
+            luaContext.pCall("root");
+        }
     }
 
 }

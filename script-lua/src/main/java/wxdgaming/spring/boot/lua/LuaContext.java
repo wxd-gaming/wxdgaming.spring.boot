@@ -8,6 +8,8 @@ import party.iroiro.luajava.JuaAPI;
 import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.value.LuaValue;
 import wxdgaming.spring.boot.core.Throw;
+import wxdgaming.spring.boot.core.io.FileReadUtil;
+import wxdgaming.spring.boot.core.lang.Record2;
 
 import java.io.Closeable;
 import java.nio.Buffer;
@@ -36,7 +38,11 @@ public class LuaContext implements Closeable {
     private final Map<String, LuaValue> funcCache = Maps.newHashMap();
 
     public LuaContext(ConcurrentHashMap<String, Object> globals, Path... paths) {
-        this.L = new Lua54_Sub("");
+        if (1 != 1) {
+            this.L = new Lua54_Sub();
+        } else {
+            this.L = new LuaJit_Sub();
+        }
         this.L.openLibraries();
         this.paths = paths;
         for (Map.Entry<String, Object> entry : globals.entrySet()) {
@@ -56,28 +62,38 @@ public class LuaContext implements Closeable {
 
     public void loadDir(Path dir) {
         ArrayList<String> modules = new ArrayList<>();
-        ArrayList<Path> errorPaths = new ArrayList<>();
+        ArrayList<Record2<String, byte[]>> errorPaths = new ArrayList<>();
         try {
-            if (!Files.exists(dir)) return;
-            Files.walk(dir, 99)
-                    .filter(p -> {
-                        String string = p.toString();
-                        return string.endsWith(".lua") || string.endsWith(".LUA");
-                    })
-                    .filter(Files::isRegularFile)
-                    .sorted(Comparator.comparing(o -> o.toString().toLowerCase()))
-                    .forEach(filePath -> {
+            FileReadUtil.readBytesStream(dir.toString(), ".lua", ".LUA")
+                    .sorted(Comparator.comparing(o -> o.t1().toLowerCase()))
+                    .forEach(item -> {
                         try {
-                            String module = loadfile(filePath);
+                            String module = load(item.t1(), item.t2());
                             modules.add(module);
                         } catch (Exception e) {
-                            errorPaths.add(filePath);
+                            errorPaths.add(item);
                         }
                     });
+            if (!Files.exists(dir)) return;
+            // Files.walk(dir, 99)
+            //         .filter(p -> {
+            //             String string = p.toString();
+            //             return string.endsWith(".lua") || string.endsWith(".LUA");
+            //         })
+            //         .filter(Files::isRegularFile)
+            //         .sorted(Comparator.comparing(o -> o.toString().toLowerCase()))
+            //         .forEach(filePath -> {
+            //             try {
+            //                 String module = loadfile(filePath);
+            //                 modules.add(module);
+            //             } catch (Exception e) {
+            //                 errorPaths.add(filePath);
+            //             }
+            //         });
             if (!errorPaths.isEmpty()) {
-                for (Path errorPath : errorPaths) {
+                for (Record2<String, byte[]> errorPath : errorPaths) {
                     log.warn("lua file load error: {}", errorPath);
-                    loadfile(errorPath);
+                    String module = load(errorPath.t1(), errorPath.t2());
                 }
             }
         } catch (Exception e) {
@@ -106,7 +122,8 @@ public class LuaContext implements Closeable {
     }
 
     public String load(String filePath, byte[] bytes) {
-        filePath = filePath.replace("\\", "/");
+        String[] split = filePath.split("[\\\\/]");
+        filePath = split[split.length - 1];
         log.debug("load lua {}", filePath);
         Buffer flip = JuaAPI.allocateDirect(bytes.length).put(bytes).flip();
         L.run(flip, filePath);
@@ -169,16 +186,30 @@ public class LuaContext implements Closeable {
         }
     }
 
+    public void gc() {
+        synchronized (this) {
+            if (closed) return;
+            try {
+                pCall("cleanup", this.L.toString());
+            } catch (Exception ignore) {
+                System.out.println(this.toString() + " - cleanup error " + ignore.toString());
+                L.gc();
+                L.gc();
+            }
+        }
+    }
+
     @Override public void close() {
         synchronized (this) {
             if (closed) return;
             closed = true;
+            gc();
             funcCache.clear();
             L.close();
         }
     }
 
     @Override public String toString() {
-        return "LuacContext{" + "lua=" + L + ", isClosed=" + closed + '}';
+        return L.toString();
     }
 }

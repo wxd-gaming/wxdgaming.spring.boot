@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import wxdgaming.spring.boot.core.threading.ExecutorBuilder;
-import wxdgaming.spring.boot.webclient.HttpClientConfig;
+import wxdgaming.spring.boot.webclient.HttpClientBuild;
 import wxdgaming.spring.boot.webclient.HttpClientService;
 import wxdgaming.spring.boot.webclient.HttpGetWork;
 
@@ -20,9 +20,9 @@ public class HttpClientTest {
 
     @Before
     public void s() {
-        HttpClientConfig httpClientConfig = new HttpClientConfig();
+        HttpClientBuild httpClientBuild = new HttpClientBuild();
         ExecutorBuilder executorBuilder = new ExecutorBuilder();
-        httpClientService = new HttpClientService(executorBuilder.virtualExecutor(), httpClientConfig.httpClient());
+        httpClientService = new HttpClientService(executorBuilder.virtualExecutor(), httpClientBuild.httpClient());
     }
 
     @Test

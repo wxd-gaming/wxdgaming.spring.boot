@@ -97,12 +97,12 @@ public class FileUtil implements Serializable {
     }
 
     /** 获取所有资源 <br>如果传入的目录本地文件夹没有，<br>会查找本地目录config目录，<br>如果还没有查找jar包内资源 */
-    public static Stream<Record2<String, InputStream>> resourceStreams(final String path) {
-        return resourceStreams(Thread.currentThread().getContextClassLoader(), path);
+    public static Stream<Record2<String, InputStream>> resourceStreams(final String path, String... extendNames) {
+        return resourceStreams(Thread.currentThread().getContextClassLoader(), path, extendNames);
     }
 
     /** 获取所有资源 <br>如果传入的目录本地文件夹没有，<br>会查找本地目录config目录，<br>如果还没有查找jar包内资源 */
-    public static Stream<Record2<String, InputStream>> resourceStreams(ClassLoader classLoader, final String path) {
+    public static Stream<Record2<String, InputStream>> resourceStreams(ClassLoader classLoader, final String path, String... extendNames) {
         try {
             String findPath = path;
             boolean fileExists = true;
@@ -131,7 +131,22 @@ public class FileUtil implements Serializable {
                             try (ZipReadFile zipFile = new ZipReadFile(findPath)) {
                                 return zipFile.stream()
                                         .filter(z -> !z.isDirectory())
-                                        .filter(p -> p.getName().startsWith(path))
+                                        .filter(p -> {
+                                            String name = p.getName();
+                                            if (name.startsWith(path)) {
+                                                if (extendNames.length > 0) {
+                                                    boolean check = false;
+                                                    for (String extendName : extendNames) {
+                                                        if (name.endsWith(extendName)) {
+                                                            check = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                    return check;
+                                                }
+                                            }
+                                            return false;
+                                        })
                                         .map(z -> new Record2<String, InputStream>(z.getName(), new ByteArrayInputStream(zipFile.unzipFile(z))))
                                         .toList()
                                         .stream();
@@ -143,7 +158,7 @@ public class FileUtil implements Serializable {
                     findPath = findPath.substring(1);
                 }
             }
-            return walkFiles(findPath).map(filePath -> {
+            return walkFiles(findPath, extendNames).map(filePath -> {
                 try {
                     return new Record2<>(filePath.toString(), Files.newInputStream(filePath));
                 } catch (Exception e) {

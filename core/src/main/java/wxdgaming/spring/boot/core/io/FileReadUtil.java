@@ -26,19 +26,14 @@ public class FileReadUtil implements Serializable {
 
 
     /** 递归查找所有文件 */
-    public static Map<String, byte[]> readBytesAll(Path file, String... extendNames) {
+    public static Map<String, byte[]> readBytesAll(String file, String... extendNames) {
         return readBytesStream(file, extendNames).collect(Collectors.toMap(Record2::t1, Record2::t2));
     }
 
     /** 递归查找所有文件 */
-    public static Stream<Record2<String, byte[]>> readBytesStream(Path file, String... extendNames) {
-        return FileUtil.walkFiles(file, extendNames)
-                .map(f -> new Record2<>(f.toString(), readBytes(f)));
-    }
-
-    /** 递归查找所有文件 */
-    public static Map<String, byte[]> readBytesAll(String file, String... extendNames) {
-        return readBytesAll(FileUtil.findPath(file), extendNames);
+    public static Stream<Record2<String, byte[]>> readBytesStream(String file, String... extendNames) {
+        return FileUtil.resourceStreams(file, extendNames)
+                .map(f -> new Record2<>(f.t1(), readBytes(f.t2())));
     }
 
     /** 递归查找所有文件 */
