@@ -55,15 +55,7 @@ public class QueueEvent extends Event implements Executor {
 
     Event curPoll = null;
 
-    @Override void check(StringBuilder sb, Thread thread) {
-        Event event = curPoll;
-        if (event != null) {
-            event.check(sb, thread);
-        }
-    }
-
     @Override public void onEvent() throws Throwable {
-
         try {
             curPoll = runnableBlockingQueue.poll();
             if (curPoll != null) {

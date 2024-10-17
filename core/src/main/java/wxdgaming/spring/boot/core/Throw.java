@@ -83,6 +83,12 @@ public class Throw extends RuntimeException implements Serializable {
         }
     }
 
+    public static String ofString(StackTraceElement[] stackTraces, boolean appendLine) {
+        StringBuilder stringBuilder = new StringBuilder();
+        ofString(stringBuilder, stackTraces, appendLine);
+        return stringBuilder.toString();
+    }
+
     public static void ofString(StringBuilder stringBuilder, StackTraceElement[] stackTraces, boolean appendLine) {
         for (StackTraceElement e : stackTraces) {
             if (appendLine)
