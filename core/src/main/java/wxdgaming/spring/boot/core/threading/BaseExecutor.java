@@ -15,7 +15,7 @@ public class BaseExecutor extends ThreadPoolExecutor {
         super(coreSize, maximumPoolSize,
                 0L, TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<>(queueSize),
-                new ThreadNameFactory(prefix)
+                new WxdThreadFactory(prefix)
         );
     }
 

@@ -9,10 +9,13 @@ import wxdgaming.spring.boot.core.util.StringsUtil;
  * @version: 2024-08-12 15:02
  **/
 public abstract class Event implements Runnable {
-
+    /** 事件所在的队列 */
     String queueName;
+    /** 事件名 */
     String runName;
+    /** 事件开始执行的时间 */
     volatile long execStartTime;
+    /** 当前事件的上下文 */
     final ThreadContext threadContext;
 
     public Event() {
