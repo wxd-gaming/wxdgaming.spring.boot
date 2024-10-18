@@ -43,10 +43,23 @@ public class QueueEvent extends Event implements Executor {
         this(queueName, new BaseExecutor(threadPrefix, 1, 1, 1), queueMaxSize);
     }
 
+    /**
+     * 指定执行器的队列
+     *
+     * @param queueName 队列名称
+     * @param executor  执行器
+     */
     public QueueEvent(String queueName, Executor executor) {
         this(queueName, executor, 3000);
     }
 
+    /**
+     * 指定执行器的队列
+     *
+     * @param queueName    队列名称
+     * @param executor     执行器
+     * @param queueMaxSize 队列最大长度
+     */
     public QueueEvent(String queueName, Executor executor, int queueMaxSize) {
         this.queueName = queueName;
         this.executor = executor;

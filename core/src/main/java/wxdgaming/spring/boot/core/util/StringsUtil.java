@@ -85,6 +85,7 @@ public class StringsUtil {
     public static final Pattern PATTERN_ABC_1_1_1 = Pattern.compile("[\\[\\].,'\":;\\|`~(){}【】\\\\\\-=*&@\\^%]");
     /** 验证只能是,汉字，数字，字母 */
     public static final Pattern PATTERN_ABC_2 = Pattern.compile("^[\\s@a-zA-Z0-9\\u4e00-\\u9fa5]*$");
+    public static final Pattern PATTERN_DB = Pattern.compile("[`~!=|/\\\\*%\\[\\]]*$");
     /** 过滤 非 汉字，数字，字母，下划线 */
     public static final Pattern PATTERN_REPLACE_ABC_1 = Pattern.compile("[^_\\s@a-zA-Z0-9\\u4e00-\\u9fa5]");
     /** 验证必须是 存字母 A - Z */

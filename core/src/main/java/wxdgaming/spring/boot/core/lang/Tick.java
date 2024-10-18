@@ -19,7 +19,7 @@ public class Tick extends ObjectBase {
     /** 间隔毫秒 */
     private final long interval;
     /** 上一次执行时间 */
-    private long last = 0;
+    private volatile long last = 0;
 
     public Tick(long interval) {
         this(interval, TimeUnit.MILLISECONDS);
@@ -46,25 +46,25 @@ public class Tick extends ObjectBase {
     }
 
     /** 判断是否满足条件，如果满足条件自动更新  返回间隔毫秒数 */
-    public long need() {
+    public boolean need() {
         long millis = MyClock.millis();
         return need(millis);
     }
 
     /** 判断是否满足条件，如果满足条件自动更新 返回间隔毫秒数 */
-    public long need(long now) {
+    public boolean need(long now) {
         long nanoTime = now - last;
         if (nanoTime >= interval) {
             last = now;
-            return nanoTime;
+            return true;
         }
-        return 0;
+        return false;
     }
 
     /** 同步等待 */
     public void waitNext() {
         try {
-            while (!Thread.currentThread().isInterrupted() && need() < 1) {
+            while (!Thread.currentThread().isInterrupted() && !need()) {
                 Thread.sleep(heart);
             }
         } catch (InterruptedException e) {

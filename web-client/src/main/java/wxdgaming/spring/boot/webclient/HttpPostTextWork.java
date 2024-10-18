@@ -3,6 +3,7 @@ package wxdgaming.spring.boot.webclient;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 
 import java.nio.charset.StandardCharsets;
@@ -19,6 +20,7 @@ public class HttpPostTextWork extends HttpPostMultiWork {
 
     public HttpPostTextWork(Executor executor, CloseableHttpClient closeableHttpClient, String url) {
         super(executor, closeableHttpClient, url);
+        contentType = ContentType.APPLICATION_FORM_URLENCODED;
     }
 
     @Override protected HttpUriRequestBase httpUriRequest() {

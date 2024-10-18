@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.Throw;
+import wxdgaming.spring.boot.core.lang.DiffTime;
 import wxdgaming.spring.boot.core.lang.Tick;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 
@@ -68,28 +69,31 @@ class GuardThread implements Runnable, InitPrint, Closeable {
     }
 
     void check(Thread thread, Record tuple) {
-        long need = tuple.tick.need();
-        if (need > 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("\n");
-            sb.append("线程：").append(thread.getName()).append("\n");
-            if (StringsUtil.notEmptyOrNull(tuple.runnable.queueName)) {
-                sb.append("队列：").append(tuple.runnable.queueName).append("\n");
-            }
-            sb.append("任务：").append(tuple.runnable.runName).append("\n");
-            sb.append("耗时：").append(String.format("%3d", need)).append(" ms\n");
-            Throw.ofString(sb, thread.getStackTrace(), true);
-            log.warn(sb.toString());
+        if (!tuple.tick.need()) {
+            return;
         }
+        long diff = tuple.diffTime.diffLong();
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        sb.append("线程：").append(thread.getName()).append("\n");
+        if (StringsUtil.notEmptyOrNull(tuple.runnable.queueName)) {
+            sb.append("队列：").append(tuple.runnable.queueName).append("\n");
+        }
+        sb.append("任务：").append(tuple.runnable.runName).append("\n");
+        sb.append("耗时：").append(String.format("%3d", diff)).append(" ms\n");
+        Throw.ofString(sb, thread.getStackTrace(), true);
+        log.warn(sb.toString());
     }
 
     static class Record {
 
+        final DiffTime diffTime = new DiffTime();
         final Tick tick = new Tick(50, 3000, 0);
         Event runnable;
 
         public void reset(Event runnable) {
             this.tick.reset();
+            this.diffTime.reset();
             this.runnable = runnable;
         }
 

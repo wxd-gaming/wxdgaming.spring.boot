@@ -54,6 +54,9 @@ public class LuaApiController implements InitPrint {
         servletPath = servletPath.substring(index, len);
         servletPath = servletPath.replace("/", "_");
 
+        Thread x = Thread.currentThread();
+        System.out.println(x + " - " + x.isVirtual());
+
         Object obj = luaService.getLuaRuntime().get().context().pCall(servletPath, request, response, body);
 
     }
