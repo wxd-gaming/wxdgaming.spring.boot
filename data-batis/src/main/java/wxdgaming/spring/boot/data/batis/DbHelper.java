@@ -111,7 +111,7 @@ public class DbHelper implements InitPrint {
             } catch (Exception e) {
                 if (e.getMessage().contains("utf8mb4")) {
                     DAOCHARACTER = "utf8";
-                    log.warn("数据库 " + database + " 不支持 utf8mb4 格式 重新用 utf8 字符集创建数据库", new RuntimeException());
+                    log.warn("数据库 {} 不支持 utf8mb4 格式 重新用 utf8 字符集创建数据库", database, new RuntimeException());
                     stringBuilder.setLength(0);
                     stringBuilder.append("CREATE DATABASE IF NOT EXISTS `")
                             .append(database.toLowerCase())

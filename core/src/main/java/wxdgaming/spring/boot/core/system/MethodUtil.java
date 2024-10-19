@@ -184,7 +184,10 @@ public class MethodUtil {
                 continue;
             }
             String methodFullName = methodFullName(method);
-            method.setAccessible(true);
+            try {
+                method.setAccessible(true);
+            } catch (Exception ignore) {}
+
             /*非桥模式，也就是覆盖了父类或者实现了接口*/
             methodList.put(methodFullName, method);
         }
