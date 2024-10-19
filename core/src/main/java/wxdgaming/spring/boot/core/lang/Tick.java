@@ -1,7 +1,6 @@
 package wxdgaming.spring.boot.core.lang;
 
 import lombok.Getter;
-import wxdgaming.spring.boot.core.GlobalUtil;
 import wxdgaming.spring.boot.core.timer.MyClock;
 
 import java.util.concurrent.TimeUnit;
@@ -20,7 +19,7 @@ public class Tick extends ObjectBase {
     /** 间隔毫秒 */
     private final long interval;
     /** 上一次执行时间 */
-    private long last = 0;
+    private volatile long last = 0;
 
     public Tick(long interval) {
         this(interval, TimeUnit.MILLISECONDS);
@@ -42,15 +41,20 @@ public class Tick extends ObjectBase {
             throw new RuntimeException("自循环心跳 heart=" + heart + " 大于间隔执行 interval=" + this.interval);
     }
 
-    /** 判断是否满足条件，如果满足条件自动更新 */
+    public void reset() {
+        last = MyClock.millis();
+    }
+
+    /** 判断是否满足条件，如果满足条件自动更新  返回间隔毫秒数 */
     public boolean need() {
         long millis = MyClock.millis();
         return need(millis);
     }
 
-    /** 判断是否满足条件，如果满足条件自动更新 */
+    /** 判断是否满足条件，如果满足条件自动更新 返回间隔毫秒数 */
     public boolean need(long now) {
-        if (now - last >= interval) {
+        long nanoTime = now - last;
+        if (nanoTime >= interval) {
             last = now;
             return true;
         }
@@ -60,7 +64,7 @@ public class Tick extends ObjectBase {
     /** 同步等待 */
     public void waitNext() {
         try {
-            while (!GlobalUtil.SHUTTING.get() && !need()) {
+            while (!Thread.currentThread().isInterrupted() && !need()) {
                 Thread.sleep(heart);
             }
         } catch (InterruptedException e) {

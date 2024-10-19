@@ -4,10 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.core.timer.MyClock;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author: wxd-gaming(無心道, 15388152619)
@@ -31,38 +27,6 @@ public class NewId implements Serializable {
     volatile long lastDays = 0;
     volatile long lastSecondByDay = 0;
     volatile long seed = 0;
-
-    public static void main(String[] args) throws InterruptedException {
-
-        System.out.println(TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis()));
-
-        System.out.println(Long.MAX_VALUE);
-        System.out.println(Offset32);
-        System.out.println((4000 << 17 | 86400));
-
-        final NewId newId = new NewId(80001, 120);
-        {
-            final long id = newId.newId();
-            System.out.println(id);
-            System.out.println("serverId=" + newId.hexId(id));
-            System.out.println("type=" + newId.type(id));
-            System.out.println("idValue=" + newId.idValue(id));
-        }
-
-        Set<Long> ids = new HashSet<>();
-        while (true) {
-            for (int i = 0; i < 16000; i++) {
-                final long id = newId.newId();
-                if (!ids.add(id)) {
-                    System.out.println("重复id " + id + " " + new Date());
-                    System.out.println("结束 " + ids.size());
-                    return;
-                }
-                //                log.debug("{}", id);
-            }
-            Thread.sleep(900);
-        }
-    }
 
     public NewId(int hexId, int type) {
 

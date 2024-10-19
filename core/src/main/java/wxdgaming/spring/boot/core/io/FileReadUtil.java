@@ -1,7 +1,6 @@
 package wxdgaming.spring.boot.core.io;
 
 
-
 import wxdgaming.spring.boot.core.Throw;
 import wxdgaming.spring.boot.core.function.Consumer2;
 import wxdgaming.spring.boot.core.function.ConsumerE1;
@@ -11,6 +10,7 @@ import wxdgaming.spring.boot.core.zip.ZipReadFile;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,25 +26,20 @@ public class FileReadUtil implements Serializable {
 
 
     /** 递归查找所有文件 */
-    public static Map<String, byte[]> readBytesAll(File file, String... extendNames) {
+    public static Map<String, byte[]> readBytesAll(String file, String... extendNames) {
         return readBytesStream(file, extendNames).collect(Collectors.toMap(Record2::t1, Record2::t2));
     }
 
     /** 递归查找所有文件 */
-    public static Stream<Record2<String, byte[]>> readBytesStream(File file, String... extendNames) {
-        return FileUtil.walkFiles(file.getPath(), extendNames)
-                .map(f -> new Record2<>(f.getPath(), readBytes(f)));
-    }
-
-    /** 递归查找所有文件 */
-    public static Map<String, byte[]> readBytesAll(String file, String... extendNames) {
-        return readBytesAll(FileUtil.findFile(file), extendNames);
+    public static Stream<Record2<String, byte[]>> readBytesStream(String file, String... extendNames) {
+        return FileUtil.resourceStreams(file, extendNames)
+                .map(f -> new Record2<>(f.t1(), readBytes(f.t2())));
     }
 
     /** 递归查找所有文件 */
     public static void readBytesAll(Path file, String[] extendNames, Consumer2<String, byte[]> call) {
         FileUtil.walkFiles(file, extendNames)
-                .forEach(f -> call.accept(f.getPath(), readBytes(f)));
+                .forEach(f -> call.accept(f.toString(), readBytes(f)));
     }
 
     public static String readString(String fileName) {
@@ -110,18 +105,18 @@ public class FileReadUtil implements Serializable {
         return lines;
     }
 
-    public static List<String> readLines(File file) {
-        return readLines(file, StandardCharsets.UTF_8);
+    public static List<String> readLines(Path path) {
+        return readLines(path, StandardCharsets.UTF_8);
     }
 
-    public static List<String> readLines(File file, Charset charset) {
+    public static List<String> readLines(Path path, Charset charset) {
         List<String> lines = new ArrayList<>();
-        readLine(file, charset, lines::add);
+        readLine(path, charset, lines::add);
         return lines;
     }
 
-    public static void readLine(File file, Charset charset, ConsumerE1<String> call) {
-        try (final FileInputStream fileInputStream = new FileInputStream(file)) {
+    public static void readLine(Path path, Charset charset, ConsumerE1<String> call) {
+        try (final InputStream fileInputStream = Files.newInputStream(path)) {
             readLine(fileInputStream, charset, call);
         } catch (Exception e) {
             throw Throw.of(e);
@@ -142,11 +137,11 @@ public class FileReadUtil implements Serializable {
     }
 
     public static byte[] readBytes(String file) {
-        return readBytes(FileUtil.findFile(file));
+        return readBytes(FileUtil.findPath(file));
     }
 
-    public static byte[] readBytes(File file) {
-        try (final FileInputStream fileInputStream = new FileInputStream(file)) {
+    public static byte[] readBytes(Path path) {
+        try (final InputStream fileInputStream = Files.newInputStream(path)) {
             return readBytes(fileInputStream);
         } catch (Exception e) {
             throw Throw.of(e);

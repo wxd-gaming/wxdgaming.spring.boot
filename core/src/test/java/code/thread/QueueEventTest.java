@@ -31,7 +31,7 @@ public class QueueEventTest {
             ThreadContext.putContent("1", index);
             test.execute(new Event() {
                 @Override public void onEvent() throws Throwable {
-                    Thread.sleep(3000);
+                    Thread.sleep(7000);
                     System.out.println(Thread.currentThread().getName()
                             + " - " + index
                             + " -" + start
@@ -58,7 +58,7 @@ public class QueueEventTest {
             ThreadContext.putContent("1", index);
             queueEvent.execute(new Event() {
                 @Override public void onEvent() throws Throwable {
-                    Thread.sleep(3000);
+                    Thread.sleep(9000);
                     System.out.println(Thread.currentThread().getName()
                             + " - " + index
                             + " -" + start

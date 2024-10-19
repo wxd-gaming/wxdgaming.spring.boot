@@ -17,6 +17,7 @@ public abstract class ObjectBase
     }
 
     /** 内存大小,很消耗内存，谨慎使用 */
+    @Deprecated
     public long totalSize() {
         return GraphLayout.parseInstance(this).totalSize();
     }

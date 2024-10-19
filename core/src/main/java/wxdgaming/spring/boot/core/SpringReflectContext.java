@@ -26,10 +26,15 @@ public class SpringReflectContext {
 
     public static Stream<Object> getBeans(ConfigurableApplicationContext applicationContext) {
         String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
-        return Arrays.stream(beanDefinitionNames)
+        Stream<String> stream = Arrays.stream(beanDefinitionNames);
+        if (applicationContext.getParent() != null) {
+            String[] beanDefinitionNames1 = applicationContext.getParent().getBeanDefinitionNames();
+            stream = Stream.concat(stream, Arrays.stream(beanDefinitionNames1));
+        }
+
+        return stream
                 .map(applicationContext::getBean)
                 .sorted(SpringUtil.OBJECT_COMPARATOR);
-
     }
 
     public static SpringReflectContext build(ConfigurableApplicationContext applicationContext) {

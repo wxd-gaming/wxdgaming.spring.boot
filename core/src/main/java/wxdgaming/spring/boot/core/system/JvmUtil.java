@@ -164,6 +164,7 @@ public class JvmUtil {
         return System.getProperty("os.version");
     }
 
+    /** 用户目录，启动目录 */
     public static String userHome() {
         return System.getProperty("user.dir");
     }

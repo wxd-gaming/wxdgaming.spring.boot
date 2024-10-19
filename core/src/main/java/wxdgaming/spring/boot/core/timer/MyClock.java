@@ -524,6 +524,12 @@ public class MyClock {
         return startTime <= targetTime && targetTime < endTime;
     }
 
+    /**
+     * 判断时间是否和当前时间在同一周(注意这里周日和周一判断是在一周里的)
+     *
+     * @param time 时间戳
+     * @return true 表示这一周
+     */
     public static boolean isSameWeek(long time) {
         return isSameWeek(millis(), time);
     }
@@ -531,9 +537,9 @@ public class MyClock {
     /**
      * 判断两个时间是否在同一周(注意这里周日和周一判断是在一周里的)
      *
-     * @param time1
-     * @param time2
-     * @return
+     * @param time1 时间戳
+     * @param time2 时间戳
+     * @return true 表示同一周
      */
     public static boolean isSameWeek(long time1, long time2) {
         return weekFirstDay(time1) == weekFirstDay(time2);
@@ -542,9 +548,9 @@ public class MyClock {
     /**
      * 判断两个时间是否在同一月
      *
-     * @param time1
-     * @param time2
-     * @return
+     * @param time1 时间戳
+     * @param time2 时间戳
+     * @return true 在同一月
      */
     public static boolean isSameMonth(long time1, long time2) {
         return monthFirstDay(time1) == monthFirstDay(time2);
@@ -553,9 +559,9 @@ public class MyClock {
     /**
      * 判断两个时间是否在同一季度
      *
-     * @param time1
-     * @param time2
-     * @return
+     * @param time1 时间戳
+     * @param time2 时间戳
+     * @return true 同一季度
      */
     public static boolean isSameQuarter(long time1, long time2) {
         int y1 = getYear(time1);
@@ -568,19 +574,15 @@ public class MyClock {
     /**
      * 判断两个时间是否在同一年
      *
-     * @param time1
-     * @param time2
-     * @return
+     * @param time1 时间戳
+     * @param time2 时间戳
+     * @return true 同一年
      */
     public static boolean isSameYear(long time1, long time2) {
         return getYear(time1) == getYear(time2);
     }
 
-    /**
-     * 返回指定日期的季度第一天 yyyy-MM-dd
-     *
-     * @return
-     */
+    /** 返回指定日期的季度第一天 yyyy-MM-dd */
     public static String getQuarterOfYear() {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(millis());
@@ -591,11 +593,7 @@ public class MyClock {
         return formatDate(SDF_YYYYMMDD, cal.getTime());
     }
 
-    /**
-     * 获取每一个月的第一天的日期 ,yyyy-MM-dd
-     *
-     * @return
-     */
+    /** 获取每一个月的第一天的日期 ,yyyy-MM-dd */
     public static String getDateMonthDayString() {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(millis());
@@ -603,11 +601,7 @@ public class MyClock {
         return formatDate(SDF_YYYYMMDD, cal.getTime());
     }
 
-    /**
-     * 获取每一年的第一天的日期,yyyy-MM-dd
-     *
-     * @return
-     */
+    /** 获取每一年的第一天的日期,yyyy-MM-dd */
     public static String getDateYearDayString() {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(millis());
@@ -658,6 +652,7 @@ public class MyClock {
         try {
             FileUtil.walkFiles(filePath, names)
                     .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
                     .forEach((checkFile) -> {
                         if (countDays(millis(), checkFile.lastModified()) > fileDays) {
                             checkFile.delete();
@@ -817,7 +812,7 @@ public class MyClock {
     public static int dayOfSecond(long millis) {
         LocalDateTime localDateTime = localDateTime(millis);
         return (int) (TimeUnit.HOURS.toSeconds(localDateTime.getHour())
-                + TimeUnit.HOURS.toSeconds(localDateTime.getMinute())
+                + TimeUnit.MINUTES.toSeconds(localDateTime.getMinute())
                 + localDateTime.getSecond());
     }
 

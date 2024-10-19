@@ -3,6 +3,8 @@ package wxdgaming.spring.boot.lua;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import party.iroiro.luajava.Lua;
+import party.iroiro.luajava.value.LuaValue;
+import wxdgaming.spring.boot.core.function.Consumer2;
 import wxdgaming.spring.boot.core.io.FileUtil;
 
 import java.io.File;
@@ -44,8 +46,8 @@ public class LuaEventBus {
 
         FileUtil.walkDirs(script_path.getPath(), 1).forEach(dir -> {
             if (dir.equals(script_path)) return;
-            log.info("load lua module：{} - {}", dir, dir.getName());
-            LuaRuntime luaRuntime = new LuaRuntime(dir.getName(), new Path[]{dir.toPath(), Paths.get(base_dir + "/util")});
+            log.info("load lua module：{} - {}", dir, dir.getFileName());
+            LuaRuntime luaRuntime = new LuaRuntime(dir.getFileName().toString(), new Path[]{dir, Paths.get(base_dir + "/util")});
             luaRuntime.getGlobals().put("jlog", LuaLogger.getIns());
             luaRuntime.getGlobals().put("globalArgs", lua_data);
             luaEventBus.put(luaRuntime);
@@ -66,7 +68,7 @@ public class LuaEventBus {
         luaRuntimeMap = stringLuaRuntimeLinkedHashMap;
     }
 
-    public void set(String key, JavaFunction value) {
+    public void set(String key, LuaFunction value) {
         luaRuntimeMap.values().forEach(v -> v.getGlobals().put(key, value));
     }
 
@@ -81,7 +83,7 @@ public class LuaEventBus {
 
     /** 把一个方法转化成函数传递给lua */
     public void pushJavaFunction(final Object bean, String key, Method method) {
-        JavaFunction jFunction = new JavaFunction() {
+        LuaFunction jFunction = new LuaFunction() {
             @Override public Object doAction(Lua L, Object[] args) {
                 try {
                     return method.invoke(bean, args);
@@ -99,23 +101,19 @@ public class LuaEventBus {
     }
 
     /** 当前线程上下文 */
-    public LuaContext context(String key) {
+    public void context(String key, Consumer2<LuaContext, LuaValue> func) {
         for (LuaRuntime luaRuntime : luaRuntimeMap.values()) {
             LuaContext context = luaRuntime.context();
-            if (context.has(key)) {
-                return context;
+            LuaValue value = context.find(key);
+            if (context.has(value)) {
+                func.accept(context, value);
             }
         }
-        return null;
     }
 
     /** 自动释放资源 */
     public void pCall(String key, Object... args) {
-        luaRuntimeMap.values().forEach(globalPool -> {
-            try (LuaContext lua = globalPool.newContext()) {
-                lua.pCall(key, args);
-            }
-        });
+        context(key, (context, value) -> context.pCall(value, args));
     }
 
 }

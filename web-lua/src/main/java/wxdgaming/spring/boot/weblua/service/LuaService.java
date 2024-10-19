@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
+import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.lua.LuaContext;
 import wxdgaming.spring.boot.lua.LuaLogger;
 import wxdgaming.spring.boot.lua.LuaRuntime;
@@ -13,6 +14,7 @@ import wxdgaming.spring.boot.lua.LuaRuntime;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * lua service
@@ -27,7 +29,7 @@ public class LuaService implements InitPrint {
 
     final RedisTemplate<Object, Object> redisTemplate;
     final LuaResponseService luaResponseService;
-    LuaRuntime luaRuntime;
+    final AtomicReference<LuaRuntime> luaRuntime = new AtomicReference<>();
 
     public LuaService(RedisTemplate<Object, Object> redisTemplate, LuaResponseService luaResponseService) {
         this.redisTemplate = redisTemplate;
@@ -39,13 +41,15 @@ public class LuaService implements InitPrint {
         LuaRuntime main = new LuaRuntime("main", new Path[]{Paths.get("lua")});
         main.getGlobals().put("responseUtil", luaResponseService);
         main.getGlobals().put("jlog", LuaLogger.getIns());
-        main.getGlobals().put("opsForValue", redisTemplate.opsForValue());
-        log.debug("redisTemplate hashCode: {}", redisTemplate.hashCode());
-        LuaRuntime tmp = luaRuntime;
+        SpringUtil.getIns().getBeansOfType(LuaFunctionSpi.class)
+                .forEach(spi -> {
+                    main.getGlobals().put(spi.getName(), spi);
+                });
+        LuaRuntime tmp = luaRuntime.get();
         if (tmp != null) {
             CompletableFuture.runAsync(() -> {
                         try {
-                            Thread.sleep(10000);
+                            Thread.sleep(20_000);
                         } catch (InterruptedException ignore) {}
                         tmp.close();
                     })
@@ -54,8 +58,8 @@ public class LuaService implements InitPrint {
                         return null;
                     });
         }
-        luaRuntime = main;
-        try (LuaContext luaContext = luaRuntime.newContext()) {
+        luaRuntime.set(main);
+        try (LuaContext luaContext = luaRuntime.get().newContext()) {
             luaContext.pCall("root");
         }
     }

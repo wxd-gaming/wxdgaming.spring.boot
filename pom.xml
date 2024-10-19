@@ -107,11 +107,6 @@
                 <artifactId>fastjson</artifactId>
                 <version>2.0.52</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>mysql</groupId>-->
-<!--                <artifactId>mysql-connector-java</artifactId>-->
-<!--                <version>8.0.33</version>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
@@ -132,6 +127,18 @@
                 <artifactId>lua54-platform</artifactId>
                 <version>4.0.2</version>
                 <classifier>natives-desktop</classifier>
+            </dependency>
+            <dependency>
+                <groupId>party.iroiro.luajava</groupId>
+                <artifactId>luajit</artifactId>
+                <version>4.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>party.iroiro.luajava</groupId>
+                <artifactId>luajit-platform</artifactId>
+                <version>4.0.2</version>
+                <classifier>natives-desktop</classifier>
+                <scope>runtime</scope>
             </dependency>
             <!--计算对象占用内存大小-->
             <dependency>
@@ -159,6 +166,26 @@
                 <groupId>io.protostuff</groupId>
                 <artifactId>protostuff-runtime</artifactId>
                 <version>1.8.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>2.3.32</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>0.12.6</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>0.12.6</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>0.12.6</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -240,6 +267,22 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
         </dependency>
     </dependencies>
 

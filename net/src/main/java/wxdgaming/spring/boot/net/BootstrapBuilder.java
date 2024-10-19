@@ -13,7 +13,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import wxdgaming.spring.boot.core.InitPrint;
-import wxdgaming.spring.boot.core.threading.ThreadNameFactory;
+import wxdgaming.spring.boot.core.threading.WxdThreadFactory;
 
 /**
  * 配置项
@@ -35,9 +35,9 @@ public class BootstrapBuilder implements InitPrint {
 
     public static EventLoopGroup createGroup(int size, String prefix) {
         if (Epoll.isAvailable()) {
-            return new EpollEventLoopGroup(size, new ThreadNameFactory(prefix));
+            return new EpollEventLoopGroup(size, new WxdThreadFactory(prefix));
         } else {
-            return new NioEventLoopGroup(size, new ThreadNameFactory(prefix));
+            return new NioEventLoopGroup(size, new WxdThreadFactory(prefix));
         }
     }
 

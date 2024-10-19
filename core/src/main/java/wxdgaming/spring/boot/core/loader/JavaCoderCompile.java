@@ -8,6 +8,7 @@ import wxdgaming.spring.boot.core.io.FileWriteUtil;
 import javax.tools.*;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -73,7 +74,9 @@ public class JavaCoderCompile {
      * @param sourceDir 需要编译的文件路径
      */
     public JavaCoderCompile compilerJava(String sourceDir) throws Exception {
-        final Collection<File> sourceFileList = FileUtil.walkFiles(sourceDir, ".java").collect(Collectors.toList());
+        final Collection<File> sourceFileList = FileUtil.walkFiles(sourceDir, ".java")
+                .map(Path::toFile)
+                .collect(Collectors.toList());
         compilerJava(sourceDir, sourceFileList);
         return this;
     }

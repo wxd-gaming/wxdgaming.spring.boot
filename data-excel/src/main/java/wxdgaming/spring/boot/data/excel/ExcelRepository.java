@@ -8,16 +8,20 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.Throw;
-import wxdgaming.spring.boot.core.json.FastJsonUtil;
+import wxdgaming.spring.boot.core.format.string.*;
+import wxdgaming.spring.boot.core.io.FileUtil;
+import wxdgaming.spring.boot.core.io.FileWriteUtil;
 import wxdgaming.spring.boot.core.lang.ConvertUtil;
 import wxdgaming.spring.boot.core.util.StringsUtil;
+import wxdgaming.spring.boot.data.excel.store.ICreateCode;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class ExcelRepository implements Serializable, InitPrint {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     private final String[] String_Split = {"[,，]", "[:：]"};
 
@@ -43,26 +47,56 @@ public class ExcelRepository implements Serializable, InitPrint {
         return Optional.ofNullable(tableInfoMap.get(tableName));
     }
 
-    public final void readExcel(File file) {
-        if (file == null || StringsUtil.emptyOrNull(file.getName()) || file.getName().contains("@") || file.getName().contains("$")) {
-            log.info("Excel文件不能解析：{}", file);
-            return;
+    public ExcelRepository outJsonFile(String outPath) {
+        tableInfoMap.values().forEach(tableData -> {
+            FileWriteUtil.writeString(outPath + "/" + tableData.getTableName() + ".json", tableData.data2Json());
+        });
+        return this;
+    }
+
+    public ExcelRepository createCode(ICreateCode iCreateCode, String outPath, String packageName, String belong) {
+        tableInfoMap.values().forEach(tableData -> {
+            iCreateCode.createCode(tableData, outPath, packageName, belong);
+        });
+        return this;
+    }
+
+    public ExcelRepository createCode(ICreateCode iCreateCode, TableData tableData, String outPath, String packageName, String belong) {
+        iCreateCode.createCode(tableData, outPath, packageName, belong);
+        return this;
+    }
+
+    public final ExcelRepository readExcel(Path path, String belong) {
+        FileUtil.walkFiles(path)
+                .forEach(filePath -> readExcel0(filePath, belong));
+        return this;
+    }
+
+    public final ExcelRepository readExcel0(Path path, String belong) {
+        if (path == null) {
+            log.info("Excel文件不能解析：{}", path);
+            return this;
+        }
+        String pathString = path.toString();
+        if (StringsUtil.emptyOrNull(pathString) || pathString.contains("@") || pathString.contains("$")) {
+            log.info("Excel文件不能解析：{}", pathString);
+            return this;
         }
         try {
-            String fileName = file.getName().toLowerCase();
+            String fileName = path.getFileName().toString().toLowerCase();
             Workbook workbook;
-            InputStream is = new FileInputStream(file.getPath());
+            InputStream is = Files.newInputStream(path);
             if (fileName.endsWith(".xls")) {
                 workbook = new HSSFWorkbook(is);
             } else if (fileName.endsWith(".xlsx")) {
                 workbook = new XSSFWorkbook(is);
             } else {
-                log.info("无法识别的文件：{}", file.getPath());
-                return;
+                log.info("无法识别的文件：{}", path);
+                return this;
             }
             if (workbook.getNumberOfSheets() < 1) {
-                log.info("文件空的：{}", file.getPath());
-                return;
+                log.info("文件空的：{}", path);
+                return this;
             }
             /*多少页签*/
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
@@ -70,18 +104,18 @@ public class ExcelRepository implements Serializable, InitPrint {
                 String sheetName = sheet.getSheetName().trim().toLowerCase();
 
                 if (StringsUtil.emptyOrNull(sheetName)
-                        || sheetName.startsWith("sheet")
-                        || sheetName.contains("@")
-                        || sheetName.contains("$")
-                        || !sheetName.startsWith("q_")) {
-                    log.debug("Excel文件不能解析：{}, sheetName={} - 需要是 q_ 开头 sheet name 才能解析", file, sheetName);
+                    || sheetName.startsWith("sheet")
+                    || sheetName.contains("@")
+                    || sheetName.contains("$")
+                    || !sheetName.startsWith("q_")) {
+                    log.debug("Excel文件不能解析：{}, sheetName={} - 需要是 q_ 开头 sheet name 才能解析", path, sheetName);
                     continue;
                 }
 
                 Cell tableCommentCall = sheet.getRow(0).getCell(0);
                 String tableComment = readCellString(tableCommentCall, false);
 
-                TableData tableData = new TableData(file.getPath(), file.getName(), sheet.getSheetName(), sheetName, tableComment);
+                TableData tableData = new TableData(path.toString().replace("\\", "/"), path.getFileName().toString(), sheet.getSheetName(), sheetName, tableComment);
 
                 Row fieldBelongRow = sheet.getRow(1);/*归属*/
                 Row fieldNameRow = sheet.getRow(2);/*字段名字*/
@@ -92,10 +126,11 @@ public class ExcelRepository implements Serializable, InitPrint {
 
                 short lastCellNum = fieldNameRow.getLastCellNum();
                 for (int cellIndex = 0; cellIndex < lastCellNum; cellIndex++) {
-                    String fieldBelongCell = readCellString(fieldBelongRow.getCell(cellIndex), false);
+                    String fieldBelongCell = readCellString(fieldBelongRow.getCell(cellIndex), false);/*字段归属*/
                     String fieldNameCell = readCellString(fieldNameRow.getCell(cellIndex), true);/*字段名字*/
                     String fieldTypeCell = readCellString(fieldTypeRow.getCell(cellIndex), false);/*字段类型*/
                     String fieldCommentCell = readCellString(fieldCommentRow.getCell(cellIndex), false);/*字段含义*/
+                    if (!StringsUtil.emptyOrNull(belong) && !Objects.equals(fieldBelongCell, belong)) continue;/*排除的归属*/
                     CellInfo cellInfo = new CellInfo()
                             .setCellIndex(cellIndex)
                             .setFieldBelong(fieldBelongCell)
@@ -103,11 +138,11 @@ public class ExcelRepository implements Serializable, InitPrint {
                             .setCellType(fieldTypeCell)
                             .setFieldComment(fieldCommentCell);
 
-                    buildFieldType(cellInfo, fieldTypeCell);
+                    buildFieldType(fileName, sheetName, cellInfo, fieldTypeCell);
 
                     if (StringsUtil.emptyOrNull(fieldBelongCell)
-                            && StringsUtil.emptyOrNull(fieldNameCell)
-                            && StringsUtil.emptyOrNull(fieldTypeCell)) {
+                        && StringsUtil.emptyOrNull(fieldNameCell)
+                        && StringsUtil.emptyOrNull(fieldTypeCell)) {
                         break;
                     }
 
@@ -115,11 +150,11 @@ public class ExcelRepository implements Serializable, InitPrint {
                         continue;
 
                     if (cellInfoMap.put(cellIndex, cellInfo) != null) {
-                        throw new RuntimeException("Excel文件不能解析：" + file + ", sheetName=" + sheetName + " 存在重复的字段：" + cellInfo.getFieldName());
+                        throw new RuntimeException("Excel文件不能解析：" + path + ", sheetName=" + sheetName + " 存在重复的字段：" + cellInfo.getFieldName());
                     }
                 }
 
-                tableData.cellInfo4IndexMap = Map.copyOf(cellInfoMap);
+                tableData.cellInfo4IndexMap = cellInfoMap;
 
                 final Map<Object, RowData> rows = new LinkedHashMap<>();
                 int lastRowNum = sheet.getLastRowNum();
@@ -136,19 +171,23 @@ public class ExcelRepository implements Serializable, InitPrint {
                     if (rowData.values().stream().allMatch(v -> v == null || (v instanceof String && StringsUtil.emptyOrNull(String.valueOf(v))))) {
                         continue;
                     }
-                    Object object = rowData.getOrDefault("q_id", rowData.get("id"));
-                    if (object == null) {
-                        throw new RuntimeException("Excel文件不能解析：" + file + ", sheetName=" + sheetName + " 字段内容异常：" + rowIndex);
+                    Object row_id = rowData.getOrDefault("q_id", rowData.get("id"));
+                    if (row_id == null) {
+                        throw new RuntimeException("Excel文件不能解析：" + path + ", sheetName=" + sheetName + " 字段内容异常：" + rowIndex);
                     }
-                    rows.put(object, rowData);
+                    RowData oldData = rows.put(row_id, rowData);
+                    if (oldData != null) {
+                        throw new RuntimeException("Excel文件不能解析：" + path + ", sheetName=" + sheetName + " 行: " + rowIndex + " id重复: " + row_id);
+                    }
                 }
 
-                tableData.rows = Map.copyOf(rows);
+                tableData.rows = rows;
 
                 tableInfoMap.put(tableData.getTableName(), tableData);
             }
+            return this;
         } catch (Throwable throwable) {
-            throw Throw.of(file.getPath(), throwable);
+            throw Throw.of(path.toString(), throwable);
         }
     }
 
@@ -203,279 +242,83 @@ public class ExcelRepository implements Serializable, InitPrint {
 
                 switch (entityField.getFieldTypeString().toLowerCase()) {
                     case "byte[]": {
-                        byte[] arrays;
-                        if (notNullOrEmpty(trim)) {
-                            if (trim.startsWith("[") && trim.endsWith("]")) {
-                                arrays = FastJsonUtil.parse(trim.replace('|', ','), byte[].class);
-                            } else {
-                                String[] split = trim.split(String_Split[1]);
-                                arrays = new byte[split.length];
-                                for (int i = 0; i < split.length; i++) {
-                                    arrays[i] = Double.valueOf(split[i]).byteValue();
-                                }
-                            }
-                        } else {
-                            arrays = new byte[0];
-                        }
-                        return arrays;
+                        return String2ByteArray.parse(trim);
                     }
                     case "byte[][]": {
-                        byte[][] arrays;
-                        if (notNullOrEmpty(trim)) {
-                            if (trim.startsWith("[") && trim.endsWith("]")) {
-                                arrays = FastJsonUtil.parse(trim.replace('|', ','), byte[][].class);
-                            } else {
-                                String[] split0 = trim.split(String_Split[0]);
-                                arrays = new byte[split0.length][];
-                                for (int i0 = 0; i0 < split0.length; i0++) {
-                                    String[] split1 = split0[i0].split(String_Split[1]);
-                                    byte[] integers = new byte[split1.length];
-                                    for (int i1 = 0; i1 < split1.length; i1++) {
-                                        integers[i1] = Double.valueOf(split1[i1]).byteValue();
-                                    }
-                                    arrays[i0] = integers;
-                                }
-                            }
-                        } else {
-                            arrays = new byte[0][];
-                        }
-                        return arrays;
+                        return String2ByteArray2.parse(trim);
                     }
                     case "int[]": {
-                        int[] arrays;
-                        if (notNullOrEmpty(trim)) {
-                            if (trim.startsWith("[") && trim.endsWith("]")) {
-                                arrays = FastJsonUtil.parse(trim.replace('|', ','), int[].class);
-                            } else {
-                                String[] split = trim.split(String_Split[1]);
-                                arrays = new int[split.length];
-                                for (int i = 0; i < split.length; i++) {
-                                    arrays[i] = Double.valueOf(split[i]).intValue();
-                                }
-                            }
-                        } else {
-                            arrays = new int[0];
-                        }
-                        return arrays;
+                        return String2IntArray.parse(trim);
                     }
                     case "int[][]": {
-                        int[][] arrays;
-                        if (notNullOrEmpty(trim)) {
-                            if (trim.startsWith("[") && trim.endsWith("]")) {
-                                arrays = FastJsonUtil.parse(trim.replace('|', ','), int[][].class);
-                            } else {
-                                String[] split0 = trim.split(String_Split[0]);
-                                arrays = new int[split0.length][];
-                                for (int i0 = 0; i0 < split0.length; i0++) {
-                                    String[] split1 = split0[i0].split(String_Split[1]);
-                                    int[] integers = new int[split1.length];
-                                    for (int i1 = 0; i1 < split1.length; i1++) {
-                                        integers[i1] = Double.valueOf(split1[i1]).intValue();
-                                    }
-                                    arrays[i0] = integers;
-                                }
-                            }
-                        } else {
-                            arrays = new int[0][];
-                        }
-                        return arrays;
+                        return String2IntArray2.parse(trim);
                     }
                     case "long[]": {
-                        long[] arrays;
-                        if (notNullOrEmpty(trim)) {
-                            if (trim.startsWith("[") && trim.endsWith("]")) {
-                                arrays = FastJsonUtil.parse(trim.replace('|', ','), long[].class);
-                            } else {
-                                String[] split = trim.split(String_Split[1]);
-                                arrays = new long[split.length];
-                                for (int i = 0; i < split.length; i++) {
-                                    arrays[i] = Double.valueOf(split[i]).longValue();
-                                }
-                            }
-                        } else {
-                            arrays = new long[0];
-                        }
-                        return arrays;
+                        return String2LongArray.parse(trim);
                     }
                     case "long[][]": {
-                        long[][] arrays;
-                        if (notNullOrEmpty(trim)) {
-                            if (trim.startsWith("[") && trim.endsWith("]")) {
-                                arrays = FastJsonUtil.parse(trim.replace('|', ','), long[][].class);
-                            } else {
-                                String[] split0 = trim.split(String_Split[0]);
-                                arrays = new long[split0.length][];
-                                for (int i0 = 0; i0 < split0.length; i0++) {
-                                    String[] split1 = split0[i0].split(String_Split[1]);
-                                    long[] vs1 = new long[split1.length];
-                                    for (int i1 = 0; i1 < split1.length; i1++) {
-                                        vs1[i1] = Double.valueOf(split1[i1]).longValue();
-                                    }
-                                    arrays[i0] = vs1;
-                                }
-                            }
-                        } else {
-                            arrays = new long[0][];
-                        }
-                        return arrays;
+                        return String2LongArray2.parse(trim);
                     }
                     case "float[]": {
-                        float[] arrays;
-                        if (notNullOrEmpty(trim)) {
-                            if (trim.startsWith("[") && trim.endsWith("]")) {
-                                arrays = FastJsonUtil.parse(trim.replace('|', ','), float[].class);
-                            } else {
-                                String[] split = trim.split(String_Split[1]);
-                                arrays = new float[split.length];
-                                for (int i = 0; i < split.length; i++) {
-                                    arrays[i] = Double.valueOf(split[i]).floatValue();
-                                }
-                            }
-                        } else {
-                            arrays = new float[0];
-                        }
-                        return arrays;
+                        return String2FloatArray.parse(trim);
                     }
                     case "float[][]": {
-                        float[][] arrays;
-                        if (notNullOrEmpty(trim)) {
-                            if (trim.startsWith("[") && trim.endsWith("]")) {
-                                arrays = FastJsonUtil.parse(trim.replace('|', ','), float[][].class);
-                            } else {
-                                String[] split0 = trim.split(String_Split[0]);
-                                arrays = new float[split0.length][];
-                                for (int i0 = 0; i0 < split0.length; i0++) {
-                                    String[] split1 = split0[i0].split(String_Split[1]);
-                                    float[] vs1 = new float[split1.length];
-                                    for (int i = 0; i < split1.length; i++) {
-                                        vs1[i] = Double.valueOf(split1[i]).floatValue();
-                                    }
-                                    arrays[i0] = vs1;
-                                }
-                            }
-                        } else {
-                            arrays = new float[0][];
-                        }
-                        return arrays;
+                        return String2FloatArray2.parse(trim);
                     }
                     case "string[]": {
-                        String[] arrays;
-                        if (notNullOrEmpty(trim)) {
-                            if (trim.startsWith("[") && trim.endsWith("]")) {
-                                arrays = FastJsonUtil.parse(trim.replace('|', ','), String[].class);
-                            } else {
-                                arrays = trim.split(String_Split[1]);
-                            }
-                        } else {
-                            arrays = new String[0];
-                        }
-                        return arrays;
+                        return String2StringArray.parse(trim);
                     }
                     case "string[][]": {
-                        String[][] arrays;
-                        if (notNullOrEmpty(trim)) {
-                            if (trim.startsWith("[") && trim.endsWith("]")) {
-                                arrays = FastJsonUtil.parse(trim.replace('|', ','), String[][].class);
-                            } else {
-                                String[] split0 = trim.split(String_Split[0]);
-                                arrays = new String[split0.length][];
-                                for (int i = 0; i < split0.length; i++) {
-                                    arrays[i] = split0[i].split(String_Split[1]);
-                                }
-                            }
-                        } else {
-                            arrays = new String[0][];
-                        }
-                        return arrays;
+                        return String2StringArray2.parse(trim);
                     }
                     case "list<bool>":
                     case "list<boolean>":
                     case "arraylist<boolean>": {
-                        List<Boolean> list;
-                        if (notNullOrEmpty(trim)) {
-                            list = FastJsonUtil.parseArray(trim.replace('|', ','), Boolean.class);
-                        } else {
-                            list = new ArrayList<>();
-                        }
-                        return list;
+                        return String2BoolList.parse(trim);
                     }
                     case "list<byte>":
                     case "arraylist<byte>": {
-                        List<Byte> list;
-                        if (notNullOrEmpty(trim)) {
-                            list = FastJsonUtil.parseArray(trim.replace('|', ','), Byte.class);
-                        } else {
-                            list = new ArrayList<>();
-                        }
-                        return list;
+                        return String2ByteList.parse(trim);
                     }
                     case "list<int>":
                     case "list<integer>":
                     case "arraylist<int>":
                     case "arraylist<integer>": {
-                        List<Integer> list;
-                        if (notNullOrEmpty(trim)) {
-                            list = FastJsonUtil.parseArray(trim.replace('|', ','), Integer.class);
-                        } else {
-                            list = new ArrayList<>();
-                        }
-                        return list;
+                        return String2IntList.parse(trim);
+                    }
+                    case "list<int[]>":
+                    case "list<integer[]>":
+                    case "arraylist<int[]>":
+                    case "arraylist<integer[]>": {
+                        return String2IntArrayList.parse(trim);
                     }
                     case "list<long>":
                     case "arraylist<long>": {
-                        List<Long> list;
-                        if (notNullOrEmpty(trim)) {
-                            list = FastJsonUtil.parseArray(trim.replace('|', ','), Long.class);
-                        } else {
-                            list = new ArrayList<>();
-                        }
-                        return list;
+                        return String2LongList.parse(trim);
+                    }
+                    case "list<long[]>":
+                    case "arraylist<long[]>": {
+                        return String2LongArrayList.parse(trim);
                     }
                     case "list<string>":
                     case "arraylist<string>": {
-                        List<String> list;
-                        if (notNullOrEmpty(trim)) {
-                            list = FastJsonUtil.parseArray(trim.replace('|', ','), String.class);
-                        } else {
-                            list = new ArrayList<>();
-                        }
-                        return list;
+                        return String2StringList.parse(trim);
+                    }
+                    case "list<string[]>":
+                    case "arraylist<string[]>": {
+                        return String2StringArrayList.parse(trim);
                     }
                     case "set<byte>": {
-                        Set<Byte> list;
-                        if (notNullOrEmpty(trim)) {
-                            list = new LinkedHashSet<>(FastJsonUtil.parseArray(trim.replace('|', ','), Byte.class));
-                        } else {
-                            list = new LinkedHashSet<>();
-                        }
-                        return list;
+                        return new LinkedHashSet<>(String2ByteList.parse(trim));
                     }
                     case "set<int>": {
-                        Set<Integer> list;
-                        if (notNullOrEmpty(trim)) {
-                            list = new LinkedHashSet<>(FastJsonUtil.parseArray(trim.replace('|', ','), Integer.class));
-                        } else {
-                            list = new LinkedHashSet<>();
-                        }
-                        return list;
+                        return new LinkedHashSet<>(String2IntList.parse(trim));
                     }
                     case "set<long>": {
-                        Set<Long> list;
-                        if (notNullOrEmpty(trim)) {
-                            list = new LinkedHashSet<>(FastJsonUtil.parseArray(trim.replace('|', ','), Long.class));
-                        } else {
-                            list = new LinkedHashSet<>();
-                        }
-                        return list;
+                        return new LinkedHashSet<>(String2LongList.parse(trim));
                     }
                     case "set<string>": {
-                        Set<String> list;
-                        if (notNullOrEmpty(trim)) {
-                            list = new LinkedHashSet<>(FastJsonUtil.parseArray(trim.replace('|', ','), String.class));
-                        } else {
-                            list = new LinkedHashSet<>();
-                        }
-                        return list;
+                        return new LinkedHashSet<>(String2StringList.parse(trim));
                     }
                     default: {
                         try {
@@ -490,12 +333,12 @@ public class ExcelRepository implements Serializable, InitPrint {
         } catch (Exception ex) {
             final RuntimeException runtimeException = new RuntimeException(
                     ex.getMessage()
-                            + "\n文件：" + tableData.getTableComment()
-                            + ";\nsheet：" + tableData.getTableName()
-                            + ";\n列：" + entityField.getFieldName()
-                            + ";\n行：" + rowNumber
-                            + ";\n数据类型：" + entityField.getFieldTypeString().toLowerCase()
-                            + ";\n数据：" + trim + "----无法转换");
+                    + "\n文件：" + tableData.getTableComment()
+                    + ";\nsheet：" + tableData.getTableName()
+                    + ";\n列：" + entityField.getFieldName()
+                    + ";\n行：" + rowNumber
+                    + ";\n数据类型：" + entityField.getFieldTypeString()
+                    + ";\n数据：" + trim + "----无法转换");
             runtimeException.setStackTrace(ex.getStackTrace());
             throw runtimeException;
         }
@@ -519,7 +362,7 @@ public class ExcelRepository implements Serializable, InitPrint {
             /*空白的话，根据传入的类型返回默认值*/
             /*默认类型*/
             if (data.getCellType() == CellType.STRING
-                    || (data.getCellType() == CellType.FORMULA && data.getCachedFormulaResultType() == CellType.STRING)) {
+                || (data.getCellType() == CellType.FORMULA && data.getCachedFormulaResultType() == CellType.STRING)) {
                 /*字符类型*/
                 trim = data.getStringCellValue().trim();
             }
@@ -538,7 +381,8 @@ public class ExcelRepository implements Serializable, InitPrint {
         return trim.trim();
     }
 
-    private void buildFieldType(CellInfo entityField, String fieldTypeName) {
+    private void buildFieldType(String fileName, String sheetName, CellInfo entityField, String fieldTypeName) throws Exception {
+        if (StringsUtil.emptyOrNull(fieldTypeName)) return;
         final String typeString = typeString(fieldTypeName);
         switch (typeString.toLowerCase()) {
             case "bool":
@@ -773,9 +617,24 @@ public class ExcelRepository implements Serializable, InitPrint {
                 break;
             case "string":
             case "java.lang.string":
-            default:
                 entityField.setFieldType(String.class);
                 entityField.setFieldTypeString("String");
+                break;
+            default:
+                entityField.setFieldType(String.class);
+                try {
+                    Class<?> aClass = this.getClass().getClassLoader().loadClass(fieldTypeName);
+                    entityField.setFieldType(aClass);
+                } catch (ClassNotFoundException e) {
+                    if (fieldTypeName.contains("List<")) {
+                        entityField.setFieldType(List.class);
+                    } else if (fieldTypeName.contains("Map<")) {
+                        entityField.setFieldType(Map.class);
+                    } else {
+                        log.error("{} - {} - {} - {}", fileName, sheetName, entityField.getFieldName(), fieldTypeName, e);
+                    }
+                }
+                entityField.setFieldTypeString(fieldTypeName);
                 break;
         }
     }

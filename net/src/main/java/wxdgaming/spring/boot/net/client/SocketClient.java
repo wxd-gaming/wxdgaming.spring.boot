@@ -8,14 +8,16 @@ import io.netty.handler.timeout.IdleStateHandler;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
+import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.threading.BaseScheduledExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.boot.net.*;
-import wxdgaming.spring.boot.net.message.pojo.inner.InnerMessage;
+import wxdgaming.spring.boot.net.pojo.inner.InnerMessage;
 import wxdgaming.spring.boot.net.ssl.WxdSslHandler;
 
 import javax.net.ssl.SSLEngine;
@@ -123,7 +125,7 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
 
     @Start
     @Order(2000)
-    public void start() {
+    public void start(SpringUtil springUtil) {
         connect();
     }
 

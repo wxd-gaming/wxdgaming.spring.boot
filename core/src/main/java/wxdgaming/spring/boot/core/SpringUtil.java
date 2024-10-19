@@ -1,5 +1,8 @@
 package wxdgaming.spring.boot.core;
 
+import com.alibaba.fastjson.JSONObject;
+import io.netty.handler.codec.http.HttpHeaderValues;
+import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,18 +26,18 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import wxdgaming.spring.boot.core.lang.Tuple2;
-import wxdgaming.spring.boot.core.util.StringsUtil;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Optional;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -91,14 +94,14 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         try {
             if (
                     clazz.getAnnotation(Configuration.class) != null ||
-                            clazz.getAnnotation(ConfigurationProperties.class) != null ||
-                            clazz.getAnnotation(ConditionalOnProperty.class) != null ||
-                            clazz.getAnnotation(Service.class) != null ||
-                            clazz.getAnnotation(Component.class) != null ||
-                            clazz.getAnnotation(ComponentScan.class) != null ||
-                            clazz.getAnnotation(Repository.class) != null ||
-                            clazz.getAnnotation(Controller.class) != null ||
-                            clazz.getAnnotation(RestController.class) != null
+                    clazz.getAnnotation(ConfigurationProperties.class) != null ||
+                    clazz.getAnnotation(ConditionalOnProperty.class) != null ||
+                    clazz.getAnnotation(Service.class) != null ||
+                    clazz.getAnnotation(Component.class) != null ||
+                    clazz.getAnnotation(ComponentScan.class) != null ||
+                    clazz.getAnnotation(Repository.class) != null ||
+                    clazz.getAnnotation(Controller.class) != null ||
+                    clazz.getAnnotation(RestController.class) != null
             ) {
                 return true;
             }
@@ -288,7 +291,7 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         // 获取bean工厂并转换为DefaultListableBeanFactory
         DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) context.getBeanFactory();
         if (removeOld && defaultListableBeanFactory.containsBean(name)) {
-            defaultListableBeanFactory.removeBeanDefinition(name);
+            defaultListableBeanFactory.destroySingleton(name);
         }
         defaultListableBeanFactory.registerSingleton(name, instance);
 
@@ -391,6 +394,31 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
         return url.toString();
     }
 
+    /** 获取报文 */
+    public static String getRequestBody(HttpServletRequest request) throws IOException {
+        if (Objects.equals(request.getMethod(), "GET")) {
+            return request.getQueryString();
+        } else {
+            ServletInputStream inputStream = request.getInputStream();
+            return StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+        }
+    }
+
+    /** 获取报文 */
+    public static JSONObject getParameters(HttpServletRequest request) throws IOException {
+        if (Objects.equals(request.getContentType(), HttpHeaderValues.APPLICATION_JSON.toString())) {
+            return JSONObject.parseObject(getRequestBody(request));
+        } else {
+            Enumeration<String> parameterNames = request.getParameterNames();
+            JSONObject jsonObject = new JSONObject();
+            while (parameterNames.hasMoreElements()) {
+                String name = parameterNames.nextElement();
+                jsonObject.put(name, request.getParameter(name));
+            }
+            return jsonObject;
+        }
+    }
+
     /**
      * 记录请求日志
      *
@@ -398,18 +426,18 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
      * @author: wxd-gaming(無心道, 15388152619)
      * @version: 2024-08-12 16:26
      */
-    public static void recordRequest(HttpServletRequest request) {
-        StringBuilder stringBuilder = new StringBuilder().append("\n\n");
-        stringBuilder.append(request.getMethod()).append(" ").append(getCurrentUrl(request)).append("\n");
-        stringBuilder.append("servlet path: ").append(request.getServletPath()).append("\n");
-        String header = request.getHeader("content-type");
-        if (header != null) {
-            stringBuilder.append("content-type: ").append(header).append("\n");
+    public static void recordRequest(HttpServletRequest request) throws IOException {
+        if (log.isDebugEnabled()) {
+            StringBuilder stringBuilder = new StringBuilder().append("\n\n");
+            stringBuilder.append(request.getMethod()).append(" ").append(getCurrentUrl(request)).append("\n");
+            stringBuilder.append("servlet path: ").append(request.getServletPath()).append("\n");
+            String header = request.getHeader("content-type");
+            if (header != null) {
+                stringBuilder.append("content-type: ").append(header).append("\n");
+            }
+            // stringBuilder.append("param data: ").append(getRequestBody(request)).append("\n");
+            log.debug(stringBuilder.toString());
         }
-        if (StringsUtil.notEmptyOrNull(request.getQueryString())) {
-            stringBuilder.append("url query string: ").append(request.getQueryString()).append("\n");
-        }
-        log.debug(stringBuilder.toString());
     }
 
 }

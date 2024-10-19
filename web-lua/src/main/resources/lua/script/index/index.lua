@@ -16,7 +16,10 @@ end
 
 function index(request, response, postBody)
     --临时缓存设置300秒过期
-    opsForValue:set("lua-dd", "dd", 300, TimeUnit.SECONDS);
+    opsForValue("lua-dd", "dd", 300, TimeUnit.SECONDS)
+    print(opsForValue("lua-dd"))
+    opsForHash("lua:dd:map", "dd", "ddd")
+    print(opsForHash("lua:dd:map", "dd"))
     responseUtil:responseObj(response, "index lua -- dd")
 end
 

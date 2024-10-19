@@ -10,7 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import party.iroiro.luajava.value.LuaValue;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.weblua.service.LuaService;
 
@@ -55,7 +54,10 @@ public class LuaApiController implements InitPrint {
         servletPath = servletPath.substring(index, len);
         servletPath = servletPath.replace("/", "_");
 
-        LuaValue call = luaService.getLuaRuntime().context().pCall(servletPath, request, response, body);
+        Thread x = Thread.currentThread();
+        System.out.println(x + " - " + x.isVirtual());
+
+        Object obj = luaService.getLuaRuntime().get().context().pCall(servletPath, request, response, body);
 
     }
 

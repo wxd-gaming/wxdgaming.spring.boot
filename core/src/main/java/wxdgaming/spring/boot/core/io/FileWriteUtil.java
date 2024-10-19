@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
 
@@ -140,7 +141,7 @@ public class FileWriteUtil implements Serializable {
      * @param outPath
      */
     public static void copy(String file, String outPath) {
-        File file1 = FileUtil.findFile(file);
+        Path file1 = FileUtil.findPath(file);
         copy(file1, outPath);
     }
 
@@ -150,9 +151,9 @@ public class FileWriteUtil implements Serializable {
      * @param file
      * @param outPath
      */
-    public static void copy(File file, String outPath) {
+    public static void copy(Path file, String outPath) {
         byte[] bytes = FileReadUtil.readBytes(file);
-        writeBytes(outPath + "/" + file.getName(), bytes);
+        writeBytes(outPath + "/" + file.getFileName(), bytes);
     }
 
     /**
@@ -163,8 +164,7 @@ public class FileWriteUtil implements Serializable {
      */
     public static void copyDir(String dir, String outPath) {
         FileUtil.walkFiles(dir, 1).forEach(f -> {
-            byte[] bytes = FileReadUtil.readBytes(f);
-            writeBytes(outPath + "/" + f.getName(), bytes);
+            copy(f, outPath);
         });
     }
 }

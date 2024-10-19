@@ -15,6 +15,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +97,7 @@ public class AgentService implements Serializable {
             if (systemClassLoader instanceof URLClassLoader) {
 
                 /* 注意，是jre的bin目录，不是jdk的bin目录，VirtualMachine need the attach.dll in the jre of the JDK. */
-                File toolsJarPath = FileUtil.walkFiles(
+                Path toolsJarPath = FileUtil.walkFiles(
                                 jreHome + File.separator + "..",
                                 "lib/tools.jar"
                         )
@@ -108,7 +109,7 @@ public class AgentService implements Serializable {
                 try {
                     Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
                     method.setAccessible(true);
-                    method.invoke(systemClassLoader, toolsJarPath.toURI().toURL());
+                    method.invoke(systemClassLoader, toolsJarPath.toUri().toURL());
                     final Class<?> loadClass = systemClassLoader.loadClass(Full_Class_Name);
                     log.warn("附加外部 jar 包，加载器加载成功：{}", loadClass);
                     return loadClass;

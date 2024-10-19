@@ -120,7 +120,7 @@ public class ConvertUtil {
                 for (TypeCode value : values) {
                     for (Class<?> tmpClass : value.getClazzs()) {
                         if (tmpClass.getName().equalsIgnoreCase(clazz)
-                                || tmpClass.getSimpleName().equalsIgnoreCase(clazz)) {
+                            || tmpClass.getSimpleName().equalsIgnoreCase(clazz)) {
                             return value;
                         }
                     }
@@ -148,6 +148,9 @@ public class ConvertUtil {
         if (clazz.isInstance(obj) || clazz.isAssignableFrom(obj.getClass())) {
             return obj;
         }
+        if (ConfigString.class.isAssignableFrom(clazz)) {
+            return new ConfigString(obj.toString());
+        }
         final TypeCode typeCode = TypeCode.getTypeCode(clazz);
         /*如果等于，或者所与继承关系*/
         switch (typeCode) {
@@ -170,7 +173,14 @@ public class ConvertUtil {
             case String:
                 return String.valueOf(obj);
             default: {
-                return FastJsonUtil.parse(String.valueOf(obj), clazz);
+                String str = String.valueOf(obj);
+                if (clazz.isEnum()) {
+                    if (!str.startsWith("\""))
+                        str = "\"" + str;
+                    if (!str.endsWith("\""))
+                        str = str + "\"";
+                }
+                return FastJsonUtil.parse(str, clazz);
             }
         }
     }

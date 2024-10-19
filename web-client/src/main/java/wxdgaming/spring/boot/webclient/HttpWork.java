@@ -52,6 +52,7 @@ public abstract class HttpWork {
             for (Map.Entry<String, String> entry : requestHeaders.entrySet()) {
                 request.setHeader(entry.getKey(), entry.getValue());
             }
+            request.setHeader("Content-Type", contentType.toString());
             responseBody = closeableHttpClient.execute(request, response -> {
                 HttpWork.this.response = response;
                 return EntityUtils.toByteArray(response.getEntity());

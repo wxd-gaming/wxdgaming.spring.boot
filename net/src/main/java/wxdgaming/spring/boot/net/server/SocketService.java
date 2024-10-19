@@ -8,15 +8,14 @@ import io.netty.handler.timeout.IdleStateHandler;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
+import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.system.BytesUnit;
 import wxdgaming.spring.boot.core.threading.Event;
-import wxdgaming.spring.boot.net.BootstrapBuilder;
-import wxdgaming.spring.boot.net.SessionGroup;
-import wxdgaming.spring.boot.net.ISession;
-import wxdgaming.spring.boot.net.SessionHandler;
+import wxdgaming.spring.boot.net.*;
 import wxdgaming.spring.boot.net.ssl.WxdOptionalSslHandler;
 
 import java.io.Closeable;
@@ -133,9 +132,7 @@ public class SocketService implements InitPrint, Closeable, ISession {
         this.socketServerBuilder.getWorkerLoop().scheduleAtFixedRate(
                 new Event() {
                     @Override public void onEvent() throws Throwable {
-                        sessionGroup.forEach(session -> {
-                            session.flush();
-                        });
+                        sessionGroup.forEach(SocketSession::flush);
                     }
                 },
                 5,

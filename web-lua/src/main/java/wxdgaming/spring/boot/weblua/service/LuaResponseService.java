@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import party.iroiro.luajava.value.LuaValue;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.lua.LuaRuntime;
+import wxdgaming.spring.boot.lua.LuaUtils;
 import wxdgaming.spring.boot.web.service.ResponseService;
 
 /**
@@ -26,7 +27,7 @@ public class LuaResponseService {
         String res = "";
         Object object = obj;
         if (obj instanceof LuaValue) {
-            object = LuaRuntime.luaValue2Object((LuaValue) obj);
+            object = LuaUtils.luaValue2Object((LuaValue) obj);
         }
         if (object instanceof Number
                 || object instanceof String) {

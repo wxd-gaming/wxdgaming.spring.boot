@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import party.iroiro.luajava.Lua;
 import wxdgaming.spring.boot.core.io.FileUtil;
-import wxdgaming.spring.boot.lua.JavaFunction;
 import wxdgaming.spring.boot.lua.LuaEventBus;
+import wxdgaming.spring.boot.lua.LuaFunction;
 import wxdgaming.spring.boot.lua.LuaLogger;
 
 import java.io.File;
@@ -27,8 +27,7 @@ public class LuaTest {
         File script_path = new File(path + "/script");
         FileUtil.walkDirs(script_path.getPath(), 1).forEach(dir -> {
             if (dir.equals(script_path)) return;
-
-            System.out.println(dir + " - " + dir.getName());
+            System.out.println(dir + " - " + dir.getFileName());
         });
 
         System.out.println("========================================================");
@@ -55,7 +54,7 @@ public class LuaTest {
         luaEventBus.set("objVar", 1);
         luaEventBus.set("jlog", LuaLogger.getIns());
         /*注册函数*/
-        luaEventBus.set("testfun0", new JavaFunction() {
+        luaEventBus.set("testfun0", new LuaFunction() {
             @Override public Object doAction(Lua L, Object[] args) {
                 log.info("{}", Arrays.toString(args));
                 return "java 返回值";

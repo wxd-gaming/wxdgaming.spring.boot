@@ -6,6 +6,7 @@ import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ReflectContext;
 import wxdgaming.spring.boot.core.SpringUtil;
+import wxdgaming.spring.boot.core.ann.ReLoad;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.message.PojoBase;
@@ -26,8 +27,9 @@ public class MessageDispatcher implements InitPrint {
     protected final ConcurrentHashMap<String, Integer> messageName2Id = new ConcurrentHashMap<>();
 
     @Start
+    @ReLoad
     @Order(999)
-    public void start(SpringUtil springUtil) {
+    public void initMapping(SpringUtil springUtil) {
         springUtil.withMethodAnnotated(MsgMapper.class)
                 .forEach(t -> {
                     Class parameterType = t.getRight().getParameterTypes()[1];

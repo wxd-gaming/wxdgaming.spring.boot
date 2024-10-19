@@ -12,7 +12,7 @@ import java.util.concurrent.*;
 public class BaseScheduledExecutor extends ScheduledThreadPoolExecutor implements Executor, ScheduledExecutorService {
 
     public BaseScheduledExecutor(String prefix, int coreSize) {
-        super(coreSize, new ThreadNameFactory(prefix));
+        super(coreSize, new WxdThreadFactory(prefix));
     }
 
     @Override protected void beforeExecute(Thread t, Runnable r) {

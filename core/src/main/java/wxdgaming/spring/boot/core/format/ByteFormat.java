@@ -22,7 +22,8 @@ public class ByteFormat implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static enum FormatInfo {
+    @Getter
+    public enum FormatInfo {
         All(0, ""),
         GB(1024f * 1024 * 1024, "G"),
         MB(1024f * 1024, "M"),
@@ -37,13 +38,6 @@ public class ByteFormat implements Serializable {
             this.comment = comment;
         }
 
-        public float getCode() {
-            return code;
-        }
-
-        public String getComment() {
-            return comment;
-        }
     }
 
     private final StringBuilder sb = new StringBuilder();
