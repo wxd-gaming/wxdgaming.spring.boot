@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:net/src/main/java/wxdgaming/spring/boot/net/message/inner/InnerMessage.java
-package wxdgaming.spring.boot.net.message.inner;
-========
 package wxdgaming.spring.boot.net.pojo.inner;
->>>>>>>> 47bc7aba3c7413b36452d8aceeba054e4f7e72ad:net/src/main/java/wxdgaming/spring/boot/net/pojo/inner/InnerMessage.java
 
 import io.protostuff.Tag;
 import java.util.List;

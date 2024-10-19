@@ -14,7 +14,7 @@ import wxdgaming.spring.boot.net.message.PojoBase;
  * rpc.proto
  *
  * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-09-27 08:52:04
+ * @version: 2024-10-19 18:17:51
  */
 public class InnerMessage {
 

@@ -2,7 +2,7 @@ package wxdgaming.spring.boot.net;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import wxdgaming.spring.boot.net.message.inner.InnerMessage;
+import wxdgaming.spring.boot.net.pojo.inner.InnerMessage;
 
 /**
  * 内置的心跳定时器
