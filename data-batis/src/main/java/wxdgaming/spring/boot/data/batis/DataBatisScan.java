@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.data.batis;
 
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
+import wxdgaming.spring.boot.core.CoreScan;
 
 /**
  * 扫描器
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
  **/
 @EntityScan
 @ComponentScan
+@ComponentScan(basePackageClasses = {CoreScan.class})
 public class DataBatisScan {
 
 }

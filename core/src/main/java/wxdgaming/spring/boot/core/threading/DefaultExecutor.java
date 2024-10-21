@@ -1,5 +1,7 @@
 package wxdgaming.spring.boot.core.threading;
 
+import lombok.Getter;
+
 /**
  * default Executor
  *
@@ -8,8 +10,11 @@ package wxdgaming.spring.boot.core.threading;
  **/
 public class DefaultExecutor extends BaseScheduledExecutor {
 
+    @Getter private static DefaultExecutor ins = null;
+
     public DefaultExecutor(int coreSize) {
         super("default", coreSize);
+        ins = this;
     }
 
 }

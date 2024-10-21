@@ -1,5 +1,6 @@
 package wxdgaming.spring.boot.core.threading;
 
+import lombok.Getter;
 import wxdgaming.spring.boot.core.lang.LockBase;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -17,6 +18,8 @@ import java.util.function.Supplier;
  **/
 public class VirtualExecutor extends LockBase implements Executor {
 
+    @Getter private static VirtualExecutor ins = null;
+
     /** 用于控制并发数量 */
     private final int coreSize;
     /** 当前正在执行的任务数量 */
@@ -29,7 +32,7 @@ public class VirtualExecutor extends LockBase implements Executor {
         this.coreSize = coreSize;
         this.runnableBlockingQueue = new ArrayBlockingQueue<>(30000);
         virtual = Thread.ofVirtual().name("virtual-", 1);
-
+        ins = this;
     }
 
     @Override public void execute(Runnable command) {

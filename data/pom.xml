@@ -12,7 +12,11 @@
     <artifactId>wxdgaming.spring.boot.data</artifactId>
 
     <dependencies>
-
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>wxdgaming.spring.boot.core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

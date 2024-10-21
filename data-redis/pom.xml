@@ -17,13 +17,13 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+        </dependency>
+        <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
             <artifactId>wxdgaming.spring.boot.core</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
         </dependency>
     </dependencies>
 

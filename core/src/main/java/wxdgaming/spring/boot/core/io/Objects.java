@@ -34,16 +34,16 @@ public class Objects {
             Field[] fields = clazz.getDeclaredFields();// 根据Class对象获得属性 私有的也可以获得
             for (Field field : fields) {
                 if (Modifier.isStatic(field.getModifiers())
-                        || Modifier.isTransient(field.getModifiers())
-                        || Modifier.isFinal(field.getModifiers())) {
-//                    System.out.println(" 类：" + clazz.getName() + " 字段：" + field.getName() + " is transient or static or final;");
+                    || Modifier.isTransient(field.getModifiers())
+                    || Modifier.isFinal(field.getModifiers())) {
+                    //                    System.out.println(" 类：" + clazz.getName() + " 字段：" + field.getName() + " is transient or static or final;");
                     continue;
                 }
                 Object get = field.get(object);
                 if (get != null) {
                     hashcode += java.util.Objects.hashCode(get);
                 }
-//                System.out.println(field.getName() + " " + field.getType().getName() + "," + get);//打印每个属性的类型名字
+                //                System.out.println(field.getName() + " " + field.getType().getName() + "," + get);//打印每个属性的类型名字
             }
         } catch (Exception e) {
             e.printStackTrace(System.err);
@@ -98,30 +98,6 @@ public class Objects {
         return (a == b) || (a != null && a.equals(b));
     }
 
-
-    /**
-     * @param str 格式 1:1:1,2:2:2
-     */
-    public static int[][] asInts2(String str) {
-        return asSplit2(str, ",|，", ":|：");
-    }
-
-    /**
-     * @param str 格式 1（splitRegex2）1（splitRegex2）1（splitRegex1）2（splitRegex2）2（splitRegex2）2
-     */
-    public static int[][] asSplit2(String str, String splitRegex1, String splitRegex2) {
-        String[] split = str.split(splitRegex1);
-        int[][] ints2 = new int[split.length][3];
-        for (int i = 0; i < split.length; i++) {
-            int[] ints = new int[3];
-            String[] split1 = split[i].split(splitRegex2);
-            ints[0] = Integer.parseInt(split1[0]);
-            ints[1] = Integer.parseInt(split1[1]);
-            ints[2] = Integer.parseInt(split1[2]);
-            ints2[i] = ints;
-        }
-        return ints2;
-    }
 
     /**
      * 合并value

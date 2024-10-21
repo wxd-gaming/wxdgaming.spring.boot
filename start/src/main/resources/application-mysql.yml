@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/my_test?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&useSSL=false
+    url: jdbc:mysql://localhost:3306/my_test?serverTimezone=UTC&rewriteBatchedStatements=true&autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=true&zeroDateTimeBehavior=convertToNull
     username: root
     password: test
     driver-class-name: com.mysql.cj.jdbc.Driver

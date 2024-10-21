@@ -4,11 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import party.iroiro.luajava.Lua;
 import wxdgaming.spring.boot.core.io.FileUtil;
-import wxdgaming.spring.boot.lua.LuaEventBus;
 import wxdgaming.spring.boot.lua.LuaFunction;
-import wxdgaming.spring.boot.lua.LuaLogger;
+import wxdgaming.spring.boot.lua.LuaService;
+import wxdgaming.spring.boot.lua.LuacType;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 /**
@@ -24,8 +24,8 @@ public class LuaTest {
     public void t1() {
 
         String path = "src/main/lua/";
-        File script_path = new File(path + "/script");
-        FileUtil.walkDirs(script_path.getPath(), 1).forEach(dir -> {
+        Path script_path = Path.of(path + "/script");
+        FileUtil.walkDirs(script_path, 1).forEach(dir -> {
             if (dir.equals(script_path)) return;
             System.out.println(dir + " - " + dir.getFileName());
         });
@@ -38,7 +38,7 @@ public class LuaTest {
 
     }
 
-    protected static LuaEventBus luaEventBus = null;
+    protected static LuaService luaService = null;
 
     static int forCount = 5000;
 
@@ -50,17 +50,16 @@ public class LuaTest {
     public void t34() {
         System.out.println(System.currentTimeMillis() + " - " + System.getProperty("user.dir"));
         // luaBus = LuaBus.buildFromResources(Thread.currentThread().getContextClassLoader(), "script/");
-        luaEventBus = LuaEventBus.buildFromDirs("src/main/lua");
-        luaEventBus.set("objVar", 1);
-        luaEventBus.set("jlog", LuaLogger.getIns());
+        luaService = LuaService.of(LuacType.LUA54, false, true, "src/main/lua");
+        luaService.set("objVar", 1);
         /*注册函数*/
-        luaEventBus.set("testfun0", new LuaFunction() {
+        luaService.set("testfun0", new LuaFunction() {
             @Override public Object doAction(Lua L, Object[] args) {
                 log.info("{}", Arrays.toString(args));
                 return "java 返回值";
             }
         });
-        luaEventBus.pCall("login");
+        luaService.getRuntime().call("login");
     }
 
 

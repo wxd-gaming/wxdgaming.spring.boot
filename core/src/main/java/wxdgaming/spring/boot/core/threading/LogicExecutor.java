@@ -1,5 +1,7 @@
 package wxdgaming.spring.boot.core.threading;
 
+import lombok.Getter;
+
 /**
  * logic Executor
  *
@@ -8,8 +10,11 @@ package wxdgaming.spring.boot.core.threading;
  **/
 public class LogicExecutor extends BaseScheduledExecutor {
 
+    @Getter private static LogicExecutor ins = null;
+
     public LogicExecutor(int coreSize) {
         super("logic", coreSize);
+        ins = this;
     }
 
 }

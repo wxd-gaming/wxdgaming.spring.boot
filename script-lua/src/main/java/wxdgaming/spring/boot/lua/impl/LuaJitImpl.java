@@ -1,10 +1,11 @@
-package wxdgaming.spring.boot.lua;
+package wxdgaming.spring.boot.lua.impl;
 
 import party.iroiro.luajava.AbstractLua;
 import party.iroiro.luajava.LuaException;
 import party.iroiro.luajava.cleaner.LuaReference;
 import party.iroiro.luajava.luajit.LuaJit;
 import party.iroiro.luajava.value.LuaValue;
+import wxdgaming.spring.boot.lua.LuaLong;
 
 /**
  * 子类，重写 Lua54 pushArray to pushJavaArray
@@ -12,20 +13,20 @@ import party.iroiro.luajava.value.LuaValue;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-28 20:29
  */
-public class LuaJit_Sub extends LuaJit {
+public class LuaJitImpl extends LuaJit {
 
     private final String name;
     private boolean closed = false;
 
-    public LuaJit_Sub() throws LinkageError {
+    public LuaJitImpl() throws LinkageError {
         this.name = Thread.currentThread().getName();
     }
 
-    @Override public LuaJit_Sub newThread() {
+    @Override public LuaJitImpl newThread() {
         throw new UnsupportedOperationException("不允许");
     }
 
-    @Override protected LuaJit_Sub newThread(long L, int id, AbstractLua mainThread) {
+    @Override protected LuaJitImpl newThread(long L, int id, AbstractLua mainThread) {
         throw new UnsupportedOperationException("不允许");
     }
 

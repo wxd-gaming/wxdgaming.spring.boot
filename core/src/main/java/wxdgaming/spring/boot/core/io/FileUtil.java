@@ -301,12 +301,12 @@ public class FileUtil implements Serializable {
     }
 
     /** 所有的文件夹 */
-    public static Stream<Path> walkDirs(String path, String... extendNames) {
+    public static Stream<Path> walkDirs(Path path, String... extendNames) {
         return walkDirs(path, Integer.MAX_VALUE, extendNames);
     }
 
     /** 所有的文件 */
-    public static Stream<Path> walkDirs(String path, int maxDepth, String... extendNames) {
+    public static Stream<Path> walkDirs(Path path, int maxDepth, String... extendNames) {
         return walk(path, maxDepth, extendNames).filter(Files::isDirectory);
     }
 

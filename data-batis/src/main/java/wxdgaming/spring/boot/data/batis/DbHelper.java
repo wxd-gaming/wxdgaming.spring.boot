@@ -19,6 +19,8 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 /**
@@ -36,10 +38,6 @@ import java.util.regex.Pattern;
 public class DbHelper implements InitPrint {
 
     private final Pattern DB_NAME_REGEX = Pattern.compile("[^/]+(?=(\\?|$))");
-    /**
-     * 默认utf8
-     */
-    public static String DAOCHARACTER = "utf8mb4";
 
     String url;
     String username;
@@ -50,8 +48,8 @@ public class DbHelper implements InitPrint {
     @PostConstruct
     public void initDb() {
         String dbName = getDbName(url);
-        boolean database = createDatabase(dbName);
-        log.info("数据库 {} 创建 {}", dbName, database);
+        createDatabase(dbName);
+
     }
 
     @Bean
@@ -95,40 +93,35 @@ public class DbHelper implements InitPrint {
         return connectString;
     }
 
+    public String createDatabaseString(String database, String daoCharacter) {
+        return "CREATE DATABASE IF NOT EXISTS `" + database.toLowerCase() + "` DEFAULT CHARACTER SET " + daoCharacter + " COLLATE " + daoCharacter + "_unicode_ci;";
+    }
+
     /** 创建数据库 , 吃方法创建数据库后会自动使用 use 语句 */
-    public boolean createDatabase(String database) {
+    public void createDatabase(String database) {
         try (Connection connection = getConnection("INFORMATION_SCHEMA")) {
-            StringBuilder stringBuilder = new StringBuilder();
+            Consumer<String> stringConsumer = (character) -> {
+                String databaseString = createDatabaseString(database, character);
+                try (Statement statement = connection.createStatement()) {
+                    int update = statement.executeUpdate(databaseString);
+                    log.info("数据库 {} 创建 {}", database, update);
+                } catch (Exception e) {
+                    throw Throw.of(e);
+                }
+            };
             try {
-                stringBuilder.append("CREATE DATABASE IF NOT EXISTS `")
-                        .append(database.toLowerCase())
-                        .append("` DEFAULT CHARACTER SET ")
-                        .append(DAOCHARACTER)
-                        .append(" COLLATE ")
-                        .append(DAOCHARACTER)
-                        .append("_unicode_ci;");
-                return connection.createStatement().execute(stringBuilder.toString());
-            } catch (Exception e) {
-                if (e.getMessage().contains("utf8mb4")) {
-                    DAOCHARACTER = "utf8";
+                stringConsumer.accept("utf8mb4");
+            } catch (Throwable t) {
+                if (t.getMessage().contains("utf8mb4")) {
                     log.warn("数据库 {} 不支持 utf8mb4 格式 重新用 utf8 字符集创建数据库", database, new RuntimeException());
-                    stringBuilder.setLength(0);
-                    stringBuilder.append("CREATE DATABASE IF NOT EXISTS `")
-                            .append(database.toLowerCase())
-                            .append("` DEFAULT CHARACTER SET ")
-                            .append(DAOCHARACTER)
-                            .append(" COLLATE ")
-                            .append(DAOCHARACTER)
-                            .append("_unicode_ci;");
-                    return connection.createStatement().execute(stringBuilder.toString());
+                    stringConsumer.accept("utf8");
                 } else {
-                    log.error("创建数据库 {}", database, e);
+                    log.error("创建数据库 {}", database, t);
                 }
             }
         } catch (Exception e) {
             log.error("创建数据库 {}", database, e);
         }
-        return false;
     }
 
 }

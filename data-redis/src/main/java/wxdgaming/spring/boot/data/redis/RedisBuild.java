@@ -50,7 +50,7 @@ public class RedisBuild implements CachingConfigurer, InitPrint {
     @Primary
     @Bean("redisTemplate")
     @ConditionalOnProperty("spring.redis.first.host")
-    public RedisTemplate<?, ?> redisTemplate(
+    public RedisTemplate<String, Object> redisTemplate(
             @Qualifier("redisConnectionFactory") RedisConnectionFactory redisConnectionFactory) {
         return buildRedisTemplate(redisConnectionFactory);
     }
@@ -63,7 +63,7 @@ public class RedisBuild implements CachingConfigurer, InitPrint {
 
     @Bean("secondRedisTemplate")
     @ConditionalOnProperty("spring.redis.second.host")
-    public RedisTemplate<?, ?> secondRedisTemplate(
+    public RedisTemplate<String, Object> secondRedisTemplate(
             @Qualifier("secondRedisConnectionFactory") RedisConnectionFactory secondRedisConnectionFactory) {
         return buildRedisTemplate(secondRedisConnectionFactory);
     }
@@ -97,8 +97,8 @@ public class RedisBuild implements CachingConfigurer, InitPrint {
         return poolConfig;
     }
 
-    RedisTemplate<?, ?> buildRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<?, ?> redisTemplate = new RedisTemplate<>();
+    RedisTemplate<String, Object> buildRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         // 默认的序列化器： new JdkSerializationRedisSerializer()
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new StringRedisSerializer());

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import wxdgaming.spring.boot.core.InitPrint;
-import wxdgaming.spring.boot.weblua.service.LuaService;
+import wxdgaming.spring.boot.lua.LuaService;
 
 import java.io.IOException;
 
@@ -28,7 +28,7 @@ public class LuaApiController implements InitPrint {
     final RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
-    public LuaApiController(@Qualifier("redisTemplate") RedisTemplate<String, Object> redisTemplate, LuaService luaService) {
+    public LuaApiController(@Qualifier("redisTemplate") RedisTemplate redisTemplate, LuaService luaService) {
         this.redisTemplate = redisTemplate;
         this.luaService = luaService;
     }
@@ -36,7 +36,6 @@ public class LuaApiController implements InitPrint {
     @ResponseBody
     @RequestMapping("/lua/reload")
     public String reload() throws IOException {
-        luaService.init();
         return "ok";
     }
 
@@ -57,7 +56,7 @@ public class LuaApiController implements InitPrint {
         Thread x = Thread.currentThread();
         System.out.println(x + " - " + x.isVirtual());
 
-        Object obj = luaService.getLuaRuntime().get().context().pCall(servletPath, request, response, body);
+        Object obj = luaService.getRuntime().call(servletPath, request, response, body);
 
     }
 

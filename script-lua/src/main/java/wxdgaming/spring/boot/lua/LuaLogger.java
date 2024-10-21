@@ -2,7 +2,6 @@ package wxdgaming.spring.boot.lua;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import wxdgaming.spring.boot.core.InitPrint;
 
 /**
  * 传递给lua脚本使用的slf4j日志
@@ -11,7 +10,7 @@ import wxdgaming.spring.boot.core.InitPrint;
  * @version: 2024-08-07 20:07
  **/
 @Slf4j
-public class LuaLogger implements InitPrint {
+public class LuaLogger {
 
     @Getter private static final LuaLogger ins = new LuaLogger();
 

@@ -18,6 +18,11 @@
             <version>1.0.1</version>
         </dependency>
         <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>wxdgaming.spring.boot.data-redis</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>party.iroiro.luajava</groupId>
             <artifactId>luajava</artifactId>
         </dependency>
