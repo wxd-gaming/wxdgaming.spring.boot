@@ -64,11 +64,11 @@ public class LuaService implements AutoCloseable, Closeable {
         }
         HashMap<String, LuaRuntime> tmp = this.runtimeHashMap;
         this.runtimeHashMap = tmpRuntimeHashMap;
-
-        DefaultExecutor.getIns().schedule(() -> {
-            tmp.values().forEach(v -> v.close());
-        }, 30_000, TimeUnit.MILLISECONDS);
-
+        if (tmp != null && !tmp.isEmpty()) {
+            DefaultExecutor.getIns().schedule(() -> {
+                tmp.values().forEach(v -> v.close());
+            }, 30_000, TimeUnit.MILLISECONDS);
+        }
     }
 
     public LuaRuntime getRuntime() {

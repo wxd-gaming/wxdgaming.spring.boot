@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.value.LuaValue;
+import wxdgaming.spring.boot.core.io.FileUtil;
+import wxdgaming.spring.boot.core.lang.Record2;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -30,6 +32,8 @@ public class LuaRuntime implements Closeable {
     final LuacType luacType;
     final boolean xpcall;
     final String name;
+    /** 系统扩展 */
+    final List<Record2<Path, byte[]>> extendList;
     final List<ImmutablePair<Path, byte[]>> pathList;
     final ConcurrentHashMap<String, Object> globals = new ConcurrentHashMap<>();
     volatile ConcurrentHashMap<Thread, LuaContext> contexts = new ConcurrentHashMap<>();
@@ -39,7 +43,11 @@ public class LuaRuntime implements Closeable {
         this.luacType = luacType;
         this.xpcall = xpcall;
         this.name = name;
+
+        extendList = FileUtil.resourceStreams("lua-extend", new String[]{"lua", "LUA"}).toList();
+
         this.pathList = Arrays.stream(paths)
+                .filter(Files::exists)
                 .flatMap(path -> {
                     try {
                         return Files.walk(path, 99).filter(Files::isRegularFile);
@@ -106,10 +114,10 @@ public class LuaRuntime implements Closeable {
      */
     public long memory() {
         AtomicLong memory = new AtomicLong();
-        contexts.values().forEach(luacContext -> {
-            synchronized (luacContext) {
-                LuaValue memory0 = luacContext.findLuaValue("memory0");
-                Object pcall = luacContext.pcall(memory0);
+        contexts.values().forEach(context -> {
+            synchronized (context) {
+                LuaValue memory0 = context.findLuaValue("memory0");
+                Object pcall = context.pcall(memory0);
                 memory.addAndGet(((Number) pcall).longValue());
             }
         });
@@ -122,15 +130,17 @@ public class LuaRuntime implements Closeable {
         if (luaValue == null) {
             return null;
         }
-        if (xpcall) {
-            LuaValue dispatchLua = context.findLuaValue("dispatch");
-            if (dispatchLua == null) throw new RuntimeException("lua function dispatch not found");
-            Object[] args2 = new Object[args.length + 1];
-            System.arraycopy(args, 0, args2, 1, args.length);
-            args2[0] = key;
-            return context.pcall(dispatchLua, args2);
-        } else {
-            return context.pcall(luaValue, args);
+        synchronized (context) {
+            if (xpcall) {
+                LuaValue dispatchLua = context.findLuaValue("dispatch");
+                if (dispatchLua == null) throw new RuntimeException("lua function dispatch not found");
+                Object[] args2 = new Object[args.length + 1];
+                System.arraycopy(args, 0, args2, 1, args.length);
+                args2[0] = key;
+                return context.pcall(dispatchLua, args2);
+            } else {
+                return context.pcall(luaValue, args);
+            }
         }
     }
 

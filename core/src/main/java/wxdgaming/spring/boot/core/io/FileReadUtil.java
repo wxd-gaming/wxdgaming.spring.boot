@@ -26,14 +26,14 @@ public class FileReadUtil implements Serializable {
 
 
     /** 递归查找所有文件 */
-    public static Map<String, byte[]> readBytesAll(String file, String... extendNames) {
+    public static Map<Path, byte[]> readBytesAll(String file, String... extendNames) {
         return readBytesStream(file, extendNames).collect(Collectors.toMap(Record2::t1, Record2::t2));
     }
 
     /** 递归查找所有文件 */
-    public static Stream<Record2<String, byte[]>> readBytesStream(String file, String... extendNames) {
+    public static Stream<Record2<Path, byte[]>> readBytesStream(String file, String... extendNames) {
         return FileUtil.resourceStreams(file, extendNames)
-                .map(f -> new Record2<>(f.t1(), readBytes(f.t2())));
+                .map(f -> new Record2<>(f.t1(), f.t2()));
     }
 
     /** 递归查找所有文件 */
@@ -57,12 +57,12 @@ public class FileReadUtil implements Serializable {
 
     /** 获取jar包内资源 需要传入classloader */
     public static String readString(ClassLoader classLoader, String fileName, Charset charset) {
-        Record2<String, InputStream> inputStream = FileUtil.findInputStream(classLoader, fileName);
+        Record2<Path, byte[]> inputStream = FileUtil.findInputStream(classLoader, fileName);
         if (inputStream == null) {
             System.out.printf("文件 %s 查找失败\n", fileName);
             return null;
         }
-        return readString(inputStream.t2(), charset);
+        return new String(inputStream.t2(), charset);
     }
 
     public static String readString(File file) {
@@ -91,12 +91,12 @@ public class FileReadUtil implements Serializable {
     }
 
     public static List<String> readLines(String fileName, Charset charset) {
-        Record2<String, InputStream> inputStream = FileUtil.findInputStream(fileName);
+        Record2<Path, byte[]> inputStream = FileUtil.findInputStream(fileName);
         if (inputStream == null) {
             System.out.printf("文件 %s 查找失败\n", fileName);
             return null;
         }
-        return readLines(inputStream.t2(), charset);
+        return readLines(new ByteArrayInputStream(inputStream.t2()), charset);
     }
 
     public static List<String> readLines(InputStream fileInputStream, Charset charset) {

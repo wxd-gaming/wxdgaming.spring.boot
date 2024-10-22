@@ -9,6 +9,7 @@ import party.iroiro.luajava.JuaAPI;
 import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.value.LuaValue;
 import wxdgaming.spring.boot.core.SpringUtil;
+import wxdgaming.spring.boot.core.lang.Record2;
 import wxdgaming.spring.boot.lua.impl.Lua54Impl;
 
 import java.io.Closeable;
@@ -40,12 +41,8 @@ public class LuaContext implements Closeable, AutoCloseable {
         this.name = luacRuntime.getName() + " - " + Thread.currentThread().getName();
         L.openLibraries();
 
-        String implLua = "/impl.lua";
-        try (InputStream resourceAsStream = LuaContext.class.getResourceAsStream(implLua)) {
-            byte[] byteArray = IOUtils.toByteArray(resourceAsStream);
-            load(implLua, byteArray);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        for (Record2<Path, byte[]> immutablePair : luacRuntime.getExtendList()) {
+            load(immutablePair.t1(), immutablePair.t2());
         }
 
         for (Map.Entry<String, Object> entry : luacRuntime.getGlobals().entrySet()) {

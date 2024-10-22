@@ -31,7 +31,6 @@ import wxdgaming.spring.boot.core.InitPrint;
 @Slf4j
 @Getter
 @Setter
-@EnableCaching
 @Service
 @ConfigurationProperties(prefix = "spring.redis")
 public class RedisBuild implements CachingConfigurer, InitPrint {

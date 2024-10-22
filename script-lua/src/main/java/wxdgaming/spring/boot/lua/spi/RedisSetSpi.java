@@ -1,6 +1,7 @@
 package wxdgaming.spring.boot.lua.spi;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import party.iroiro.luajava.Lua;
@@ -15,6 +16,7 @@ import java.util.concurrent.TimeUnit;
  * @version: 2024-10-16 19:37
  **/
 @Service()
+@ConditionalOnBean(RedisTemplate.class)
 public class RedisSetSpi implements LuaJavaSpi {
 
     @Autowired RedisTemplate<String, Object> redisTemplate;

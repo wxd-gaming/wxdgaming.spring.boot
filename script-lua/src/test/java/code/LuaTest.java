@@ -2,9 +2,17 @@ package code;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 import party.iroiro.luajava.Lua;
+import wxdgaming.spring.boot.core.CoreScan;
+import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.io.FileUtil;
+import wxdgaming.spring.boot.data.redis.DataRedisScan;
 import wxdgaming.spring.boot.lua.LuaFunction;
+import wxdgaming.spring.boot.lua.LuaScan;
 import wxdgaming.spring.boot.lua.LuaService;
 import wxdgaming.spring.boot.lua.LuacType;
 
@@ -18,7 +26,11 @@ import java.util.Arrays;
  * @version: 2024-08-10 12:05
  */
 @Slf4j
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = {CoreScan.class, DataRedisScan.class, LuaScan.class})
 public class LuaTest {
+
+    @Autowired SpringUtil springUtil;
 
     @Test
     public void t1() {

@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import wxdgaming.spring.boot.core.io.FileUtil;
 import wxdgaming.spring.boot.core.lang.Record2;
 
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
 
 /**
@@ -37,11 +37,11 @@ public class LogbackUtil {
             }
         }
         lc.putProperty("LOG_PATH", userDir);
-        Record2<String, InputStream> inputStream = FileUtil.findInputStream(classLoader, "logback.xml");
+        Record2<Path, byte[]> inputStream = FileUtil.findInputStream(classLoader, "logback.xml");
         if (inputStream == null) {
             inputStream = FileUtil.findInputStream(classLoader, "logback-test.xml");
         }
-        configurator.doConfigure(inputStream.t2());
+        configurator.doConfigure(new ByteArrayInputStream(inputStream.t2()));
         LoggerFactory.getLogger("root").info("--------------- init end ---------------");
     }
 

@@ -1,12 +1,10 @@
 package wxdgaming.spring.boot.core;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.slf4j.LoggerFactory;
-import wxdgaming.spring.boot.core.io.FileReadUtil;
+import wxdgaming.spring.boot.core.io.FileUtil;
 import wxdgaming.spring.boot.core.lang.Tuple2;
 import wxdgaming.spring.boot.core.loader.ClassDirLoader;
 import wxdgaming.spring.boot.core.loader.RemoteClassLoader;
@@ -15,14 +13,16 @@ import wxdgaming.spring.boot.core.system.FieldUtil;
 import wxdgaming.spring.boot.core.system.MethodUtil;
 
 import java.io.File;
-import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
@@ -235,24 +235,6 @@ public class ReflectContext {
         private boolean filterAbstract = true;
         /** 过滤掉枚举类 */
         private boolean filterEnum = true;
-        /** graalvm 打包需要 resources.json */
-        private ArrayList<String> resources = null;
-
-        /** graalvm 打包需要 resources.json */
-        public ArrayList<String> getResources() {
-            if (resources == null) {
-                InputStream resourceAsStream = classLoader.getResourceAsStream("resources.json");
-                if (resourceAsStream != null) {
-                    byte[] bytes = FileReadUtil.readBytes(resourceAsStream);
-                    String string = new String(bytes, StandardCharsets.UTF_8);
-                    resources = JSON.parseObject(string, new TypeReference<ArrayList<String>>() {});
-                }
-            }
-            if (resources == null) {
-                resources = new ArrayList<>();
-            }
-            return resources;
-        }
 
         private Builder(ClassLoader classLoader, String[] packageNames) {
             this.classLoader = classLoader;
@@ -278,7 +260,7 @@ public class ReflectContext {
 
         private void findClasses(String packageName, Consumer<Class<?>> consumer) {
             String packagePath = packageName;
-            if (packageName.endsWith(".jar") || packageName.endsWith(".war")) {
+            if (packageName.endsWith(".jar") || packageName.endsWith(".war") || packageName.endsWith(".zip")) {
                 packagePath = packageName;
             } else if (!".".equals(packageName)) {
                 packagePath = packageName.replace(".", "/");
@@ -314,10 +296,10 @@ public class ReflectContext {
                                     String dir = urlPath.substring(0, urlPath.lastIndexOf(packagePath));
                                     findClassByFile(dir, urlPath, consumer);
                                 }
-                                case "jar", "zip" -> findClassByJar(urlPath, consumer);
+                                case "jar", "war", "zip" -> findClassByJar(urlPath, consumer);
                                 case "resource" -> {
                                     /* graalvm 打包需要 */
-                                    getResources()
+                                    FileUtil.getResources()
                                             .stream()
                                             .filter(v -> v.startsWith(packageName))
                                             .forEach(v -> {

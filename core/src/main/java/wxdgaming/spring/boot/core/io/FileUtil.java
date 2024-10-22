@@ -1,13 +1,19 @@
 package wxdgaming.spring.boot.core.io;
 
+import com.alibaba.druid.util.Utils;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import wxdgaming.spring.boot.core.ReflectContext;
 import wxdgaming.spring.boot.core.Throw;
 import wxdgaming.spring.boot.core.lang.Record2;
+import wxdgaming.spring.boot.core.system.JvmUtil;
 import wxdgaming.spring.boot.core.zip.ZipReadFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
@@ -17,7 +23,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * 文件辅助
@@ -86,24 +99,74 @@ public class FileUtil implements Serializable {
         return null;
     }
 
+    /** graalvm 打包需要 resources.json */
+    private static List<String> resources = null;
+
+    /** graalvm 打包需要 resources.json */
+    public static List<String> getResources() {
+        if (resources == null) {
+            InputStream resourceAsStream = ReflectContext.class.getResourceAsStream("resources.json");
+            if (resourceAsStream != null) {
+                byte[] bytes = FileReadUtil.readBytes(resourceAsStream);
+                String string = new String(bytes, StandardCharsets.UTF_8);
+                resources = JSON.parseObject(string, new TypeReference<ArrayList<String>>() {});
+            }
+        }
+        if (resources == null) {
+            resources = Collections.emptyList();
+        }
+        return resources;
+    }
+
+    public static List<String> jarResources() throws Exception {
+        List<String> resourcesPath = new ArrayList<>();
+        String x = JvmUtil.javaClassPath();
+        String[] split = x.split(File.pathSeparator);
+        for (String string : split) {
+            if (!string.endsWith(".jar") && !string.endsWith(".war") && !string.endsWith(".zip")) continue;
+            try (InputStream inputStream = Files.newInputStream(Paths.get(string));
+                 ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
+                ZipEntry nextEntry = null;
+                while ((nextEntry = zipInputStream.getNextEntry()) != null) {
+                    /* todo 读取的资源字节可以做解密操作 */
+                    resourcesPath.add(nextEntry.getName());
+                }
+            }
+        }
+        return resourcesPath;
+    }
+
     /** 获取资源 <br>如果传入的目录本地文件夹没有，<br>会查找本地目录config目录，<br>如果还没有查找jar包内资源 */
-    public static Record2<String, InputStream> findInputStream(String fileName) {
+    public static Record2<Path, byte[]> findInputStream(String fileName) {
         return findInputStream(Thread.currentThread().getContextClassLoader(), fileName);
     }
 
     /** 获取资源 <br>如果传入的目录本地文件夹没有，<br>会查找本地目录config目录，<br>如果还没有查找jar包内资源 */
-    public static Record2<String, InputStream> findInputStream(ClassLoader classLoader, String fileName) {
+    public static Record2<Path, byte[]> findInputStream(ClassLoader classLoader, String fileName) {
         return resourceStreams(classLoader, fileName).findFirst().orElse(null);
     }
 
     /** 获取所有资源 <br>如果传入的目录本地文件夹没有，<br>会查找本地目录config目录，<br>如果还没有查找jar包内资源 */
-    public static Stream<Record2<String, InputStream>> resourceStreams(final String path, String... extendNames) {
+    public static Stream<Record2<Path, byte[]>> resourceStreams(final String path, String... extendNames) {
         return resourceStreams(Thread.currentThread().getContextClassLoader(), path, extendNames);
     }
 
     /** 获取所有资源 <br>如果传入的目录本地文件夹没有，<br>会查找本地目录config目录，<br>如果还没有查找jar包内资源 */
-    public static Stream<Record2<String, InputStream>> resourceStreams(ClassLoader classLoader, final String path, String... extendNames) {
+    public static Stream<Record2<Path, byte[]>> resourceStreams(ClassLoader classLoader, final String path, String... extendNames) {
         try {
+            List<Record2<Path, byte[]>> list = new ArrayList<>();
+            Predicate<String> filter = test -> {
+                boolean found = true;
+                if (extendNames.length > 0) {
+                    found = false;
+                    for (int i = 0; i < extendNames.length; i++) {
+                        String extension = extendNames[i];
+                        found |= test.endsWith(extension);
+                    }
+                }
+                return found;
+            };
+
             String findPath = path;
             boolean fileExists = true;
             if (!new File(path).exists()) {
@@ -117,54 +180,54 @@ public class FileUtil implements Serializable {
                     }
                 }
             }
-            if (!fileExists) {/*当本地文件不存在才查找资源文件*/
-                URL resource = classLoader.getResource(path);
-
-                if (resource != null) {
-                    if ("file".equalsIgnoreCase(resource.getProtocol())) {
-                        File file1 = new File(resource.toURI());
-                        findPath = file1.toPath().toString();
-                    } else {
+            if (fileExists) {/*当本地文件存在*/
+                walkFiles(findPath, extendNames)
+                        .map(filePath -> new Record2<>(filePath, FileReadUtil.readBytes(filePath)))
+                        .forEach(list::add);
+            } else {
+                Enumeration<URL> rs = classLoader.getResources(path);
+                while (rs.hasMoreElements()) {
+                    URL resource = rs.nextElement();
+                    if (resource != null) {
                         findPath = URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8);
-                        if (findPath.contains(".zip!") || findPath.contains(".jar!")) {
+                        String protocol = resource.getProtocol();
+                        if ("file".equals(protocol)) {
+                            File file1 = new File(resource.toURI());
+                            walkFiles(file1.toPath(), extendNames)
+                                    .map(filePath -> new Record2<>(filePath, FileReadUtil.readBytes(filePath)))
+                                    .forEach(list::add);
+                        } else if ("zip".equals(protocol) || "jar".equals(protocol) || "war".equals(protocol)) {
                             findPath = findPath.substring(5, findPath.indexOf("!/"));
                             try (ZipReadFile zipFile = new ZipReadFile(findPath)) {
-                                return zipFile.stream()
+                                zipFile.stream()
                                         .filter(z -> !z.isDirectory())
+                                        .filter(v -> v.getName().startsWith(path))
                                         .filter(p -> {
                                             String name = p.getName();
-                                            if (name.startsWith(path)) {
-                                                if (extendNames.length > 0) {
-                                                    boolean check = false;
-                                                    for (String extendName : extendNames) {
-                                                        if (name.endsWith(extendName)) {
-                                                            check = true;
-                                                            break;
-                                                        }
-                                                    }
-                                                    return check;
-                                                }
-                                            }
-                                            return false;
+                                            return filter.test(name);
                                         })
-                                        .map(z -> new Record2<String, InputStream>(z.getName(), new ByteArrayInputStream(zipFile.unzipFile(z))))
-                                        .toList()
-                                        .stream();
+                                        .map(z -> new Record2<>(Paths.get(z.getName()), zipFile.unzipFile(z)))
+                                        .forEach(list::add);
                             }
+                        } else if ("resource".equals(protocol)) {
+                            getResources().stream()
+                                    .filter(v -> v.startsWith(path))
+                                    .filter(filter)
+                                    .map(v -> {
+                                        try (InputStream resourceAsStream = Utils.class.getClassLoader().getResourceAsStream(v)) {
+                                            byte[] byteArray = IOUtils.toByteArray(resourceAsStream);
+                                            return new Record2<>(Paths.get(v), byteArray);
+                                        } catch (IOException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    })
+                                    .forEach(list::add);
+                            break;
                         }
                     }
                 }
-                if (findPath.startsWith("/")) {
-                    findPath = findPath.substring(1);
-                }
             }
-            return walkFiles(findPath, extendNames).map(filePath -> {
-                try {
-                    return new Record2<>(filePath.toString(), Files.newInputStream(filePath));
-                } catch (Exception e) {
-                    throw Throw.of("resources:" + filePath, e);
-                }
-            });
+            return list.stream();
         } catch (Exception e) {
             throw Throw.of("resources:" + path, e);
         }

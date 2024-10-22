@@ -2,15 +2,17 @@ package wxdgaming.spring.boot.core.ssl;
 
 
 import lombok.extern.slf4j.Slf4j;
-import wxdgaming.spring.boot.core.io.FileReadUtil;
 import wxdgaming.spring.boot.core.io.FileUtil;
 import wxdgaming.spring.boot.core.lang.Record2;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,8 +22,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * 基于 jks 文件初始化 SSLContext
  *
  * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2020-12-18 16:18
- **/
+ * @version: 2024-10-22 15:27
+ */
 @Slf4j
 public class SslContextByJks implements Serializable {
 
@@ -30,8 +32,8 @@ public class SslContextByJks implements Serializable {
     public static SSLContext sslContext(SslProtocolType sslProtocolType, String jks_path, String jks_pwd_path) {
 
         if (sslProtocolType == null
-                || jks_path == null || jks_path.isEmpty() || jks_path.isBlank()
-                || jks_pwd_path == null || jks_pwd_path.isEmpty() || jks_pwd_path.isBlank())
+            || jks_path == null || jks_path.isEmpty() || jks_path.isBlank()
+            || jks_pwd_path == null || jks_pwd_path.isEmpty() || jks_pwd_path.isBlank())
             return null;
 
         Map<String, SSLContext> row = sslContextMap.computeIfAbsent(sslProtocolType, l -> new ConcurrentHashMap<>());
@@ -40,16 +42,17 @@ public class SslContextByJks implements Serializable {
                 AtomicReference<InputStream> streams = new AtomicReference<>();
                 AtomicReference<String> pwd = new AtomicReference<>();
                 // 获取当前运行的JAR文件
-                Record2<String, InputStream> jksStream = FileUtil.findInputStream(SslContextByJks.class.getClassLoader(), jks_path);
-                streams.set(jksStream.t2());
-                System.out.printf("读取文件目录：jks=%s, 文件大小：%s\n", jksStream.t1(), jksStream.t2().available());
+                Record2<Path, byte[]> jksStream = FileUtil.findInputStream(SslContextByJks.class.getClassLoader(), jks_path);
+                ByteArrayInputStream newValue = new ByteArrayInputStream(jksStream.t2());
+                streams.set(newValue);
+                System.out.printf("读取文件目录：jks=%s, 文件大小：%s\n", jksStream.t1(), newValue.available());
                 pwd.set(jks_pwd_path);
 
-                Record2<String, InputStream> pwdStream = FileUtil.findInputStream(SslContextByJks.class.getClassLoader(), jks_pwd_path);
+                Record2<Path, byte[]> pwdStream = FileUtil.findInputStream(SslContextByJks.class.getClassLoader(), jks_pwd_path);
                 if (pwdStream != null) {
                     // 判断是否为资源文件
                     System.out.printf("读取文件目录：jkspwd=%s\n", pwdStream.t1());
-                    pwd.set(FileReadUtil.readString(pwdStream.t2()));
+                    pwd.set(new String(pwdStream.t2(), StandardCharsets.UTF_8));
                 }
                 return initSSLContext(sslProtocolType, "jks", streams.get(), pwd.get(), pwd.get());
             } catch (Exception e) {
