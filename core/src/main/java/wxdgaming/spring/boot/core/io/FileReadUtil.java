@@ -1,6 +1,7 @@
 package wxdgaming.spring.boot.core.io;
 
 
+import org.apache.commons.io.IOUtils;
 import wxdgaming.spring.boot.core.Throw;
 import wxdgaming.spring.boot.core.function.Consumer2;
 import wxdgaming.spring.boot.core.function.ConsumerE1;
@@ -99,28 +100,35 @@ public class FileReadUtil implements Serializable {
         return readLines(new ByteArrayInputStream(inputStream.t2()), charset);
     }
 
-    public static List<String> readLines(InputStream fileInputStream, Charset charset) {
-        List<String> lines = new ArrayList<>();
-        readLine(fileInputStream, charset, lines::add);
-        return lines;
-    }
 
     public static List<String> readLines(Path path) {
         return readLines(path, StandardCharsets.UTF_8);
     }
 
     public static List<String> readLines(Path path, Charset charset) {
-        List<String> lines = new ArrayList<>();
-        readLine(path, charset, lines::add);
-        return lines;
+        try {
+            return Files.readAllLines(path, charset);
+        } catch (Throwable e) {
+            throw Throw.of(e);
+        }
     }
 
     public static void readLine(Path path, Charset charset, ConsumerE1<String> call) {
-        try (final InputStream fileInputStream = Files.newInputStream(path)) {
-            readLine(fileInputStream, charset, call);
-        } catch (Exception e) {
+        try {
+            List<String> strings = Files.readAllLines(path, charset);
+            for (int i = 0; i < strings.size(); i++) {
+                String string = strings.get(i);
+                call.accept(string);
+            }
+        } catch (Throwable e) {
             throw Throw.of(e);
         }
+    }
+
+    public static List<String> readLines(InputStream fileInputStream, Charset charset) {
+        List<String> lines = new ArrayList<>();
+        readLine(fileInputStream, charset, lines::add);
+        return lines;
     }
 
     public static void readLine(InputStream fileInputStream, Charset charset, ConsumerE1<String> call) {
@@ -141,43 +149,27 @@ public class FileReadUtil implements Serializable {
     }
 
     public static byte[] readBytes(Path path) {
-        try (final InputStream fileInputStream = Files.newInputStream(path)) {
-            return readBytes(fileInputStream);
+        try {
+            return Files.readAllBytes(path);
         } catch (Exception e) {
             throw Throw.of(e);
         }
     }
 
     public static byte[] readBytes(InputStream inputStream) {
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            readBytes(outputStream, inputStream);
-            return outputStream.toByteArray();
+        try (inputStream) {
+            return IOUtils.toByteArray(inputStream);
         } catch (Exception e) {
             throw Throw.of(e);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                throw Throw.of(e);
-            }
         }
     }
 
     public static void readBytes(OutputStream outputStream, InputStream inputStream) {
-        byte[] bytes = new byte[200];
-        try {
-            int read = 0;
-            while ((read = inputStream.read(bytes, 0, bytes.length)) >= 0) {
-                outputStream.write(bytes, 0, read);
-            }
+        try (inputStream) {
+            byte[] bytes = readBytes(inputStream);
+            outputStream.write(bytes);
         } catch (Exception e) {
             throw Throw.of(e);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                throw Throw.of(e);
-            }
         }
     }
 

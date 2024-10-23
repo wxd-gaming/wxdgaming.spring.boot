@@ -15,7 +15,7 @@ import wxdgaming.spring.boot.core.SpringUtil;
  **/
 @Service
 @RequestMapping("/**")
-public class RequestLogRecord implements BaseFilter {
+public class RequestLogRecord extends BaseFilter {
 
     @Override public void filter(InterceptorRegistration registration) {
 
@@ -24,7 +24,7 @@ public class RequestLogRecord implements BaseFilter {
     /** 记录请求日志 */
     @Override public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         SpringUtil.recordRequest(request);
-        return BaseFilter.super.preHandle(request, response, handler);
+        return super.preHandle(request, response, handler);
     }
 
 }

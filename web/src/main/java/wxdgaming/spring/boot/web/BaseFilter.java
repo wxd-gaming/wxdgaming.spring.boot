@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.web;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -10,6 +11,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import wxdgaming.spring.boot.core.LogbackUtil;
 import wxdgaming.spring.boot.core.SpringUtil;
+import wxdgaming.spring.boot.web.service.ResponseService;
 
 /**
  * 过滤器 , 在类使用 注解 {@link RequestMapping}
@@ -17,10 +19,12 @@ import wxdgaming.spring.boot.core.SpringUtil;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-07-30 13:59
  **/
-public interface BaseFilter extends WebMvcConfigurer, HandlerInterceptor {
+public abstract class BaseFilter implements WebMvcConfigurer, HandlerInterceptor {
+
+    @Autowired ResponseService responseService;
 
     @Override
-    default void addInterceptors(InterceptorRegistry registry) {
+    public void addInterceptors(InterceptorRegistry registry) {
         try {
             RequestMapping annotation = this.getClass().getAnnotation(RequestMapping.class);
             String[] value = annotation.value();
@@ -33,18 +37,18 @@ public interface BaseFilter extends WebMvcConfigurer, HandlerInterceptor {
         }
     }
 
-    void filter(InterceptorRegistration registration);
+    public abstract void filter(InterceptorRegistration registration);
 
 
-    @Override default boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    @Override public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }
 
-    @Override default void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+    @Override public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
     }
 
-    @Override default void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    @Override public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         if (ex != null) {
             LogbackUtil.logger().info(
                     "\n{} {}\ndata={}\nhandler={}",

@@ -22,6 +22,6 @@ public class EntityBase<ID> extends ObjectBase {
     @Column
     private ID uid;
     @Column
-    private long createdTime;
+    private int createdTime;
 
 }
