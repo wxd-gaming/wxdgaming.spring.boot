@@ -74,6 +74,7 @@ public class MyClock {
     public static final String SDF_YYYYMMDDHHMMSSSSS_1 = "yyyy/MM/dd HH:mm:ss:SSS";
     /** yyyy/MM/dd HH:mm:ss */
     public static final String SDF_YYYYMMDDHHMMSS_1 = "yyyy/MM/dd HH:mm:ss";
+    public static final String SDF_YYYYMMDDHHMM_10 = "yyyy-MM-dd'T'HH:mm";
     /** yyyy-MM-dd HH:mm:ss */
     public static final String SDF_YYYYMMDDHHMMSS_2 = "yyyy-MM-dd HH:mm:ss";
     /** yyyy-MM-dd-HH-mm-ss */

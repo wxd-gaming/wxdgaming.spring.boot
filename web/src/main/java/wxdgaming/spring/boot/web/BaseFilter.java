@@ -50,7 +50,7 @@ public abstract class BaseFilter implements WebMvcConfigurer, HandlerInterceptor
 
     @Override public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         if (ex != null) {
-            LogbackUtil.logger().info(
+            LogbackUtil.logger().error(
                     "\n{} {}\ndata={}\nhandler={}",
                     request.getMethod(),
                     SpringUtil.getCurrentUrl(request),
