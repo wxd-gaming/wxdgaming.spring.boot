@@ -12,7 +12,7 @@ enum Stype {
 }
 
 //服务注册
-message ReqRegister {
+message ReqBrokerRegister {
     int32 sid               = 1;//服务器id
     Stype stype             = 2;//服务器类型
     string wlanIp           = 3;//外围ip
@@ -20,7 +20,7 @@ message ReqRegister {
 }
 
 //服务注册
-message ResRegister {
+message ResBrokerRegister {
     int32 sid               = 1;//服务器id
     Stype stype             = 2;//服务器类型
 }

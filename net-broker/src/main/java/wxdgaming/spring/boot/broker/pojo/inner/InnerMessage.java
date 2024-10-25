@@ -14,7 +14,7 @@ import wxdgaming.spring.boot.net.message.PojoBase;
  * rpc.proto
  *
  * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-10-19 18:17:51
+ * @version: 2024-10-24 21:10:50
  */
 public class InnerMessage {
 
@@ -55,7 +55,7 @@ public class InnerMessage {
    @Getter
    @Setter
    @Accessors(chain = true)
-   public static class ReqRegister extends PojoBase {
+   public static class ReqBrokerRegister extends PojoBase {
    
        /** 服务器id */
        @Tag(1)
@@ -76,7 +76,7 @@ public class InnerMessage {
    @Getter
    @Setter
    @Accessors(chain = true)
-   public static class ResRegister extends PojoBase {
+   public static class ResBrokerRegister extends PojoBase {
    
        /** 服务器id */
        @Tag(1)

@@ -1,9 +1,13 @@
 package wxdgaming.spring.boot.broker;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import wxdgaming.spring.boot.broker.pojo.inner.InnerMessage;
+import wxdgaming.spring.boot.core.collection.concurrent.ConcurrentTable;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.SessionGroup;
 import wxdgaming.spring.boot.net.SessionHandler;
+import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.server.ServerMessageEncode;
 import wxdgaming.spring.boot.net.server.SocketServerBuilder;
 import wxdgaming.spring.boot.net.server.SocketService;
@@ -15,7 +19,10 @@ import wxdgaming.spring.boot.net.server.SocketService;
  * @version: 2024-09-17 16:31
  */
 @Slf4j
+@Getter
 public class BrokerService extends SocketService {
+
+    private ConcurrentTable<InnerMessage.Stype, Integer, SocketSession> sessions = new ConcurrentTable<>();
 
     public BrokerService(BootstrapBuilder bootstrapBuilder,
                          SocketServerBuilder socketServerBuilder,

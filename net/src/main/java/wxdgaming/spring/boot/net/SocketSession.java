@@ -39,6 +39,14 @@ public class SocketSession {
         ChannelUtil.attr(this.channel, ChannelUtil.SOCKET_SESSION_KEY, this);
     }
 
+    public <R> R attribute(String key) {
+        return ChannelUtil.attr(this.channel, key);
+    }
+
+    public void attribute(String key, Object value) {
+        ChannelUtil.attr(this.channel, key, value);
+    }
+
     public ChannelFuture writeAndFlush(Object message) {
         return channel.writeAndFlush(message);
     }

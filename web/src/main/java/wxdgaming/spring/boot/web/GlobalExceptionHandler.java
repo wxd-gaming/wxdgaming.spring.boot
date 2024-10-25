@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.lang.RunResult;
 
@@ -21,7 +22,11 @@ public class GlobalExceptionHandler implements InitPrint {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RunResult> handleException(Exception ex) {
         RunResult error = RunResult.error(500, "Internal Server Error: " + ex.getMessage());
-        log.error("", ex);
+        if (ex instanceof NoResourceFoundException) {
+            log.warn("{}", ex.toString());
+        } else {
+            log.error("", ex);
+        }
         return new ResponseEntity<>(error, HttpStatus.OK);
     }
 

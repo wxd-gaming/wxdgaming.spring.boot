@@ -30,7 +30,7 @@ public class StringTest {
     }
 
     public void t12(byte[] byteArray) {
-        wxdgaming.spring.boot.broker.pojo.inner.InnerMessage.ReqRegister parseFrom = new wxdgaming.spring.boot.broker.pojo.inner.InnerMessage.ReqRegister();
+        wxdgaming.spring.boot.broker.pojo.inner.InnerMessage.ReqBrokerRegister parseFrom = new wxdgaming.spring.boot.broker.pojo.inner.InnerMessage.ReqBrokerRegister();
         parseFrom.decode(byteArray);
         System.out.println(parseFrom);
     }
