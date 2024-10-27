@@ -11,4 +11,4 @@ echo %PATH%
 :: 打印Java版本信息，确认配置成功
 java -version
 
-C:\java\maven-mvnd-1.0.2-windows-amd64\bin\mvnd.cmd clean compile test -Dtest=action.NativeClassActionTest#f1 -DfailIfNoTests=false package -Pwindows
+C:\java\maven-mvnd-1.0.2-windows-amd64\bin\mvnd.cmd clean compile test -Dtest=action.NativeClassActionTest#f1 -DfailIfNoTests=false install -Pos.windows
