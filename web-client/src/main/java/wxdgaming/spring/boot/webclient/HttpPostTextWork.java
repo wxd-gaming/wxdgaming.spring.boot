@@ -118,4 +118,15 @@ public class HttpPostTextWork extends HttpPostMultiWork {
         super.request();
         return this;
     }
+
+
+    @Override public HttpPostTextWork connectTimeOut(long connectTimeOut) {
+        super.connectTimeOut(connectTimeOut);
+        return this;
+    }
+
+    @Override public HttpPostTextWork responseTimeout(long responseTimeout) {
+        super.responseTimeout(responseTimeout);
+        return this;
+    }
 }

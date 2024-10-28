@@ -100,4 +100,15 @@ public class HttpPostMultiWork extends HttpWork {
     protected void addRequestParam0(String key, Object value) {
         paramMap.put(key, value);
     }
+
+    @Override public HttpPostMultiWork connectTimeOut(long connectTimeOut) {
+        super.connectTimeOut(connectTimeOut);
+        return this;
+    }
+
+    @Override public HttpPostMultiWork responseTimeout(long responseTimeout) {
+        super.responseTimeout(responseTimeout);
+        return this;
+    }
+
 }

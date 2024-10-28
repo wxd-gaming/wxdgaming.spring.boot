@@ -36,4 +36,13 @@ public class HttpGetWork extends HttpPostTextWork {
         return this;
     }
 
+    @Override public HttpGetWork connectTimeOut(long connectTimeOut) {
+        super.connectTimeOut(connectTimeOut);
+        return this;
+    }
+
+    @Override public HttpGetWork responseTimeout(long responseTimeout) {
+        super.responseTimeout(responseTimeout);
+        return this;
+    }
 }

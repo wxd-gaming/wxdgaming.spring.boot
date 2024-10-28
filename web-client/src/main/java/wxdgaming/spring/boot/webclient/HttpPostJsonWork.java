@@ -48,4 +48,14 @@ public class HttpPostJsonWork extends HttpWork {
         super.addRequestHeader(headerKey, headerValue);
         return this;
     }
+
+    @Override public HttpPostJsonWork connectTimeOut(long connectTimeOut) {
+        super.connectTimeOut(connectTimeOut);
+        return this;
+    }
+
+    @Override public HttpPostJsonWork responseTimeout(long responseTimeout) {
+        super.responseTimeout(responseTimeout);
+        return this;
+    }
 }

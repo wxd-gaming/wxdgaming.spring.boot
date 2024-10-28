@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
@@ -17,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * http 执行器
@@ -31,6 +33,8 @@ public abstract class HttpWork {
     private final Executor executor;
     private final CloseableHttpClient closeableHttpClient;
     private final String url;
+    private long connectTimeOut = 3000;
+    private long responseTimeout = 3000;
     protected ContentType contentType = ContentType.APPLICATION_FORM_URLENCODED;
     private final Map<String, String> requestHeaders = new LinkedHashMap<>();
     private ClassicHttpResponse response;
@@ -49,6 +53,10 @@ public abstract class HttpWork {
     public HttpWork request() {
         try {
             HttpUriRequestBase request = httpUriRequest();
+            RequestConfig.Builder custom = RequestConfig.custom();
+            custom.setConnectionRequestTimeout(connectTimeOut, TimeUnit.MILLISECONDS);
+            custom.setResponseTimeout(responseTimeout, TimeUnit.MILLISECONDS);
+            request.setConfig(custom.build());
             for (Map.Entry<String, String> entry : requestHeaders.entrySet()) {
                 request.setHeader(entry.getKey(), entry.getValue());
             }
@@ -75,6 +83,16 @@ public abstract class HttpWork {
         return (M) Mono.fromFuture(future);
     }
 
+    public HttpWork connectTimeOut(long connectTimeOut) {
+        this.connectTimeOut = connectTimeOut;
+        return this;
+    }
+
+    public HttpWork responseTimeout(long responseTimeout) {
+        this.responseTimeout = responseTimeout;
+        return this;
+    }
+
     /**
      * 添加 head 标记
      *
@@ -95,6 +113,11 @@ public abstract class HttpWork {
 
     public JSONObject bodyJson() {
         return FastJsonUtil.parse(bodyString());
+    }
+
+    public <R> R bodyJsonParse(Class<R> bodyClass) {
+        String str = bodyString();
+        return FastJsonUtil.parse(str, bodyClass);
     }
 
 }

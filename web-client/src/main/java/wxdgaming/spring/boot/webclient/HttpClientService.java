@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
+import wxdgaming.spring.boot.core.threading.Qos;
 import wxdgaming.spring.boot.core.threading.VirtualExecutor;
 
 import java.io.File;
@@ -78,6 +79,19 @@ public class HttpClientService {
     /** 上传文件 */
     public HttpPostFileWork doPostFile(String url, File file) {
         return doPostFile(url).addFile(file);
+    }
+
+    public IPInfo getCity4Ip(String ip) {
+        final String format = "http://ip-api.com/json/%s?lang=zh-CN";
+        return Qos.retrySupply(3, () -> {
+            IPInfo ipInfo = doGet(String.format(format, ip))
+                    .connectTimeOut(15000)
+                    .responseTimeout(5000)
+                    .request().bodyJsonParse(IPInfo.class);
+            if (!"success".equals(ipInfo.getStatus()))
+                throw new RuntimeException("ip地址解析失败");
+            return ipInfo;
+        });
     }
 
 

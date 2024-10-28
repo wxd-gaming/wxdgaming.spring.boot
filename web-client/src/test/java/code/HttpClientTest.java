@@ -44,4 +44,11 @@ public class HttpClientTest {
         httpGetActionMono.block();
     }
 
+    @Test
+    public void ip() {
+        System.out.println(httpClientService.getCity4Ip("171.223.187.24"));
+        System.out.println(httpClientService.getCity4Ip("42.102.207.241"));
+        System.out.println(httpClientService.getCity4Ip("39.144.137.236"));
+    }
+
 }

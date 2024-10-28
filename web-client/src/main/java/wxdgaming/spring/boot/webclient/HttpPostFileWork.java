@@ -63,4 +63,13 @@ public class HttpPostFileWork extends HttpPostMultiWork {
         return this;
     }
 
+    @Override public HttpPostFileWork connectTimeOut(long connectTimeOut) {
+        super.connectTimeOut(connectTimeOut);
+        return this;
+    }
+
+    @Override public HttpPostFileWork responseTimeout(long responseTimeout) {
+        super.responseTimeout(responseTimeout);
+        return this;
+    }
 }
