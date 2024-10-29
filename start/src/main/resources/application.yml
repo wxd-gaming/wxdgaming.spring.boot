@@ -1,8 +1,17 @@
 server:
   port: 18801   #端口号
   tomcat:
-    max-threads: 200
+    initial-size: 64 #初始化内存
+    min-free-size: 64 #最小内存
+    max-size: 128     #最小内存
+    max-threads: 100
     min-spare-threads: 10
+  #  undertow: #替代tomcat配置
+  #    threads:
+  #      io: 4
+  #      worker: 200 #任务线程池
+  #    buffer-size: 1024 #每个块的大小
+  #    direct-buffers: true #直接内存
   executor:
     defaultCoreSize: 2 #默认线程池
     logicCoreSize: 10 #逻辑线程池
