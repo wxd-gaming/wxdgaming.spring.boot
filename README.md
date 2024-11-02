@@ -1,5 +1,13 @@
 # wxdgamig.spring.boot
 
+## 更新仓库地址
+
+github https://github.com/orgs/wxd-gaming/repositories<br>
+gitee &nbsp;&nbsp;&nbsp;https://gitee.com/wxd-gaming<br>
+博客首页 https://www.cnblogs.com/wxd-gameing<br>
+
+## 项目介绍
+
 無心道 基于spring boot的辅助架构
 
 ## 模块介绍
