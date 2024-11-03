@@ -11,6 +11,6 @@ package wxdgaming.spring.boot.core.function;
 @FunctionalInterface
 public interface STLFunction3<T, P1, P2, P3, R> extends SerializableLambda {
 
-    R apply(P1 p1, P2 p2, P3 p3) throws Throwable;
+    R apply(P1 p1, P2 p2, P3 p3) throws Exception;
 
 }

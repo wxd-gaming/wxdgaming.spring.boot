@@ -11,6 +11,6 @@ package wxdgaming.spring.boot.core.function;
 @FunctionalInterface
 public interface STVFunction0<T> extends SerializableLambda {
 
-    void apply() throws Throwable;
+    void apply() throws Exception;
 
 }

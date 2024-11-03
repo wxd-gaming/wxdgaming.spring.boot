@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.data.batis;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
+import com.alibaba.fastjson2.JSONObject;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,12 +15,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.Throw;
+import wxdgaming.spring.boot.core.collection.ObjMap;
+import wxdgaming.spring.boot.core.function.ConsumerE1;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -121,6 +121,30 @@ public class DbHelper implements InitPrint {
             }
         } catch (Exception e) {
             log.error("创建数据库 {}", database, e);
+        }
+    }
+
+    public void queryJsonObject(String query, ConsumerE1<JSONObject> consumer) throws Exception {
+        query0(query, resultSet -> {
+            int columnCount = resultSet.getMetaData().getColumnCount();
+            for (int j = 1; j < columnCount + 1; j++) {
+                JSONObject jsonObject = new JSONObject();
+                Object object = resultSet.getObject(j);
+                String columnName = resultSet.getMetaData().getColumnLabel(j);
+                jsonObject.put(columnName, object);
+                consumer.accept(jsonObject);
+            }
+        });
+    }
+
+    public void query0(String query, ConsumerE1<ResultSet> consumer) throws Exception {
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement()) {
+            try (ResultSet resultSet = statement.executeQuery(query);) {
+                while (resultSet.next()) {
+                    consumer.accept(resultSet);
+                }
+            }
         }
     }
 

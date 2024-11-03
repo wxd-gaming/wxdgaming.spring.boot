@@ -7,6 +7,6 @@ package wxdgaming.spring.boot.core.function;
 @FunctionalInterface
 public interface PredicateE<T> extends SerializableLambda {
 
-    boolean test(T t) throws Throwable;
+    boolean test(T t) throws Exception;
 
 }

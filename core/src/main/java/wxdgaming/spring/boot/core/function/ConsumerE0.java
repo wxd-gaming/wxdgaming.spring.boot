@@ -7,6 +7,6 @@ package wxdgaming.spring.boot.core.function;
 @FunctionalInterface
 public interface ConsumerE0 extends SerializableLambda {
 
-    void accept() throws Throwable;
+    void accept() throws Exception;
 
 }
