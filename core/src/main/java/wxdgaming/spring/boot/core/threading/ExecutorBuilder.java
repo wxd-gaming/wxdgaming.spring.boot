@@ -26,23 +26,27 @@ public class ExecutorBuilder {
     /** 虚拟线程并发数量 */
     private int virtualCoreSize = 100;
 
+    DefaultExecutor defaultExecutor;
+    LogicExecutor logicExecutor;
+    VirtualExecutor virtualExecutor;
+
     @Bean
     @ConditionalOnMissingBean(DefaultExecutor.class)
     public DefaultExecutor defaultExecutor() {
-        return new DefaultExecutor(defaultCoreSize);
+        return defaultExecutor = new DefaultExecutor(defaultCoreSize);
     }
 
     /** 逻辑线程池 */
     @Bean
     @ConditionalOnMissingBean(LogicExecutor.class)
     public LogicExecutor logicExecutor() {
-        return new LogicExecutor(logicCoreSize);
+        return logicExecutor = new LogicExecutor(logicCoreSize);
     }
 
     /** 虚拟线程池 */
     @Bean
     @ConditionalOnMissingBean(VirtualExecutor.class)
     public VirtualExecutor virtualExecutor() {
-        return new VirtualExecutor(virtualCoreSize);
+        return virtualExecutor = new VirtualExecutor(virtualCoreSize);
     }
 }

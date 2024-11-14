@@ -4,10 +4,12 @@ import lombok.Getter;
 import wxdgaming.spring.boot.core.GlobalUtil;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 /**
  * 队列事件
@@ -104,6 +106,21 @@ public class QueueEvent extends Event implements Executor {
         } finally {
             reentrantLock.unlock();
         }
+    }
+
+    public <R> CompletableFuture<R> submit(Supplier<R> command) {
+        RunEventCompletableFuture event = RunEventCompletableFuture.of(command);
+        event.queueName = queueName;
+        runnableBlockingQueue.add(event);
+        try {
+            reentrantLock.lock();
+            if (atomicBoolean.compareAndSet(false, true)) {
+                this.executor.execute(this);
+            }
+        } finally {
+            reentrantLock.unlock();
+        }
+        return event.getFuture();
     }
 
 }

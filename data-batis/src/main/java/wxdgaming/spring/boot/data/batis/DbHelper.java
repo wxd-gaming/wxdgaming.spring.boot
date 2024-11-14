@@ -2,7 +2,7 @@ package wxdgaming.spring.boot.data.batis;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
-import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson.JSONObject;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import wxdgaming.spring.boot.core.lang.ObjectBase;
+import wxdgaming.spring.boot.core.timer.MyClock;
 
 /**
  * @author: wxd-gaming(無心道, 15388152619)
@@ -22,6 +23,6 @@ public class EntityBase<ID> extends ObjectBase {
     @Column
     private ID uid;
     @Column(nullable = false)
-    private Long createdTime;
+    private Long createdTime = MyClock.millis();
 
 }

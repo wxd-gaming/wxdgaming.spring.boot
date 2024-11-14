@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.ReflectContext;
 
@@ -21,15 +22,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @Accessors(chain = true)
 @Service
 public class DataRepository {
-
+    @Value("${data.json.path}")
     @Setter private String jsonPath;
     @Setter private ClassLoader classLoader;
     @Setter private String scanPackageName;
     /** 存储数据表 */
-    private Map<Class<?>, DataTable<?>> dataTableMap = Map.of();
+    private Map<Class<?>, DataTable<?>> dataTableMap = new ConcurrentHashMap<>();
 
     public <D extends DataKey, T extends DataTable<D>> T dataTable(Class<T> dataTableClass) {
-        return (T) dataTableMap.get(dataTableClass);
+        return (T) dataTableMap.computeIfAbsent(dataTableClass, k -> buildDataTable(k));
     }
 
     public void load() {
@@ -54,8 +55,13 @@ public class DataRepository {
         dataTableMap.get(dataTableClass).loadJson(jsonPath);
     }
 
-    DataTable<?> buildDataTable(Class<?> dataTableClass) throws Exception {
-        DataTable<?> dataTable = (DataTable<?>) dataTableClass.getDeclaredConstructor().newInstance();
+    DataTable<?> buildDataTable(Class<?> dataTableClass) {
+        DataTable<?> dataTable = null;
+        try {
+            dataTable = (DataTable<?>) dataTableClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         dataTable.loadJson(jsonPath);
         log.info("load data table 文件：{}, 数据：{}, 行数：{}", dataTable.getDataMapping().excelPath(), dataTable.getDataMapping().name(), dataTable.dbSize());
         return dataTable;
