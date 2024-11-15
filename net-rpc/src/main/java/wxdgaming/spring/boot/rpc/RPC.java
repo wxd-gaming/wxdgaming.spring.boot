@@ -7,6 +7,8 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface RPC {
 
+    boolean checkToken() default true;
+
     /** 路由映射 */
     String value() default "";
 

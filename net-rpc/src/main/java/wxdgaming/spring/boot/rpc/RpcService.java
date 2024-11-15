@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,9 +35,10 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class RpcService implements InitPrint {
 
+    @Value("${socket.rpc-token}")
+    private final String RPC_TOKEN = "getg6jhkopw435dvmkmcvx5y63-40";
     private final SpringUtil springUtil;
     private final ConcurrentHashMap<String, RpcActionMapping> rpcHandlerMap = new ConcurrentHashMap<>();
-    private final String RPC_TOKEN = "getg6jhkopw435dvmkmcvx5y63-40";
     private final AtomicLong atomicLong = new AtomicLong(0);
     private final ConcurrentSkipListMap<Long, CompletableFuture<String>> rpcEvent = new ConcurrentSkipListMap<>();
 
@@ -49,28 +51,28 @@ public class RpcService implements InitPrint {
     @ReLoad
     @Order(99999)
     public void initMapping(SpringUtil springUtil) {
-        springUtil.withMethodAnnotated(RPC.class)
-                .forEach(t -> {
-                    t.getRight().setAccessible(true);
-                    String value = "";
-                    RequestMapping requestMapping = t.getLeft().getClass().getAnnotation(RequestMapping.class);
-                    if (requestMapping != null && requestMapping.value().length > 0) {
-                        value = requestMapping.value()[0];
-                    }
-                    String mapping = t.getRight().getAnnotation(RPC.class).value();
-                    if (StringsUtil.emptyOrNull(mapping)) {
-                        value += "/" + t.getRight().getName();
-                    } else {
-                        value += mapping;
-                    }
-                    RpcActionMapping oldMapping = rpcHandlerMap.put(value, new RpcActionMapping(t.getRight(), t.getLeft()));
-                    if (oldMapping != null) {
-                        if (!oldMapping.getBean().getClass().getName().endsWith(t.getLeft().getClass().getName())) {
-                            throw new RuntimeException("处理器重复：" + oldMapping.getBean().getClass().getName() + " - " + t.getLeft().getClass().getName());
-                        }
-                    }
-                    log.debug("rpc register path={}, {}#{}", value, t.getLeft().getClass().getName(), t.getRight().getName());
-                });
+        springUtil.withMethodAnnotated(RPC.class).forEach(t -> {
+            t.getRight().setAccessible(true);
+            String value = "";
+            RequestMapping requestMapping = t.getLeft().getClass().getAnnotation(RequestMapping.class);
+            if (requestMapping != null && requestMapping.value().length > 0) {
+                value = requestMapping.value()[0];
+            }
+            RPC annotation = t.getRight().getAnnotation(RPC.class);
+            String mapping = annotation.value();
+            if (StringsUtil.emptyOrNull(mapping)) {
+                value += "/" + t.getRight().getName();
+            } else {
+                value += mapping;
+            }
+            RpcActionMapping oldMapping = rpcHandlerMap.put(value, new RpcActionMapping(annotation, t.getLeft(), t.getRight()));
+            if (oldMapping != null) {
+                if (!oldMapping.getBean().getClass().getName().endsWith(t.getLeft().getClass().getName())) {
+                    throw new RuntimeException("RPC 处理器重复：" + oldMapping.getBean().getClass().getName() + " - " + t.getLeft().getClass().getName());
+                }
+            }
+            log.debug("rpc register path={}, {}#{}", value, t.getLeft().getClass().getName(), t.getRight().getName());
+        });
     }
 
     /** rpc test */

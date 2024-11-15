@@ -4,9 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import wxdgaming.spring.boot.core.util.StringsUtil;
@@ -30,9 +30,9 @@ import java.lang.reflect.Constructor;
 @Setter
 @Accessors(chain = true)
 @Configuration
-@ConfigurationProperties("socket.server")
 public class BrokerServerBuilder {
 
+    @Value("${socket.server.broker}")
     private SocketServerBuilder.Config broker;
     private final SessionGroup sessionGroup = new SessionGroup();
 

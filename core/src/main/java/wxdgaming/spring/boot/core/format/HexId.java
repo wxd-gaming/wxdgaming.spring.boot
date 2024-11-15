@@ -38,8 +38,9 @@ public class HexId implements Serializable {
 
 
     public synchronized long newId() {
-        final long days = MyClock.days() - OffSetDays;
-        final long secondByDay = MyClock.dayOfSecond();
+        long nanoTime = System.currentTimeMillis();
+        final long days = MyClock.days(nanoTime) - OffSetDays;
+        final long secondByDay = MyClock.dayOfSecond(nanoTime);
         if (lastDays != days || secondByDay != lastSecondByDay) {
             seed = 0;
             lastDays = days;

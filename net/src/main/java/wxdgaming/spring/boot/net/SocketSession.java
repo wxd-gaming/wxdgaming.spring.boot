@@ -94,7 +94,7 @@ public class SocketSession {
         try {channel.disconnect();} catch (Exception ignore) {}
         try {channel.close();} catch (Exception ignore) {}
         try {channel.deregister();} catch (Exception ignore) {}
-        log.info("{} {}", toString(), string);
+        log.info("close {} {}", toString(), string);
     }
 
     @Override public String toString() {

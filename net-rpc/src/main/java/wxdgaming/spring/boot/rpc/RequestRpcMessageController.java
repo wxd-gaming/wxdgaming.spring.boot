@@ -68,13 +68,13 @@ public class RequestRpcMessageController {
             rpcService.response(session, rpcId, 9, "Not found path=【" + path + "】!");
             return null;
         }
-
-        if (!rpcService.getRPC_TOKEN().equalsIgnoreCase(rpcToken)) {
-            log.error("rpc 调用验签失败 rpcId={}, path={}, params={}", rpcId, path, remoteParams);
-            rpcService.response(session, rpcId, 10, "token error path=【" + path + "】!");
-            return null;
+        if (rpcActionMapping.getAnnotation().checkToken()) {
+            if (!rpcService.getRPC_TOKEN().equalsIgnoreCase(rpcToken)) {
+                log.error("rpc 调用验签失败 rpcId={}, path={}, params={}", rpcId, path, remoteParams);
+                rpcService.response(session, rpcId, 10, "token error path=【" + path + "】!");
+                return null;
+            }
         }
-
         Parameter[] parameters = rpcActionMapping.getMethod().getParameters();
         Object[] params = new Object[parameters.length];
         for (int i = 0; i < params.length; i++) {
