@@ -32,11 +32,11 @@ public class BaseExecutor extends ThreadPoolExecutor {
     }
 
     @Override public Future<?> submit(Runnable task) {
-        return super.submit(RunEvent.of(task));
+        return super.submit(RunEvent.of(4, task));
     }
 
     @Override public <T> Future<T> submit(Runnable task, T result) {
-        return super.submit(RunEvent.of(task), result);
+        return super.submit(RunEvent.of(4, task), result);
     }
 
     @Override public <T> Future<T> submit(Callable<T> task) {
@@ -44,7 +44,7 @@ public class BaseExecutor extends ThreadPoolExecutor {
     }
 
     @Override public void execute(Runnable command) {
-        super.execute(RunEvent.of(command));
+        super.execute(RunEvent.of(4, command));
     }
 
     @Override public void shutdown() {

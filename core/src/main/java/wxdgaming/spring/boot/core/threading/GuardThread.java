@@ -72,7 +72,7 @@ class GuardThread implements Runnable, InitPrint, Closeable {
         if (!tuple.tick.need()) {
             return;
         }
-        long diff = tuple.diffTime.diffLong();
+        float diff = tuple.diffTime.diffLong() / 100 / 10f;
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
         sb.append("线程：").append(thread.getName()).append("\n");
@@ -80,7 +80,7 @@ class GuardThread implements Runnable, InitPrint, Closeable {
             sb.append("队列：").append(tuple.runnable.queueName).append("\n");
         }
         sb.append("任务：").append(tuple.runnable.runName).append("\n");
-        sb.append("耗时：").append(String.format("%3d", diff)).append(" ms\n");
+        sb.append("耗时：").append(String.format("%.2f", diff)).append(" s\n");
         Throw.ofString(sb, thread.getStackTrace(), true);
         log.warn(sb.toString());
     }

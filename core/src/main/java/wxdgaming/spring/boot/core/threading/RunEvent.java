@@ -8,10 +8,10 @@ package wxdgaming.spring.boot.core.threading;
  **/
 class RunEvent extends Event {
 
-    static Event of(Runnable runnable) {
+    static Event of(int stackTrace, Runnable runnable) {
         Event event;
         if (!(runnable instanceof Event)) {
-            event = new RunEvent(runnable);
+            event = new RunEvent(stackTrace, runnable);
         } else {
             event = (Event) runnable;
         }
@@ -20,7 +20,8 @@ class RunEvent extends Event {
 
     private final Runnable runnable;
 
-    public RunEvent(Runnable runnable) {
+    public RunEvent(int stackTrace, Runnable runnable) {
+        super(stackTrace);
         this.runnable = runnable;
     }
 

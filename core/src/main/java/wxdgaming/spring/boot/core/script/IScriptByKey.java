@@ -9,7 +9,8 @@ import java.io.Serializable;
  * @version: 2024-11-13 20:52
  **/
 
-public interface IScript extends Serializable {
+public interface IScriptByKey<Key extends Serializable> extends IScript {
 
+    Key scriptKey();
 
 }
