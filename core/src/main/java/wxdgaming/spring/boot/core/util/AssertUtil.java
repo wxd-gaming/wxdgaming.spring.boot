@@ -46,7 +46,12 @@ public class AssertUtil {
     }
 
     /** 条件如果是false 抛出异常 */
-    public static void assertTrue(boolean success, String format, Object... args) {
+    public static void assertTrues(boolean success, String... args) {
+        if (!success) throw assertException(String.join(" ", args));
+    }
+
+    /** 条件如果是false 抛出异常 */
+    public static void assertTrueFmt(boolean success, String format, Object... args) {
         if (!success) throw assertException(format, args);
     }
 
@@ -85,8 +90,8 @@ public class AssertUtil {
     /** null empty */
     public static void assertNullEmpty(Object source, String message) {
         if (source == null
-                || (source instanceof String str && (str.isEmpty() || str.isBlank()))
-                || (source instanceof Collection && ((Collection<?>) source).isEmpty())) {
+            || (source instanceof String str && (str.isEmpty() || str.isBlank()))
+            || (source instanceof Collection && ((Collection<?>) source).isEmpty())) {
             throw assertException(message);
         }
     }

@@ -191,6 +191,17 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
     }
 
     /**
+     * 返回当前 spring 容器所有的bean
+     *
+     * @return
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2024-08-12 13:38
+     */
+    public SpringReflectContext withSuperClass(Class superCls) {
+        return new SpringReflectContext(getBeansOfType(superCls));
+    }
+
+    /**
      * 指定注解的方法
      *
      * @param annotationType 注解

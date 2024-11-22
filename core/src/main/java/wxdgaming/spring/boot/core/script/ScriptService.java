@@ -48,14 +48,14 @@ public class ScriptService {
                         String name = cls.getName();
                         List<IScript> iScripts = tmpScriptMap.computeIfAbsent(name, l -> new ArrayList<>());
                         if (IScriptSingleton.class.isAssignableFrom(cls)) {
-                            AssertUtil.assertTrue(iScripts.isEmpty(), "脚本：%s, 应该是单例", script.getClass().getName());
+                            AssertUtil.assertTrueFmt(iScripts.isEmpty(), "脚本：%s, 应该是单例", script.getClass().getName());
                         }
                         iScripts.add(script);
                         if (IScriptByKey.class.isAssignableFrom(cls)) {
                             IScriptByKey<Serializable> scriptByKey = (IScriptByKey) script;
                             IScriptByKey<Serializable> old = tmpKeyScriptMap.put(name, scriptByKey.scriptKey(), scriptByKey);
                             if (IScriptByKeySingleton.class.isAssignableFrom(cls)) {
-                                AssertUtil.assertTrue(old == null, "脚本：%s, 应该是单例", script.getClass().getName());
+                                AssertUtil.assertTrueFmt(old == null, "脚本：%s, 应该是单例", script.getClass().getName());
                             }
                         }
                     });

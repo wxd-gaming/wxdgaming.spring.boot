@@ -33,6 +33,10 @@ public class DataRepository {
         return (T) dataTableMap.computeIfAbsent(dataTableClass, k -> buildDataTable(k));
     }
 
+    public <T extends DataTable, E> E dataTable(Class<T> dataTableClass, Object key) {
+        return (E) (dataTableMap.computeIfAbsent(dataTableClass, k -> buildDataTable(k)).get(key));
+    }
+
     public void load() {
         Map<Class<?>, DataTable<?>> tmpDataTableMap = new ConcurrentHashMap<>();
         ReflectContext reflectContext = ReflectContext.Builder.of(classLoader, scanPackageName).build();

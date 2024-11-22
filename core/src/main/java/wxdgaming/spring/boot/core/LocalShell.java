@@ -34,6 +34,29 @@ public class LocalShell implements Serializable {
         }
     }
 
+    /** 分离式子进程执行shell */
+    public static void asyncExeLocalCommand(File file, String command) throws IOException {
+        ProcessBuilder pb = new ProcessBuilder(new String[]{"/bin/bash", "-c", command});
+        // 不使用Runtime.getRuntime().exec(command)的方式,因为无法设置以下特性
+        // Java执行本地命令是启用一个子进程处理,默认情况下子进程与父进程I/O通过管道相连(默认ProcessBuilder.Redirect.PIPE)
+        // 当服务执行自身重启的命令时,父进程关闭导致管道连接中断,将导致子进程也崩溃,从而无法完成后续的启动
+        // 解决方式,(1)设置子进程IO输出重定向到指定文件;(2)设置属性子进程的I/O源或目标将与当前进程的相同,两者相互独立
+        if (file == null || !file.exists()) {
+            // 设置属性子进程的I/O源或目标将与当前进程的相同,两者相互独立
+            pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+            pb.redirectInput(ProcessBuilder.Redirect.INHERIT);
+        } else {
+            // 设置子进程IO输出重定向到指定文件
+            // 错误输出与标准输出,输出到一块
+            pb.redirectErrorStream(true);
+            // 设置输出日志
+            pb.redirectOutput(ProcessBuilder.Redirect.appendTo(file));
+        }
+        // 执行命令进程
+        pb.start();
+    }
+
     public void t0(String[] args) throws Exception {
         String cmd = String.join(" ", args);
         cmd = cmd.trim();
@@ -106,8 +129,8 @@ public class LocalShell implements Serializable {
         if (localShell != null) {
             for (String line : localShell.getLines()) {
                 if (line != null
-                        && line.length() >= processId.length()
-                        && line.contains(processId)) {
+                    && line.length() >= processId.length()
+                    && line.contains(processId)) {
                     return true;
                 }
             }

@@ -32,9 +32,7 @@ public class SpringReflectContext {
             stream = Stream.concat(stream, Arrays.stream(beanDefinitionNames1));
         }
 
-        return stream
-                .map(applicationContext::getBean)
-                .sorted(SpringUtil.OBJECT_COMPARATOR);
+        return stream.map(applicationContext::getBean);
     }
 
     public static SpringReflectContext build(ConfigurableApplicationContext applicationContext) {
@@ -45,7 +43,7 @@ public class SpringReflectContext {
     private final Stream<Object> instanceList;
 
     public SpringReflectContext(Stream<Object> instanceList) {
-        this.instanceList = instanceList;
+        this.instanceList = instanceList.sorted(SpringUtil.OBJECT_COMPARATOR);
     }
 
     /** 父类或者接口 */
