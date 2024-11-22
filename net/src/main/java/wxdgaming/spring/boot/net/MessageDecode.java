@@ -140,11 +140,10 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
 
     protected void action(SocketSession socketSession, int messageId, byte[] messageBytes) throws Exception {
         DoMessageMapping doMessageMapping = dispatcher.getMappings().get(messageId);
-        Logger logger = LogbackUtil.logger();
         if (doMessageMapping != null) {
             PojoBase message = (PojoBase) SerializerUtil.decode(messageBytes, doMessageMapping.getMessageType());
-            if (bootstrapBuilder.isPrintLogger() && logger.isInfoEnabled()) {
-                logger.info(
+            if (bootstrapBuilder.isPrintLogger() && log.isInfoEnabled()) {
+                log.info(
                         "收到消息：ctx={}, id={}, len={}, body={}",
                         socketSession.toString(),
                         messageId,
@@ -155,14 +154,20 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
             /* TODO 这里考虑如何线程规划 */
             doMessageMapping.getMethod().invoke(doMessageMapping.getBean(), socketSession, message);
         } else {
-            if (bootstrapBuilder.isPrintLogger() && logger.isInfoEnabled()) {
-                logger.info(
-                        "收到消息：ctx={}, id={}, len={} (未知消息)",
-                        socketSession.toString(),
-                        messageId,
-                        messageBytes.length
-                );
-            }
+            /*找不到处理接口*/
+            notSpi(socketSession, messageId, messageBytes);
+        }
+    }
+
+    /** 当找不到处理接口的时候调用的 */
+    protected void notSpi(SocketSession socketSession, int messageId, byte[] messageBytes) {
+        if (bootstrapBuilder.isPrintLogger() && log.isInfoEnabled()) {
+            log.info(
+                    "收到消息：ctx={}, id={}, len={} (未知消息)",
+                    socketSession.toString(),
+                    messageId,
+                    messageBytes.length
+            );
         }
     }
 

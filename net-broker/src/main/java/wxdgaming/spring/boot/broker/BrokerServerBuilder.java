@@ -38,8 +38,8 @@ public class BrokerServerBuilder {
 
     @Bean(name = "brokerMessageDecode")
     @ConditionalOnMissingBean(BrokerMessageDecode.class)
-    public BrokerMessageDecode brokerMessageDecode(BootstrapBuilder bootstrapBuilder, MessageDispatcher messageDispatcher) {
-        return new BrokerMessageDecode(bootstrapBuilder, messageDispatcher, sessionGroup);
+    public BrokerMessageDecode brokerMessageDecode(BootstrapBuilder bootstrapBuilder, MessageDispatcher messageDispatcher, DataCenter dataCenter) {
+        return new BrokerMessageDecode(bootstrapBuilder, messageDispatcher, sessionGroup, dataCenter);
     }
 
     @Bean(name = "brokerService")

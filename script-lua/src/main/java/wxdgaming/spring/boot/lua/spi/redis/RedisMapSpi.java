@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.lua.spi;
+package wxdgaming.spring.boot.lua.spi.redis;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

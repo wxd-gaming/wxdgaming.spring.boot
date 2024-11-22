@@ -22,8 +22,6 @@ import wxdgaming.spring.boot.net.server.SocketService;
 @Getter
 public class BrokerService extends SocketService {
 
-    private ConcurrentTable<InnerMessage.Stype, Integer, SocketSession> sessions = new ConcurrentTable<>();
-
     public BrokerService(BootstrapBuilder bootstrapBuilder,
                          SocketServerBuilder socketServerBuilder,
                          SocketServerBuilder.Config config,

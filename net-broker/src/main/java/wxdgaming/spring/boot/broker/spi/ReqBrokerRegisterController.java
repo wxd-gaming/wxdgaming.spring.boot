@@ -1,10 +1,14 @@
-package wxdgaming.spring.boot.broker;
+package wxdgaming.spring.boot.broker.spi;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import wxdgaming.spring.boot.broker.DataCenter;
+import wxdgaming.spring.boot.broker.ServerMapping;
 import wxdgaming.spring.boot.broker.pojo.inner.InnerMessage;
 import wxdgaming.spring.boot.net.MsgMapper;
 import wxdgaming.spring.boot.net.SocketSession;
+
+import java.util.Set;
 
 /**
  * 请求rpc执行处理
@@ -16,18 +20,21 @@ import wxdgaming.spring.boot.net.SocketSession;
 @Controller
 public class ReqBrokerRegisterController {
 
-    private final BrokerService brokerService;
+    final DataCenter dataCenter;
 
-    public ReqBrokerRegisterController(BrokerService brokerService) {
-        this.brokerService = brokerService;
+    public ReqBrokerRegisterController(DataCenter dataCenter) {
+        this.dataCenter = dataCenter;
     }
+
 
     @MsgMapper
     public void reqRegisterAction(SocketSession session, InnerMessage.ReqBrokerRegister reqRegister) throws Exception {
         InnerMessage.Stype stype = reqRegister.getStype();
         int sid = reqRegister.getSid();
         session.attribute("register", reqRegister);
-        brokerService.getSessions().put(stype, sid, session);
+        ServerMapping serverMapping = dataCenter.getSessions().computeIfAbsent(stype, sid, m -> new ServerMapping(stype, sid));
+        serverMapping.setSession(session);
+        serverMapping.setListenIdSet(Set.copyOf(reqRegister.getListenMessageId()));
     }
 
 }
