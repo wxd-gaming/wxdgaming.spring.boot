@@ -199,9 +199,9 @@ public class StringsUtil {
         for (int i = 0; i < x1.length(); i++) {
             chars[index] = x1.charAt(i);
             if (index == 7
-                    || index == 12
-                    || index == 17
-                    || index == 22) {
+                || index == 12
+                || index == 17
+                || index == 22) {
                 index++;
                 chars[index] = '-';
             }
@@ -333,10 +333,12 @@ public class StringsUtil {
     }
 
     /**
-     * @param source
-     * @param len
-     * @param ch
-     * @return
+     * 字符串左边补齐
+     *
+     * @param source 源字符
+     * @param len    长度
+     * @param ch     补齐字符
+     * @return 新字符
      * @author 尧
      * @author String左对齐
      */
@@ -361,10 +363,12 @@ public class StringsUtil {
     }
 
     /**
-     * @param source
-     * @param len
-     * @param ch
-     * @return
+     * 字符串右边补齐
+     *
+     * @param source 源字符
+     * @param len    长度
+     * @param ch     补齐字符
+     * @return 新字符
      * @author 尧
      * @author String右对齐
      */
@@ -390,7 +394,7 @@ public class StringsUtil {
 
     /** 如果字符是null或者空白字符返回true */
     public static boolean emptyOrNull(String str) {
-        return null == str || str.isEmpty() || str.isBlank();
+        return null == str || str.isBlank();
     }
 
     /** 如果字符是null或者空白字符返回 false */
