@@ -21,14 +21,13 @@ public class LuaBuild {
 
     private String path;
     private LuacType luacType = LuacType.LUA54;
-    private boolean useModule = false;
     private boolean useXpcall = true;
 
     @Bean
     @Primary
     @ConditionalOnProperty(prefix = "lua.path")
     public LuaService luaService() {
-        return LuaService.of(LuacType.LUA54, useModule, useXpcall, path);
+        return LuaService.of(LuacType.LUA54, useXpcall, path);
     }
 
 }

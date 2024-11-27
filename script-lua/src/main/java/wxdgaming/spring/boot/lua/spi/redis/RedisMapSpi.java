@@ -17,7 +17,9 @@ import wxdgaming.spring.boot.lua.LuaJavaSpi;
 @ConditionalOnBean(RedisTemplate.class)
 public class RedisMapSpi implements LuaJavaSpi {
 
-    @Autowired RedisTemplate<String, Object> redisTemplate;
+    final RedisTemplate<String, Object> redisTemplate;
+
+    public RedisMapSpi(RedisTemplate<String, Object> redisTemplate) {this.redisTemplate = redisTemplate;}
 
     @Override public String getName() {
         return "opsForHash";

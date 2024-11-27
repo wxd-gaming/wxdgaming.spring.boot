@@ -62,7 +62,7 @@ public class LuaTest {
     public void t34() {
         System.out.println(System.currentTimeMillis() + " - " + System.getProperty("user.dir"));
         // luaBus = LuaBus.buildFromResources(Thread.currentThread().getContextClassLoader(), "script/");
-        luaService = LuaService.of(LuacType.LUA54, false, true, "src/main/lua");
+        luaService = LuaService.of(LuacType.LUA54, true, "src/main/lua");
         luaService.set("objVar", 1);
         /*注册函数*/
         luaService.set("testfun0", new LuaFunction() {

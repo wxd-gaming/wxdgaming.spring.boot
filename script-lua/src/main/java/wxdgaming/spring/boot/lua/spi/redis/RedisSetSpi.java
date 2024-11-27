@@ -19,7 +19,9 @@ import java.util.concurrent.TimeUnit;
 @ConditionalOnBean(RedisTemplate.class)
 public class RedisSetSpi implements LuaJavaSpi {
 
-    @Autowired RedisTemplate<String, Object> redisTemplate;
+    final RedisTemplate<String, Object> redisTemplate;
+
+    public RedisSetSpi(RedisTemplate<String, Object> redisTemplate) {this.redisTemplate = redisTemplate;}
 
     @Override public String getName() {
         return "opsForValue";
