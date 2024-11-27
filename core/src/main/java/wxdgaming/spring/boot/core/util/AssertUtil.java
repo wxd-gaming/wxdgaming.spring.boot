@@ -1,9 +1,12 @@
 package wxdgaming.spring.boot.core.util;
 
 
+import wxdgaming.spring.boot.core.json.FastJsonUtil;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 断言辅助
@@ -46,8 +49,18 @@ public class AssertUtil {
     }
 
     /** 条件如果是false 抛出异常 */
-    public static void assertTrues(boolean success, String... args) {
-        if (!success) throw assertException(String.join(" ", args));
+    public static void assertTrues(boolean success, Object... args) {
+        if (!success) {
+            String collect = Arrays.stream(args).map(v -> {
+                        if (v instanceof String || v instanceof Boolean || v instanceof Number) {
+                            return String.valueOf(v);
+                        } else {
+                            return FastJsonUtil.toJson(v);
+                        }
+                    })
+                    .collect(Collectors.joining(" "));
+            throw assertException(collect);
+        }
     }
 
     /** 条件如果是false 抛出异常 */

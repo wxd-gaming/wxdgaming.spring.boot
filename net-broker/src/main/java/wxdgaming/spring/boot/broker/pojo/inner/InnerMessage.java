@@ -122,7 +122,7 @@ public class InnerMessage {
        private int sid;
        /** 转发消息 */
        @Tag(2)
-       private bytes data;
+       private byte[] data;
 
    }
 

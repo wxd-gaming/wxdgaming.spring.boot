@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ApplicationStart" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-    <module name="start" />
+    <module name="wxdgaming.spring.boot.start" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="wxdgaming.spring.boot.start.ApplicationStart" />
     <extension name="coverage">
       <pattern>

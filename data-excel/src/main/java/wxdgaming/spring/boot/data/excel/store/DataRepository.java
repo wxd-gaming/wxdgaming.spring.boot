@@ -5,8 +5,10 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.ReflectContext;
+import wxdgaming.spring.boot.core.ann.Start;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,8 +26,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DataRepository {
     @Value("${data.json.path}")
     @Setter private String jsonPath;
-    @Setter private ClassLoader classLoader;
+    @Value("${data.json.scan}")
     @Setter private String scanPackageName;
+    @Setter private ClassLoader classLoader;
     /** 存储数据表 */
     private Map<Class<?>, DataTable<?>> dataTableMap = new ConcurrentHashMap<>();
 
@@ -37,8 +40,13 @@ public class DataRepository {
         return (E) (dataTableMap.computeIfAbsent(dataTableClass, k -> buildDataTable(k)).get(key));
     }
 
+    @Order(1)
+    @Start
     public void load() {
         Map<Class<?>, DataTable<?>> tmpDataTableMap = new ConcurrentHashMap<>();
+        if (classLoader == null) {
+            classLoader = Thread.currentThread().getContextClassLoader();
+        }
         ReflectContext reflectContext = ReflectContext.Builder.of(classLoader, scanPackageName).build();
         reflectContext.classWithSuper(DataTable.class, null)
                 .forEach(dataTableClass -> {
