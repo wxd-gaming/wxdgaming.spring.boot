@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.core.system.BytesUnit;
 import wxdgaming.spring.boot.core.threading.DefaultExecutor;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
-import wxdgaming.spring.boot.net.SessionHandler;
 import wxdgaming.spring.boot.net.SocketSession;
 
 import java.net.URI;
@@ -41,10 +40,9 @@ public class WebSocketClient extends SocketClient {
                            BootstrapBuilder bootstrapBuilder,
                            SocketClientBuilder socketClientBuilder,
                            SocketClientBuilder.Config config,
-                           SessionHandler sessionHandler,
                            ClientMessageDecode clientMessageDecode,
                            ClientMessageEncode clientMessageEncode) {
-        super(defaultExecutor, bootstrapBuilder, socketClientBuilder, config, sessionHandler, clientMessageDecode, clientMessageEncode);
+        super(defaultExecutor, bootstrapBuilder, socketClientBuilder, config, clientMessageDecode, clientMessageEncode);
     }
 
     @PostConstruct

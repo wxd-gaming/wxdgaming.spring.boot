@@ -13,7 +13,6 @@ import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.MessageDispatcher;
 import wxdgaming.spring.boot.net.SessionGroup;
-import wxdgaming.spring.boot.net.SessionHandler;
 import wxdgaming.spring.boot.net.server.ServerMessageEncode;
 import wxdgaming.spring.boot.net.server.SocketServerBuilder;
 
@@ -46,7 +45,6 @@ public class BrokerServerBuilder {
     @ConditionalOnProperty(prefix = "socket.server.broker", name = "port")
     public BrokerService brokerService(BootstrapBuilder bootstrapBuilder,
                                        SocketServerBuilder socketServerBuilder,
-                                       SessionHandler sessionHandler,
                                        BrokerMessageDecode brokerMessageDecode,
                                        ServerMessageEncode serverMessageEncode) throws Exception {
 
@@ -56,15 +54,15 @@ public class BrokerServerBuilder {
 
         Class aClass = Thread.currentThread().getContextClassLoader().loadClass(broker.getServiceClass());
         Constructor<BrokerService> declaredConstructor = aClass.getDeclaredConstructors()[0];
-        return declaredConstructor.newInstance(
+        BrokerService brokerService = declaredConstructor.newInstance(
                 bootstrapBuilder,
                 socketServerBuilder,
                 broker,
-                sessionHandler,
-                sessionGroup,
                 brokerMessageDecode,
                 serverMessageEncode
         );
+        brokerService.setSessionGroup(sessionGroup);
+        return brokerService;
 
     }
 

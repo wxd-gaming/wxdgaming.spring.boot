@@ -47,6 +47,10 @@ public class SocketSession {
         ChannelUtil.attr(this.channel, key, value);
     }
 
+    public String getIP() {
+        return ChannelUtil.getIP(this.channel);
+    }
+
     public ChannelFuture writeAndFlush(Object message) {
         return channel.writeAndFlush(message);
     }

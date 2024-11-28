@@ -21,6 +21,7 @@ import wxdgaming.spring.boot.core.ssl.SslProtocolType;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.MessageDispatcher;
+import wxdgaming.spring.boot.net.SessionGroup;
 import wxdgaming.spring.boot.net.SessionHandler;
 
 import javax.net.ssl.SSLContext;
@@ -83,7 +84,6 @@ public class SocketServerBuilder {
     @Bean(name = "socketService")
     @ConditionalOnProperty(prefix = "socket.server.config", name = "port")
     public SocketService socketService(BootstrapBuilder bootstrapBuilder,
-                                       SessionHandler sessionHandler,
                                        ServerMessageDecode serverMessageDecode,
                                        ServerMessageEncode serverMessageEncode) throws Exception {
 
@@ -96,7 +96,7 @@ public class SocketServerBuilder {
         return declaredConstructor.newInstance(
                 bootstrapBuilder,
                 this,
-                config, sessionHandler,
+                config,
                 serverMessageDecode,
                 serverMessageEncode
         );
@@ -109,7 +109,7 @@ public class SocketServerBuilder {
     @Accessors(chain = true)
     public static class Config {
 
-        private String serviceClass ;
+        private String serviceClass;
         private int port = 18001;
         private int idleTimeout = 30;
         /** 是否开启 ssl */

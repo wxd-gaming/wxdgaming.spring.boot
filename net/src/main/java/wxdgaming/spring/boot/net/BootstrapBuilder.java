@@ -42,14 +42,6 @@ public class BootstrapBuilder implements InitPrint {
     }
 
     @Bean
-    @ConditionalOnMissingBean(SessionHandler.class)
-    public SessionHandler sessionHandler() {
-        SessionHandler sessionHandler = new SessionHandler() {};
-        log.debug("init default sessionHandler = {}", sessionHandler.hashCode());
-        return sessionHandler;
-    }
-
-    @Bean
     @ConditionalOnMissingBean(MessageDispatcher.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
     public MessageDispatcher messageDispatcher() {
         MessageDispatcher messageDispatcher = new MessageDispatcher();

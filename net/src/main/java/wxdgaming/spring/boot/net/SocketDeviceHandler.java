@@ -5,6 +5,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.internal.OutOfDirectMemoryError;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.core.GlobalUtil;
 
@@ -19,11 +20,10 @@ import java.util.Optional;
 public abstract class SocketDeviceHandler extends ChannelInboundHandlerAdapter {
 
     protected final BootstrapBuilder bootstrapBuilder;
-    protected final SessionHandler sessionHandler;
+    @Setter protected SessionHandler sessionHandler = new SessionHandler() {};
 
-    public SocketDeviceHandler(BootstrapBuilder bootstrapBuilder, SessionHandler sessionHandler) {
+    public SocketDeviceHandler(BootstrapBuilder bootstrapBuilder) {
         this.bootstrapBuilder = bootstrapBuilder;
-        this.sessionHandler = sessionHandler;
     }
 
     @Override
@@ -75,11 +75,11 @@ public abstract class SocketDeviceHandler extends ChannelInboundHandlerAdapter {
                 .map(String::toLowerCase).orElse("");
         String ctxName = ChannelUtil.ctxTostring(ctx);
         if (message.contains("sslhandshak")
-                || message.contains("sslexception")
-                || message.contains("certificate_unknown")
-                || message.contains("connection reset")
-                || message.contains("你的主机中的软件中止了一个已建立的连接")
-                || message.contains("远程主机强迫关闭了一个现有的连接")) {
+            || message.contains("sslexception")
+            || message.contains("certificate_unknown")
+            || message.contains("connection reset")
+            || message.contains("你的主机中的软件中止了一个已建立的连接")
+            || message.contains("远程主机强迫关闭了一个现有的连接")) {
             if (log.isDebugEnabled()) {
                 log.debug("内部处理异常：{}, {}", message, ctxName);
             }

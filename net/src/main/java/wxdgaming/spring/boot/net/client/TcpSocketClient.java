@@ -5,7 +5,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import wxdgaming.spring.boot.core.threading.DefaultExecutor;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
-import wxdgaming.spring.boot.net.SessionHandler;
 
 /**
  * tcp socket client
@@ -20,10 +19,9 @@ public class TcpSocketClient extends SocketClient {
                            BootstrapBuilder bootstrapBuilder,
                            SocketClientBuilder socketClientBuilder,
                            SocketClientBuilder.Config config,
-                           SessionHandler sessionHandler,
                            ClientMessageDecode clientMessageDecode,
                            ClientMessageEncode clientMessageEncode) {
-        super(defaultExecutor, bootstrapBuilder, socketClientBuilder, config, sessionHandler, clientMessageDecode, clientMessageEncode);
+        super(defaultExecutor, bootstrapBuilder, socketClientBuilder, config, clientMessageDecode, clientMessageEncode);
     }
 
     @PostConstruct

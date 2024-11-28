@@ -25,8 +25,6 @@ public class BrokerService extends SocketService {
     public BrokerService(BootstrapBuilder bootstrapBuilder,
                          SocketServerBuilder socketServerBuilder,
                          SocketServerBuilder.Config config,
-                         SessionHandler sessionHandler,
-                         SessionGroup sessionGroup,
                          BrokerMessageDecode brokerMessageDecode,
                          ServerMessageEncode serverMessageEncode) {
 
@@ -34,8 +32,6 @@ public class BrokerService extends SocketService {
                 bootstrapBuilder,
                 socketServerBuilder,
                 config,
-                sessionHandler,
-                sessionGroup,
                 brokerMessageDecode,
                 serverMessageEncode
         );

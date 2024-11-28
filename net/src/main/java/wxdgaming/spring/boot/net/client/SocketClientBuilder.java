@@ -77,14 +77,13 @@ public class SocketClientBuilder {
     @Bean()
     @ConditionalOnProperty(prefix = "socket.client.tcp", name = "port")
     public TcpSocketClient tcpSocketClient(DefaultExecutor defaultExecutor, BootstrapBuilder bootstrapBuilder,
-                                           SessionHandler sessionHandler,
                                            ClientMessageDecode clientMessageDecode,
                                            ClientMessageEncode clientMessageEncode) {
         return new TcpSocketClient(
                 defaultExecutor,
                 bootstrapBuilder,
                 this,
-                tcp, sessionHandler,
+                tcp,
                 clientMessageDecode,
                 clientMessageEncode
         );
@@ -93,14 +92,13 @@ public class SocketClientBuilder {
     @Bean()
     @ConditionalOnProperty(prefix = "socket.client.web", name = "port")
     public WebSocketClient webSocketClient(DefaultExecutor defaultExecutor, BootstrapBuilder bootstrapBuilder,
-                                           SessionHandler sessionHandler,
                                            ClientMessageDecode clientMessageDecode,
                                            ClientMessageEncode clientMessageEncode) {
         return new WebSocketClient(
                 defaultExecutor,
                 bootstrapBuilder,
                 this,
-                web, sessionHandler,
+                web,
                 clientMessageDecode,
                 clientMessageEncode
         );

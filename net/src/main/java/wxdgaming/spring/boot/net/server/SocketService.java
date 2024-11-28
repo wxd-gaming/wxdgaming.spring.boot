@@ -7,15 +7,17 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
-import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.system.BytesUnit;
 import wxdgaming.spring.boot.core.threading.Event;
-import wxdgaming.spring.boot.net.*;
+import wxdgaming.spring.boot.net.BootstrapBuilder;
+import wxdgaming.spring.boot.net.ISession;
+import wxdgaming.spring.boot.net.SessionGroup;
+import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.ssl.WxdOptionalSslHandler;
 
 import java.io.Closeable;
@@ -41,41 +43,20 @@ public class SocketService implements InitPrint, Closeable, ISession {
     private ServerBootstrap bootstrap = null;
     private ChannelFuture future = null;
     /** 所有的连接 */
-    protected final SessionGroup sessionGroup;
-
-
-    public SocketService(BootstrapBuilder bootstrapBuilder,
-                         SocketServerBuilder socketServerBuilder,
-                         SocketServerBuilder.Config config,
-                         SessionHandler sessionHandler,
-                         ServerMessageDecode serverMessageDecode,
-                         ServerMessageEncode serverMessageEncode) {
-        this(
-                bootstrapBuilder,
-                socketServerBuilder,
-                config,
-                sessionHandler,
-                new SessionGroup(),
-                serverMessageDecode,
-                serverMessageEncode
-        );
-    }
+    @Setter protected SessionGroup sessionGroup = new SessionGroup();
 
     public SocketService(BootstrapBuilder bootstrapBuilder,
                          SocketServerBuilder socketServerBuilder,
                          SocketServerBuilder.Config config,
-                         SessionHandler sessionHandler,
-                         SessionGroup sessionGroup,
                          ServerMessageDecode serverMessageDecode,
                          ServerMessageEncode serverMessageEncode) {
 
         this.bootstrapBuilder = bootstrapBuilder;
         this.socketServerBuilder = socketServerBuilder;
         this.config = config;
-        this.socketServerDeviceHandler = new SocketServerDeviceHandler(bootstrapBuilder, sessionHandler, this);
+        this.socketServerDeviceHandler = new SocketServerDeviceHandler(bootstrapBuilder, this);
         this.serverMessageDecode = serverMessageDecode;
         this.serverMessageEncode = serverMessageEncode;
-        this.sessionGroup = sessionGroup;
     }
 
     @PostConstruct

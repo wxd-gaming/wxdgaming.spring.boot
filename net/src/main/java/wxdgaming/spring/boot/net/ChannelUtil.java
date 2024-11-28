@@ -58,6 +58,7 @@ public class ChannelUtil implements Serializable {
         return null;
     }
 
+    /** 返回 ip:port */
     static public String getRemoteAddress(Channel session) {
         try {
             InetSocketAddress insocket = (InetSocketAddress) session.remoteAddress();
@@ -66,6 +67,7 @@ public class ChannelUtil implements Serializable {
         return null;
     }
 
+    /** 返回 ip:port */
     static public String getLocalAddress(Channel session) {
         try {
             InetSocketAddress insocket = (InetSocketAddress) session.localAddress();

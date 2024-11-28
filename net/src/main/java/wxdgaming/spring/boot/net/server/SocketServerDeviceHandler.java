@@ -2,7 +2,10 @@ package wxdgaming.spring.boot.net.server;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import wxdgaming.spring.boot.net.*;
+import wxdgaming.spring.boot.net.BootstrapBuilder;
+import wxdgaming.spring.boot.net.ChannelUtil;
+import wxdgaming.spring.boot.net.SocketDeviceHandler;
+import wxdgaming.spring.boot.net.SocketSession;
 
 /**
  * socket server 驱动
@@ -15,8 +18,8 @@ public class SocketServerDeviceHandler extends SocketDeviceHandler {
 
     private final SocketService socketService;
 
-    public SocketServerDeviceHandler(BootstrapBuilder bootstrapBuilder, SessionHandler sessionHandler, SocketService socketService) {
-        super(bootstrapBuilder, sessionHandler);
+    public SocketServerDeviceHandler(BootstrapBuilder bootstrapBuilder, SocketService socketService) {
+        super(bootstrapBuilder);
         this.socketService = socketService;
     }
 

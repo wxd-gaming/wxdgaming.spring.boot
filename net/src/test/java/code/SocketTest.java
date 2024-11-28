@@ -39,7 +39,6 @@ public class SocketTest {
         socketServerBuilder.setConfig(new SocketServerBuilder.Config().setEnableWebSocket(true));
         socketService = socketServerBuilder.socketService(
                 bootstrapBuilder,
-                new SessionHandler() {},
                 new ServerMessageDecode(bootstrapBuilder, messageDispatcher) {
                     @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
                         super.action(session, messageId, messageBytes);
@@ -82,7 +81,6 @@ public class SocketTest {
         tcpSocketClient = socketClientBuilder.tcpSocketClient(
                 defaultExecutor,
                 bootstrapBuilder,
-                new SessionHandler() {},
                 new ClientMessageDecode(bootstrapBuilder, messageDispatcher) {
                     @Override protected void action(SocketSession socketSession, int messageId, byte[] messageBytes) throws Exception {
                         super.action(socketSession, messageId, messageBytes);
@@ -96,7 +94,6 @@ public class SocketTest {
         webSocketClient = socketClientBuilder.webSocketClient(
                 defaultExecutor,
                 bootstrapBuilder,
-                new SessionHandler() {},
                 new ClientMessageDecode(bootstrapBuilder, messageDispatcher),
                 new ClientMessageEncode(messageDispatcher)
         );

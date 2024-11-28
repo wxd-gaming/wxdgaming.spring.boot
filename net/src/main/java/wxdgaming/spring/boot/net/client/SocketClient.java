@@ -8,7 +8,6 @@ import io.netty.handler.timeout.IdleStateHandler;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.SpringUtil;
@@ -16,7 +15,10 @@ import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.threading.BaseScheduledExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.timer.MyClock;
-import wxdgaming.spring.boot.net.*;
+import wxdgaming.spring.boot.net.BootstrapBuilder;
+import wxdgaming.spring.boot.net.ISession;
+import wxdgaming.spring.boot.net.SessionGroup;
+import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.pojo.inner.InnerMessage;
 import wxdgaming.spring.boot.net.ssl.WxdSslHandler;
 
@@ -55,14 +57,13 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
                         BootstrapBuilder bootstrapBuilder,
                         SocketClientBuilder socketClientBuilder,
                         SocketClientBuilder.Config config,
-                        SessionHandler sessionHandler,
                         ClientMessageDecode clientMessageDecode,
                         ClientMessageEncode clientMessageEncode) {
         this.executor = executor;
         this.bootstrapBuilder = bootstrapBuilder;
         this.socketClientBuilder = socketClientBuilder;
         this.config = config;
-        this.socketClientDeviceHandler = new SocketClientDeviceHandler(bootstrapBuilder, sessionHandler);
+        this.socketClientDeviceHandler = new SocketClientDeviceHandler(bootstrapBuilder);
         this.clientMessageDecode = clientMessageDecode;
         this.clientMessageEncode = clientMessageEncode;
 
@@ -169,10 +170,10 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
     protected boolean reconnection() {
 
         if (closed
-                || !config.isEnableReconnection()
-                || executor.isShutdown()
-                || executor.isTerminated()
-                || executor.isTerminating()) return false;
+            || !config.isEnableReconnection()
+            || executor.isShutdown()
+            || executor.isTerminated()
+            || executor.isTerminating()) return false;
 
         long l = atomicLong.get();
         if (l < 10) {
