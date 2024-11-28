@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import wxdgaming.spring.boot.core.lang.TickCount;
 import wxdgaming.spring.boot.net.message.PojoBase;
 
 /**
@@ -31,6 +32,11 @@ public class SocketSession {
     private final Channel channel;
     private boolean webSocket;
     private boolean ssl;
+    /** 帧最大字节数 */
+    private int maxFrameBytes = 8 * 1024 * 1024;
+    /** 每秒钟帧的最大数量 */
+    private int maxFrameLength = -1;
+    private final TickCount receiveMessageTick = new TickCount(1000);
 
     public SocketSession(Type type, Channel channel, Boolean webSocket) {
         this.type = type;
@@ -99,6 +105,20 @@ public class SocketSession {
         try {channel.close();} catch (Exception ignore) {}
         try {channel.deregister();} catch (Exception ignore) {}
         log.info("close {} {}", toString(), string);
+    }
+
+    /** 增加接受消息的次数 */
+    public boolean checkReceiveMessage(int c) {
+        if (getMaxFrameBytes() < c) {
+            close("超过最大帧字节数");
+            return false;
+        }
+        long added = receiveMessageTick.add(1);
+        if (getMaxFrameLength() > 0 && added > getMaxFrameLength()) {
+            close("超过最大帧数量");
+            return false;
+        }
+        return true;
     }
 
     @Override public String toString() {

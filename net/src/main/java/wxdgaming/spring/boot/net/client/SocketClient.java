@@ -157,6 +157,8 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
                     }
                     Channel channel = future.channel();
                     SocketSession socketSession = new SocketSession(SocketSession.Type.client, channel, false);
+                    socketSession.setMaxFrameBytes(getConfig().getMaxFrameBytes());
+                    socketSession.setMaxFrameLength(getConfig().getMaxFrameLength());
                     socketSession.setSsl(config.isEnableSsl());
                     log.debug("{} connect success {}", this.getClass().getSimpleName(), channel);
                     if (consumer != null) {

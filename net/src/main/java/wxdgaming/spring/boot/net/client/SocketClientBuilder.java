@@ -112,6 +112,10 @@ public class SocketClientBuilder {
 
         protected String host = "127.0.0.1";
         private int port = 18001;
+        /** 帧最大字节数 */
+        private int maxFrameBytes = 8 * 1024 * 1024;
+        /** 每秒钟帧的最大数量 */
+        private int maxFrameLength = -1;
         private int idleTimeout = 30;
         private int connectTimeout = 2000;
         private boolean enableReconnection = false;

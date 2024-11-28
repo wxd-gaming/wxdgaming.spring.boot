@@ -21,8 +21,6 @@ import wxdgaming.spring.boot.core.ssl.SslProtocolType;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.MessageDispatcher;
-import wxdgaming.spring.boot.net.SessionGroup;
-import wxdgaming.spring.boot.net.SessionHandler;
 
 import javax.net.ssl.SSLContext;
 import java.lang.reflect.Constructor;
@@ -111,6 +109,10 @@ public class SocketServerBuilder {
 
         private String serviceClass;
         private int port = 18001;
+        /** 帧最大字节数 */
+        private int maxFrameBytes = 8 * 1024 * 1024;
+        /** 每秒钟帧的最大数量 */
+        private int maxFrameLength = -1;
         private int idleTimeout = 30;
         /** 是否开启 ssl */
         private boolean enableSsl = false;

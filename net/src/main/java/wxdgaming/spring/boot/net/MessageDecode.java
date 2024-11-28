@@ -84,6 +84,9 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
                 case TextWebSocketFrame textWebSocketFrame -> {
                     /*文本数据*/
                     String request = textWebSocketFrame.text();
+                    if (!session.checkReceiveMessage(request.length())) {
+                        return;
+                    }
                     action(session, request);
                 }
                 default -> log.warn("无法处理：{}", frame.getClass().getName());
@@ -128,6 +131,9 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
                 /*读取报文类容*/
                 byteBuf.readBytes(messageBytes);
                 SocketSession session = ChannelUtil.session(ctx.channel());
+                if (!session.checkReceiveMessage(messageBytes.length)) {
+                    return;
+                }
                 action(session, messageId, messageBytes);
             } else {
                 /*重新设置读取进度*/
