@@ -4,9 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import wxdgaming.spring.boot.core.InitPrint;
 
 /**
