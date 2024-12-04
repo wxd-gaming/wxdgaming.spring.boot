@@ -102,7 +102,7 @@ a:hover, a:active { color: #33be85; }
 .upload_file_bg .upload_file_c {
     display: block;padding: 8px 8px 60px;margin-top: 10px;
     border: #95B8E7 1px solid;color: #000000;background-color: #ffffff;
-    width: 530px; overflow: hidden;text-align: left;vertical-align: center;
+    width: 360px; overflow: hidden;text-align: left;vertical-align: center;
     word-wrap: break-word;white-space: normal;
     }
 

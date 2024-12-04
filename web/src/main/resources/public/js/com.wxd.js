@@ -462,7 +462,7 @@ const wxd = {
     <div class="upload_file_c">
         <div class="upload_file_c_1" style="max-height: ${bodyHeight}px;">
             <br>
-            <input id="wxd_upload_file" type="file" style="width: 340px;" value="上传配置" multiple/>
+            <input id="wxd_upload_file" type="file" style="width: 280px;" value="上传配置" multiple/>
             <br>
             <br>
             <div id="wxd_upload_progress_box">       
@@ -528,7 +528,7 @@ const wxd = {
                 let box = `
 <span id="wxd_upload_progress_name_${i}">文件：${fileName}</span>
 <br>
-<progress id="wxd_upload_progress_bar_${i}" value="0" max="100" style="width: 430px;"></progress>&nbsp;&nbsp;<span id="wxd_p_b_v_${i}">0</span>%
+<progress id="wxd_upload_progress_bar_${i}" value="0" max="100" style="width: 280px;"></progress>&nbsp;&nbsp;<span id="wxd_p_b_v_${i}">0</span>%
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;大小：<span id="wxd_p_b_cur_${i}"></span> / <span id="wxd_p_b_max_${i}"></span>,&nbsp;&nbsp;&nbsp;&nbsp;速度：<span id="wxd_p_b_s_${i}"></span>
 <br>
