@@ -8,7 +8,6 @@ import wxdgaming.spring.boot.data.batis.DruidSourceConfig;
 import wxdgaming.spring.boot.data.batis.JdbcHelper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 public class H2Test {
@@ -17,19 +16,33 @@ public class H2Test {
     JdbcHelper jdbcHelper = new JdbcHelper();
     HexId hexId = new HexId(1);
 
-    public H2Test() {
-        jdbcHelper.setDb(new DruidSourceConfig());
-        jdbcHelper.getDb().setUrl("jdbc:h2:file:./target/test");
-        jdbcHelper.getDb().setUsername("sa");
-        jdbcHelper.getDb().setPassword("");
-        jdbcHelper.getDb().setDriverClassName("org.h2.Driver");
-        jdbcHelper.getDb().setPackageNames(new String[]{MyTestEntity.class.getPackageName()});
-        Map<String, Object> jpaConfig = new HashMap<>();
-        jpaConfig.put("database-platform", org.hibernate.dialect.H2Dialect.class.getName());
-        entityManager = jdbcHelper.getDb().entityManagerFactory(jpaConfig);
+    void createFileDriver(String url) {
+        DruidSourceConfig db = new DruidSourceConfig();
+        db.setUrl(url);
+        db.setUsername("sa");
+        db.setPassword("");
+        db.setDriverClassName("org.h2.Driver");
+        db.setPackageNames(new String[]{MyTestEntity.class.getPackageName()});
+        db.setBatchInsert(true);
+        db.setDialect(org.hibernate.dialect.H2Dialect.class.getName());
+
+        jdbcHelper.setDb(db);
+        entityManager = jdbcHelper.getDb().entityManagerFactory(Map.of());
     }
 
     @Test
+    public void insert2File() {
+        createFileDriver("jdbc:h2:file:./target/test");
+        insert();
+    }
+
+    @Test
+    public void insert2Mem() {
+        createFileDriver("jdbc:h2:mem:test");
+        insert();
+    }
+
+
     public void insert() {
         {
             entityManager.getTransaction().begin();

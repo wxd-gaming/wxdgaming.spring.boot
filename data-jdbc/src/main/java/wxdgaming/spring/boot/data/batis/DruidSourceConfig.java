@@ -36,6 +36,8 @@ public class DruidSourceConfig extends ObjectBase {
     String username;
     String password;
     String driverClassName;
+    String dialect;
+    String physical_naming_strategy = CamelCaseToUnderscoresNamingStrategy.class.getName();
     String[] packageNames;
     int initialSize = 5;
     int minIdle = 5;
@@ -48,15 +50,18 @@ public class DruidSourceConfig extends ObjectBase {
     int timeBetweenEvictionRunsMillis = 60000;
     int minEvictableIdleTimeMillis = 300000;
     int maxEvictableIdleTimeMillis = 300000;
+    boolean autoCommit = true;
     boolean logAbandoned = false;
     boolean poolPreparedStatements = true;
     int maxPoolPreparedStatementPerConnectionSize = 20;
     boolean showSql = false;
     String ddlAuto = "update";
-    String dbName = null;
     boolean batchInsert = true;
     boolean batchUpdate = true;
     int batchSize = 200;
+
+    /***/
+    String dbName = null;
 
     /**
      * 复制一个新的连接配置
@@ -85,6 +90,7 @@ public class DruidSourceConfig extends ObjectBase {
         dataSource.setMinIdle(minIdle);
         dataSource.setMaxActive(maxActive);
         dataSource.setMaxWait(maxWait);
+        dataSource.setDefaultAutoCommit(autoCommit);
         dataSource.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
         dataSource.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
         dataSource.setMaxEvictableIdleTimeMillis(maxEvictableIdleTimeMillis);
@@ -109,8 +115,9 @@ public class DruidSourceConfig extends ObjectBase {
         em.getJpaPropertyMap().put("hibernate.order_inserts", batchInsert);
         em.getJpaPropertyMap().put("hibernate.order_updates", batchUpdate);
         em.getJpaPropertyMap().put("hibernate.jdbc.batch_size", batchSize);
+        em.getJpaPropertyMap().put("hibernate.dialect", dialect);
+        em.getJpaPropertyMap().put("hibernate.physical_naming_strategy", physical_naming_strategy);
         em.getJpaPropertyMap().putAll(jpaConfig);
-        em.getJpaPropertyMap().put("hibernate.physical_naming_strategy", CamelCaseToUnderscoresNamingStrategy.class.getName());
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         em.afterPropertiesSet(); // 初始化 EntityManagerFactory
         return em.createNativeEntityManager(Map.of());

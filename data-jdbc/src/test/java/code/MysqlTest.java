@@ -24,7 +24,7 @@ public class MysqlTest {
         db.setPassword("test");
         db.setShowSql(false);
         db.setDdlAuto("update");
-
+        db.setDialect(org.hibernate.dialect.MySQLDialect.class.getName());
         db.createDatabase();
 
         jdbcHelper.setDb(db);
