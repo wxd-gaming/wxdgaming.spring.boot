@@ -16,8 +16,8 @@ import wxdgaming.spring.boot.core.function.ConsumerE1;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.List;
 
 /**
@@ -76,8 +76,13 @@ public class JdbcHelper implements InitPrint {
 
     public void query0(DataSource dataSource, String query, Object[] params, ConsumerE1<ResultSet> consumer) throws Exception {
         try (Connection connection = dataSource.getConnection();
-             Statement statement = connection.createStatement()) {
-            try (ResultSet resultSet = statement.executeQuery(query)) {
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    statement.setObject(i + 1, params[i]);
+                }
+            }
+            try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     consumer.accept(resultSet);
                 }

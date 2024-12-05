@@ -2,10 +2,10 @@ package wxdgaming.spring.boot.data.batis;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -104,7 +104,6 @@ public class DruidSourceConfig extends ObjectBase {
         return dataSource;
     }
 
-    @Transactional
     public EntityManager entityManagerFactory(Map<String, Object> jpaConfig) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(toDataSource());
@@ -115,9 +114,15 @@ public class DruidSourceConfig extends ObjectBase {
         em.getJpaPropertyMap().put("hibernate.order_inserts", batchInsert);
         em.getJpaPropertyMap().put("hibernate.order_updates", batchUpdate);
         em.getJpaPropertyMap().put("hibernate.jdbc.batch_size", batchSize);
-        em.getJpaPropertyMap().put("hibernate.dialect", dialect);
-        em.getJpaPropertyMap().put("hibernate.physical_naming_strategy", physical_naming_strategy);
-        em.getJpaPropertyMap().putAll(jpaConfig);
+        if (StringUtils.isNotBlank(dialect)) {
+            em.getJpaPropertyMap().put("hibernate.dialect", dialect);
+        }
+        if (StringUtils.isNotBlank(physical_naming_strategy)) {
+            em.getJpaPropertyMap().put("hibernate.physical_naming_strategy", physical_naming_strategy);
+        }
+        if (jpaConfig != null) {
+            em.getJpaPropertyMap().putAll(jpaConfig);
+        }
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         em.afterPropertiesSet(); // 初始化 EntityManagerFactory
         return em.createNativeEntityManager(Map.of());
