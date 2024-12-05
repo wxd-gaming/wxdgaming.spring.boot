@@ -1,10 +1,11 @@
-package wxdgaming.spring.boot.data.batis;
+package wxdgaming.spring.boot.data;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import wxdgaming.spring.boot.core.lang.ObjectBase;
+import wxdgaming.spring.boot.core.timer.MyClock;
 
 /**
  * 自增id
@@ -22,7 +23,7 @@ public class EntityAutoBase<ID> extends ObjectBase {
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private ID uid;
-    @Column
-    private String createdTime;
+    @Column(nullable = false)
+    private Long createdTime = MyClock.millis();
 
 }

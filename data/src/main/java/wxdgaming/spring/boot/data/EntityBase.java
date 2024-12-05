@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.data.batis;
+package wxdgaming.spring.boot.data;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;

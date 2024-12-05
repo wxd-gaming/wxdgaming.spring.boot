@@ -31,10 +31,12 @@ import java.util.function.Consumer;
 @Setter
 public class DruidSourceConfig extends ObjectBase {
 
+    /** 需要提高批量模式增加参数 &allowMultiQueries=true&rewriteBatchedStatements=true */
     String url;
     String username;
     String password;
     String driverClassName;
+    String[] packageNames;
     int initialSize = 5;
     int minIdle = 5;
     int maxActive = 20;
@@ -52,6 +54,9 @@ public class DruidSourceConfig extends ObjectBase {
     boolean showSql = false;
     String ddlAuto = "update";
     String dbName = null;
+    boolean batchInsert = true;
+    boolean batchUpdate = true;
+    int batchSize = 200;
 
     /**
      * 复制一个新的连接配置
@@ -94,13 +99,17 @@ public class DruidSourceConfig extends ObjectBase {
     }
 
     @Transactional
-    public EntityManager entityManagerFactory(String... packageNames) {
+    public EntityManager entityManagerFactory(Map<String, Object> jpaConfig) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(toDataSource());
         em.setPackagesToScan(packageNames); // 替换为你的实体包路径
         // 设置命名策略
         em.getJpaPropertyMap().put("hibernate.show_sql", showSql);
         em.getJpaPropertyMap().put("hibernate.hbm2ddl.auto", ddlAuto);
+        em.getJpaPropertyMap().put("hibernate.order_inserts", batchInsert);
+        em.getJpaPropertyMap().put("hibernate.order_updates", batchUpdate);
+        em.getJpaPropertyMap().put("hibernate.jdbc.batch_size", batchSize);
+        em.getJpaPropertyMap().putAll(jpaConfig);
         em.getJpaPropertyMap().put("hibernate.physical_naming_strategy", CamelCaseToUnderscoresNamingStrategy.class.getName());
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         em.afterPropertiesSet(); // 初始化 EntityManagerFactory

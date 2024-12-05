@@ -18,7 +18,7 @@ import wxdgaming.spring.boot.core.SpringReflectContext;
 import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.Throw;
 import wxdgaming.spring.boot.core.ann.Start;
-import wxdgaming.spring.boot.data.batis.DataBatisScan;
+import wxdgaming.spring.boot.data.batis.DataJdbcScan;
 import wxdgaming.spring.boot.data.excel.DataExcelScan;
 import wxdgaming.spring.boot.data.redis.DataRedisScan;
 import wxdgaming.spring.boot.net.NetScan;
@@ -49,7 +49,7 @@ import java.util.List;
         scanBasePackageClasses = {
                 ApplicationStart.class,
                 CoreScan.class,
-                DataBatisScan.class,
+                DataJdbcScan.class,
                 DataRedisScan.class,
                 DataExcelScan.class,
                 NetScan.class,

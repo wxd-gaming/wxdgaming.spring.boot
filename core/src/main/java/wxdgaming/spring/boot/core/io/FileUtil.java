@@ -1,6 +1,5 @@
 package wxdgaming.spring.boot.core.io;
 
-import com.alibaba.druid.util.Utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.io.IOUtils;
@@ -214,7 +213,7 @@ public class FileUtil implements Serializable {
                                     .filter(v -> v.startsWith(path))
                                     .filter(filter)
                                     .map(v -> {
-                                        try (InputStream resourceAsStream = Utils.class.getClassLoader().getResourceAsStream(v)) {
+                                        try (InputStream resourceAsStream = FileUtil.class.getClassLoader().getResourceAsStream(v)) {
                                             byte[] byteArray = IOUtils.toByteArray(resourceAsStream);
                                             return new Record2<>(Paths.get(v), byteArray);
                                         } catch (IOException e) {

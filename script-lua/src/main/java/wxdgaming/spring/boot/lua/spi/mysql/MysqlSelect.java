@@ -2,7 +2,7 @@ package wxdgaming.spring.boot.lua.spi.mysql;
 
 import org.springframework.stereotype.Service;
 import party.iroiro.luajava.Lua;
-import wxdgaming.spring.boot.data.batis.DbHelper;
+import wxdgaming.spring.boot.data.batis.JdbcHelper;
 import wxdgaming.spring.boot.lua.LuaJavaSpi;
 
 /**
@@ -14,10 +14,10 @@ import wxdgaming.spring.boot.lua.LuaJavaSpi;
 @Service
 public class MysqlSelect implements LuaJavaSpi {
 
-    final DbHelper dbHelper;
+    final JdbcHelper jdbcHelper;
 
-    public MysqlSelect(DbHelper dbHelper) {
-        this.dbHelper = dbHelper;
+    public MysqlSelect(JdbcHelper jdbcHelper) {
+        this.jdbcHelper = jdbcHelper;
     }
 
     @Override public String getName() {

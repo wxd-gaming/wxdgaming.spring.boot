@@ -13,6 +13,6 @@ import wxdgaming.spring.boot.core.CoreScan;
 @EntityScan
 @ComponentScan
 @ComponentScan(basePackageClasses = {CoreScan.class})
-public class DataBatisScan {
+public class DataJdbcScan {
 
 }

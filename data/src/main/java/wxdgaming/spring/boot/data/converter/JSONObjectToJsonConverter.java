@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.data.batis.converter;
+package wxdgaming.spring.boot.data.converter;
 
 import com.alibaba.fastjson.JSONObject;
 import jakarta.persistence.AttributeConverter;
