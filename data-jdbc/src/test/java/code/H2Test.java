@@ -1,6 +1,7 @@
 package code;
 
 import jakarta.persistence.EntityManager;
+import org.junit.Before;
 import org.junit.Test;
 import wxdgaming.spring.boot.core.format.HexId;
 import wxdgaming.spring.boot.data.MyTestEntity;
@@ -8,6 +9,7 @@ import wxdgaming.spring.boot.data.batis.DruidSourceConfig;
 import wxdgaming.spring.boot.data.batis.JdbcHelper;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class H2Test {
@@ -30,31 +32,33 @@ public class H2Test {
         entityManager = jdbcHelper.getDb().entityManagerFactory(Map.of());
     }
 
-    @Test
+    @Before
     public void insert2File() {
         createFileDriver("jdbc:h2:file:./target/test");
-        insert();
     }
 
     @Test
     public void insert2Mem() {
         createFileDriver("jdbc:h2:mem:test");
-        insert();
     }
 
 
-    public void insert() {
+    @Test
+    public void clearTable() {
         {
             entityManager.getTransaction().begin();
-            entityManager.createNativeQuery("TRUNCATE TABLE MY_TEST_ENTITY;").executeUpdate();
+            entityManager.createNativeQuery("delete from MY_TEST_ENTITY").executeUpdate();
             entityManager.getTransaction().commit();
         }
+    }
+
+    @Test
+    public void insert() {
         for (int j = 0; j < 10; j++) {
             ArrayList<MyTestEntity> logs = new ArrayList<>(10000);
             for (int i = 0; i < 10000; i++) {
                 MyTestEntity slog = new MyTestEntity();
                 slog.setUid(hexId.newId());
-                slog.setName(String.valueOf(i));
                 logs.add(slog);
             }
             long start = System.nanoTime();
@@ -62,5 +66,34 @@ public class H2Test {
             System.out.println(((System.nanoTime() - start) / 10000 / 100f) + " ms");
         }
     }
+
+    @Test
+    public void insertMerge() {
+        for (int k = 0; k < 2; k++) {
+
+            ArrayList<MyTestEntity> logs = new ArrayList<>(10);
+            for (int i = 0; i < 10; i++) {
+                MyTestEntity slog = new MyTestEntity();
+                slog.setUid(i + 1L);
+                logs.add(slog);
+            }
+            long start = System.nanoTime();
+            jdbcHelper.batchSave(entityManager, logs);
+            System.out.println(((System.nanoTime() - start) / 10000 / 100f) + " ms");
+        }
+        List<MyTestEntity> all = jdbcHelper.findAll(entityManager, MyTestEntity.class);
+        for (MyTestEntity myTestEntity : all) {
+            System.out.println(myTestEntity.toJson());
+        }
+    }
+
+    @Test
+    public void select() {
+        long count = jdbcHelper.findAll2Stream(entityManager, "from MyTestEntity as m where m.uid > ?1", MyTestEntity.class, 1L)
+                .peek(myTestEntity -> System.out.println(myTestEntity.toJson()))
+                .count();
+        System.out.println(count);
+    }
+
 
 }

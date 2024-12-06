@@ -17,7 +17,7 @@ import wxdgaming.spring.boot.core.timer.MyClock;
 @Setter
 @Accessors(chain = true)
 @MappedSuperclass
-public class EntityAutoBase<ID> extends ObjectBase {
+public class EntityAutoBase<ID> extends ObjectBase implements EntityUID<ID> {
 
     @Id
     @Column
