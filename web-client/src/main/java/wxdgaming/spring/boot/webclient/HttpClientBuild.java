@@ -15,6 +15,7 @@ import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.config.Registry;
 import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.hc.core5.util.TimeValue;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @Setter
 @Configuration
+@ConfigurationProperties("spring.http.client")
 public class HttpClientBuild {
 
     private int maxTotal = 200;

@@ -1,35 +1,38 @@
 package code;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import jakarta.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 import wxdgaming.spring.boot.core.format.HexId;
 import wxdgaming.spring.boot.data.MyTestEntity;
 import wxdgaming.spring.boot.data.batis.DruidSourceConfig;
-import wxdgaming.spring.boot.data.batis.JdbcHelper;
+import wxdgaming.spring.boot.data.batis.JdbcContext;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 public class H2Test {
 
-    EntityManager entityManager;
-    JdbcHelper jdbcHelper = new JdbcHelper();
     HexId hexId = new HexId(1);
+    JdbcContext jdbcContext;
 
     void createFileDriver(String url) {
-        DruidSourceConfig db = new DruidSourceConfig();
-        db.setUrl(url);
-        db.setUsername("sa");
-        db.setPassword("");
-        db.setDriverClassName("org.h2.Driver");
-        db.setPackageNames(new String[]{MyTestEntity.class.getPackageName()});
-        db.setBatchInsert(true);
-        db.setDialect(org.hibernate.dialect.H2Dialect.class.getName());
+        DruidSourceConfig dataSourceConfig = new DruidSourceConfig();
+        dataSourceConfig.setUrl(url);
+        dataSourceConfig.setUsername("sa");
+        dataSourceConfig.setPassword("");
+        dataSourceConfig.setDriverClassName("org.h2.Driver");
+        dataSourceConfig.setPackageNames(new String[]{MyTestEntity.class.getPackageName()});
+        dataSourceConfig.setBatchInsert(true);
+        dataSourceConfig.setDialect(org.hibernate.dialect.H2Dialect.class.getName());
 
-        jdbcHelper.setDb(db);
-        entityManager = jdbcHelper.getDb().entityManagerFactory(Map.of());
+        DruidDataSource dataSource = dataSourceConfig.toDataSource();
+        EntityManager entityManager = dataSourceConfig.entityManagerFactory(dataSource, Map.of());
+
+        jdbcContext = new JdbcContext(dataSource, entityManager);
     }
 
     @Before
@@ -45,26 +48,41 @@ public class H2Test {
 
     @Test
     public void clearTable() {
-        {
-            entityManager.getTransaction().begin();
-            entityManager.createNativeQuery("delete from MY_TEST_ENTITY").executeUpdate();
-            entityManager.getTransaction().commit();
+        long start = System.nanoTime();
+        int deleteFromMyTestEntity = jdbcContext.nativeQuery("delete from MY_TEST_ENTITY");
+        System.out.println(deleteFromMyTestEntity + ", " + (((System.nanoTime() - start) / 10000 / 100f) + " ms"));
+    }
+
+    @Test
+    public void count() {
+        for (int k = 0; k < 3; k++) {
+            count0();
         }
+    }
+
+    void count0() {
+        long start = System.nanoTime();
+        long count = jdbcContext.count(MyTestEntity.class);
+        System.out.println(count + ", " + (((System.nanoTime() - start) / 10000 / 100f) + " ms"));
     }
 
     @Test
     public void insert() {
-        for (int j = 0; j < 10; j++) {
-            ArrayList<MyTestEntity> logs = new ArrayList<>(10000);
-            for (int i = 0; i < 10000; i++) {
-                MyTestEntity slog = new MyTestEntity();
-                slog.setUid(hexId.newId());
-                logs.add(slog);
-            }
-            long start = System.nanoTime();
-            jdbcHelper.batchSave(entityManager, logs);
-            System.out.println(((System.nanoTime() - start) / 10000 / 100f) + " ms");
-        }
+        IntStream.range(1, 101)
+                .parallel()
+                .forEach(tk -> {
+                    ArrayList<MyTestEntity> logs = new ArrayList<>(10000);
+                    for (int i = 0; i < 10000; i++) {
+                        MyTestEntity slog = new MyTestEntity();
+                        slog.setUid(hexId.newId());
+                        slog.setName(String.valueOf(slog.getUid()));
+                        logs.add(slog);
+                    }
+                    long start = System.nanoTime();
+                    jdbcContext.batchInsert(logs);
+                    System.out.println(((System.nanoTime() - start) / 10000 / 100f) + " ms");
+                });
+        count0();
     }
 
     @Test
@@ -78,10 +96,10 @@ public class H2Test {
                 logs.add(slog);
             }
             long start = System.nanoTime();
-            jdbcHelper.batchSave(entityManager, logs);
+            jdbcContext.batchSave(logs);
             System.out.println(((System.nanoTime() - start) / 10000 / 100f) + " ms");
         }
-        List<MyTestEntity> all = jdbcHelper.findAll(entityManager, MyTestEntity.class);
+        List<MyTestEntity> all = jdbcContext.findAll(MyTestEntity.class);
         for (MyTestEntity myTestEntity : all) {
             System.out.println(myTestEntity.toJson());
         }
@@ -89,7 +107,7 @@ public class H2Test {
 
     @Test
     public void select() {
-        long count = jdbcHelper.findAll2Stream(entityManager, "from MyTestEntity as m where m.uid > ?1", MyTestEntity.class, 1L)
+        long count = jdbcContext.findAll2Stream("from MyTestEntity as m where m.uid > ?1", MyTestEntity.class, 1L)
                 .peek(myTestEntity -> System.out.println(myTestEntity.toJson()))
                 .count();
         System.out.println(count);

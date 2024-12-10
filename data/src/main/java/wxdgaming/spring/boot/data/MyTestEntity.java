@@ -1,6 +1,8 @@
 package wxdgaming.spring.boot.data;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
+@Table(indexes = {@Index(columnList = "name")})
 public class MyTestEntity extends EntityBase<Long> {
 
     private String name;

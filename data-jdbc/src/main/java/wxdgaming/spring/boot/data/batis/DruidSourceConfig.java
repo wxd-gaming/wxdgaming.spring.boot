@@ -14,6 +14,7 @@ import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.lang.ObjectBase;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
@@ -76,7 +77,6 @@ public class DruidSourceConfig extends ObjectBase {
         DruidSourceConfig parse = FastJsonUtil.parse(json, DruidSourceConfig.class);
         parse.setDbName(dbName);
         parse.url = this.url.replace(this.getDbName(), dbName);
-        parse.createDatabase();
         return parse;
     }
 
@@ -104,9 +104,9 @@ public class DruidSourceConfig extends ObjectBase {
         return dataSource;
     }
 
-    public EntityManager entityManagerFactory(Map<String, Object> jpaConfig) {
+    public EntityManager entityManagerFactory(DataSource dataSource, Map<String, Object> jpaConfig) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(toDataSource());
+        em.setDataSource(dataSource);
         em.setPackagesToScan(packageNames); // 替换为你的实体包路径
         // 设置命名策略
         em.getJpaPropertyMap().put("hibernate.show_sql", showSql);
@@ -125,6 +125,7 @@ public class DruidSourceConfig extends ObjectBase {
         }
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         em.afterPropertiesSet(); // 初始化 EntityManagerFactory
+        // return em.getNativeEntityManagerFactory().createEntityManager(SynchronizationType.SYNCHRONIZED, Map.of());
         return em.createNativeEntityManager(Map.of());
     }
 
