@@ -1,8 +1,12 @@
 package wxdgaming.spring.boot.core;
 
 
+import org.slf4j.helpers.FormattingTuple;
+import org.slf4j.helpers.MessageFormatter;
 import wxdgaming.spring.boot.core.function.Consumer2;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -18,12 +22,30 @@ public class GlobalUtil {
     /** 停服关闭状态 */
     public static final AtomicBoolean SHUTTING = new AtomicBoolean();
 
-    public static Consumer2<Object, Throwable> exceptionCall = null;
+    private static List<Consumer2<Object, Throwable>> exceptionCall = new ArrayList<>();
 
-    public static void exception(Object msg, Throwable throwable) {
-        LogbackUtil.logger(3).error("{}", msg, throwable);
-        if (exceptionCall != null) {
-            exceptionCall.accept(msg, throwable);
+    public static void register(Consumer2<Object, Throwable> consumer) {
+        synchronized (GlobalUtil.class) {
+            List<Consumer2<Object, Throwable>> tmp = new ArrayList<>(exceptionCall);
+            tmp.add(consumer);
+            exceptionCall = tmp;
+        }
+    }
+
+    public static void remove(Consumer2<Object, Throwable> consumer) {
+        synchronized (GlobalUtil.class) {
+            List<Consumer2<Object, Throwable>> tmp = new ArrayList<>(exceptionCall);
+            tmp.remove(consumer);
+            exceptionCall = tmp;
+        }
+    }
+
+    public static void exception(Object msg, Object... params) {
+        FormattingTuple formatter = MessageFormatter.arrayFormat(msg.toString(), params);
+        String message = formatter.getMessage();
+        LogbackUtil.logger(3).error("{}", message, formatter.getThrowable());
+        for (Consumer2<Object, Throwable> consumer : exceptionCall) {
+            consumer.accept(message, formatter.getThrowable());
         }
     }
 
