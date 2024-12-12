@@ -28,17 +28,17 @@ public class SocketServerChooseHandler extends ByteToMessageDecoder {
     /** WebSocket握手的协议前缀 */
     private static final String WEBSOCKET_PREFIX = "GET /";
 
-    final SocketServerBuilder.Config config;
+    final ServerConfig serverConfig;
 
-    public SocketServerChooseHandler(SocketServerBuilder.Config config) {
-        this.config = config;
+    public SocketServerChooseHandler(ServerConfig serverConfig) {
+        this.serverConfig = serverConfig;
     }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         String protocol = getBufStart(in);
         if (protocol.startsWith(WEBSOCKET_PREFIX)) {
-            if (!config.isEnableWebSocket()) {
+            if (!serverConfig.isEnableWebSocket()) {
                 ctx.disconnect();
                 ctx.close();
                 throw new RuntimeException(ChannelUtil.ctxTostring(ctx) + " - 不支持 web socket or http ");
@@ -72,7 +72,7 @@ public class SocketServerChooseHandler extends ByteToMessageDecoder {
         ctx.pipeline().addBefore("device-handler", "http-chunked", new ChunkedWriteHandler());
         ctx.pipeline().addBefore("device-handler", "WebSocketAggregator", new WebSocketFrameAggregator((int) BytesUnit.Mb.toBytes(64)));
         // 用于处理websocket, /ws为访问websocket时的uri
-        ctx.pipeline().addBefore("device-handler", "ProtocolHandler", new WebSocketServerProtocolHandler(config.getWebSocketPrefix(), null, false, 64 * 1024 * 1024));
+        ctx.pipeline().addBefore("device-handler", "ProtocolHandler", new WebSocketServerProtocolHandler(serverConfig.getWebSocketPrefix(), null, false, 64 * 1024 * 1024));
         ChannelUtil.session(ctx.channel()).setWebSocket(true);
     }
 

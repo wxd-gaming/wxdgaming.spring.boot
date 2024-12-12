@@ -13,7 +13,7 @@ import wxdgaming.spring.boot.net.MessageEncode;
 @ChannelHandler.Sharable
 public class ServerMessageEncode extends MessageEncode {
 
-    public ServerMessageEncode(MessageDispatcher messageDispatcher) {
+    public ServerMessageEncode(ServerMessageDispatcher messageDispatcher) {
         super(messageDispatcher);
     }
 

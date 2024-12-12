@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -34,13 +36,19 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import wxdgaming.spring.boot.core.lang.Tuple2;
+import wxdgaming.spring.boot.core.util.StringsUtil;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -220,12 +228,41 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
                 .forEach(t -> {
                     try {
                         t.getRight().setAccessible(true);
-                        Object[] array = Arrays.stream(t.getRight().getParameterTypes()).map(curApplicationContext()::getBean).toArray();
+                        Object[] array = springParameters(t.getLeft(), t.getRight());
+                        // Object[] array = Arrays.stream(t.getRight().getParameterTypes()).map(curApplicationContext()::getBean).toArray();
                         t.getRight().invoke(t.getLeft(), array);
                     } catch (Exception e) {
                         throw new RuntimeException(t.getLeft().getClass().getName() + "#" + t.getRight().getName(), e);
                     }
                 });
+    }
+
+    public Object[] springParameters(Object bean, Method method) {
+        Parameter[] parameters = method.getParameters();
+        Object[] params = new Object[parameters.length];
+        for (int i = 0; i < params.length; i++) {
+            Parameter parameter = parameters[i];
+            Type type = parameter.getParameterizedType();
+            if (type instanceof Class<?> clazz) {
+                /*实现注入*/
+                Qualifier qualifier = parameter.getAnnotation(Qualifier.class);
+                if (qualifier != null) {
+                    String name = qualifier.value();
+                    if (StringsUtil.emptyOrNull(name)) {
+                        throw new RuntimeException(bean.getClass().getName() + "#" + method.getName() + ", 无法识别 " + (i + 1) + " 参数 RequestParam 指定 name " + clazz);
+                    }
+                    params[i] = getBean(name);
+                    continue;
+                }
+                Value value = parameter.getAnnotation(Value.class);
+                if (value != null) {
+                    params[i] = curApplicationContext().getEnvironment().getProperty(value.value());
+                    continue;
+                }
+                params[i] = getBean(clazz);
+            }
+        }
+        return params;
     }
 
     /**

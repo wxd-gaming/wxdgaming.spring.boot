@@ -13,6 +13,7 @@ import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.MessageDispatcher;
 import wxdgaming.spring.boot.net.SessionGroup;
+import wxdgaming.spring.boot.net.server.ServerConfig;
 import wxdgaming.spring.boot.net.server.ServerMessageEncode;
 import wxdgaming.spring.boot.net.server.SocketServerBuilder;
 
@@ -32,7 +33,7 @@ import java.lang.reflect.Constructor;
 public class BrokerServerBuilder {
 
     @Value("${socket.server.broker}")
-    private SocketServerBuilder.Config broker;
+    private ServerConfig broker;
     private final SessionGroup sessionGroup = new SessionGroup();
 
     @Bean(name = "brokerMessageDecode")

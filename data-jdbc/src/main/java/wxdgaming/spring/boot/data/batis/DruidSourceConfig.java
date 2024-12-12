@@ -150,6 +150,7 @@ public class DruidSourceConfig extends ObjectBase {
 
     /** 创建数据库 , 吃方法创建数据库后会自动使用 use 语句 */
     public void createDatabase() {
+        if (url.contains("jdbc:h2")) return;
         String dbName = getDbName();
         try (Connection connection = getConnection()) {
             Consumer<String> stringConsumer = (character) -> {

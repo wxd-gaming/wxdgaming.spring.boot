@@ -35,8 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class SocketService implements InitPrint, Closeable, ISession {
 
     private final BootstrapBuilder bootstrapBuilder;
-    private final SocketServerBuilder socketServerBuilder;
-    private final SocketServerBuilder.Config config;
+    private final ServerConfig serverConfig;
     private final SocketServerDeviceHandler socketServerDeviceHandler;
     private final ServerMessageDecode serverMessageDecode;
     private final ServerMessageEncode serverMessageEncode;
@@ -46,14 +45,12 @@ public class SocketService implements InitPrint, Closeable, ISession {
     @Setter protected SessionGroup sessionGroup = new SessionGroup();
 
     public SocketService(BootstrapBuilder bootstrapBuilder,
-                         SocketServerBuilder socketServerBuilder,
-                         SocketServerBuilder.Config config,
+                         ServerConfig serverConfig,
                          ServerMessageDecode serverMessageDecode,
                          ServerMessageEncode serverMessageEncode) {
 
         this.bootstrapBuilder = bootstrapBuilder;
-        this.socketServerBuilder = socketServerBuilder;
-        this.config = config;
+        this.serverConfig = serverConfig;
         this.socketServerDeviceHandler = new SocketServerDeviceHandler(bootstrapBuilder, this);
         this.serverMessageDecode = serverMessageDecode;
         this.serverMessageEncode = serverMessageEncode;
@@ -62,9 +59,9 @@ public class SocketService implements InitPrint, Closeable, ISession {
     @PostConstruct
     public void init() {
         bootstrap = new ServerBootstrap();
-        bootstrap.group(this.socketServerBuilder.getBossLoop(), this.socketServerBuilder.getWorkerLoop());
+        bootstrap.group(this.bootstrapBuilder.getBossLoop(), this.bootstrapBuilder.getWorkerLoop());
         /*channel方法用来创建通道实例( NioServerSocketChannel 类来实例化一个进来的链接)*/
-        bootstrap.channel(this.socketServerBuilder.getServer_Socket_Channel_Class())
+        bootstrap.channel(this.bootstrapBuilder.getServer_Socket_Channel_Class())
                 /*方法用于设置监听套接字*/
                 .option(ChannelOption.SO_BACKLOG, 0)
                 /*地址重用，socket链接断开后，立即可以被其他请求使用*/
@@ -89,15 +86,15 @@ public class SocketService implements InitPrint, Closeable, ISession {
                             pipeline.addLast(new LoggingHandler("DEBUG"));// 设置log监听器，并且日志级别为debug，方便观察运行流程
                         }
 
-                        pipeline.addFirst(new WxdOptionalSslHandler(config.getSslContext()));
+                        pipeline.addFirst(new WxdOptionalSslHandler(serverConfig.getSslContext()));
 
-                        int idleTime = config.getIdleTimeout();
+                        int idleTime = serverConfig.getIdleTimeout();
                         if (idleTime > 0) {
                             /*设置15秒的读取空闲*/
                             pipeline.addLast(new IdleStateHandler(idleTime, 0, 0, TimeUnit.SECONDS));
                         }
                         /* socket 选择器 区分是tcp websocket http*/
-                        pipeline.addLast("socket-choose-handler", new SocketServerChooseHandler(config));
+                        pipeline.addLast("socket-choose-handler", new SocketServerChooseHandler(serverConfig));
                         /*处理链接*/
                         pipeline.addLast("device-handler", socketServerDeviceHandler);
                         /*解码消息*/
@@ -110,7 +107,7 @@ public class SocketService implements InitPrint, Closeable, ISession {
 
                 });
 
-        this.socketServerBuilder.getWorkerLoop().scheduleAtFixedRate(
+        this.bootstrapBuilder.getWorkerLoop().scheduleAtFixedRate(
                 new Event() {
                     @Override public void onEvent() throws Throwable {
                         sessionGroup.forEach(SocketSession::flush);
@@ -128,9 +125,9 @@ public class SocketService implements InitPrint, Closeable, ISession {
     @Start()
     @Order(1000)
     public void start() {
-        this.future = bootstrap.bind(this.config.getPort());
+        this.future = bootstrap.bind(this.serverConfig.getPort());
         this.future.syncUninterruptibly();
-        log.info("open socket service {}", this.config.getPort());
+        log.info("open socket service {}", this.serverConfig.getPort());
     }
 
     /**
@@ -140,6 +137,6 @@ public class SocketService implements InitPrint, Closeable, ISession {
         if (this.future != null) {
             this.future.channel().close();
         }
-        log.info("shutdown socket service {}", this.config.getPort());
+        log.info("shutdown socket service {}", this.serverConfig.getPort());
     }
 }

@@ -7,12 +7,12 @@ import org.junit.Before;
 import org.junit.Test;
 import wxdgaming.spring.boot.core.threading.DefaultExecutor;
 import wxdgaming.spring.boot.core.threading.ExecutorBuilder;
-import wxdgaming.spring.boot.net.*;
+import wxdgaming.spring.boot.net.BootstrapBuilder;
+import wxdgaming.spring.boot.net.ByteBufUtil;
+import wxdgaming.spring.boot.net.SessionGroup;
+import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.client.*;
-import wxdgaming.spring.boot.net.server.ServerMessageDecode;
-import wxdgaming.spring.boot.net.server.ServerMessageEncode;
-import wxdgaming.spring.boot.net.server.SocketServerBuilder;
-import wxdgaming.spring.boot.net.server.SocketService;
+import wxdgaming.spring.boot.net.server.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 public class SocketTest {
 
     BootstrapBuilder bootstrapBuilder;
-    MessageDispatcher messageDispatcher;
+    ServerMessageDispatcher messageDispatcher;
     DefaultExecutor defaultExecutor;
 
     SocketService socketService;
@@ -32,11 +32,11 @@ public class SocketTest {
     public void before() throws Exception {
         defaultExecutor = new ExecutorBuilder().defaultExecutor();
         bootstrapBuilder = new BootstrapBuilder();
-        messageDispatcher = new MessageDispatcher();
+        bootstrapBuilder.init();
+        messageDispatcher = new ServerMessageDispatcher(new String[0]);
 
         SocketServerBuilder socketServerBuilder = new SocketServerBuilder();
-        socketServerBuilder.init();
-        socketServerBuilder.setConfig(new SocketServerBuilder.Config().setEnableWebSocket(true));
+        socketServerBuilder.setConfig(new ServerConfig().setEnableWebSocket(true));
         socketService = socketServerBuilder.socketService(
                 bootstrapBuilder,
                 new ServerMessageDecode(bootstrapBuilder, messageDispatcher) {

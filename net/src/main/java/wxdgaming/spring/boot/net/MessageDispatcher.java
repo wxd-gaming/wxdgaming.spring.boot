@@ -21,10 +21,16 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 @Slf4j
 @Getter
-public class MessageDispatcher implements InitPrint {
+public abstract class MessageDispatcher implements InitPrint {
 
     protected final ConcurrentHashMap<Integer, DoMessageMapping> mappings = new ConcurrentHashMap<>();
     protected final ConcurrentHashMap<String, Integer> messageName2Id = new ConcurrentHashMap<>();
+
+    private final String[] packages;
+
+    public MessageDispatcher(String[] packages) {
+        this.packages = packages;
+    }
 
     @Start
     @ReLoad
