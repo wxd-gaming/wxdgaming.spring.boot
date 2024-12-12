@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import wxdgaming.spring.boot.core.ssl.SslContextByJks;
 import wxdgaming.spring.boot.core.ssl.SslContextNoFile;
 import wxdgaming.spring.boot.core.ssl.SslProtocolType;
@@ -33,18 +34,19 @@ import java.lang.reflect.Constructor;
  **/
 @Slf4j
 @Getter
-@Setter
 @Accessors(chain = true)
 @Configuration
 @ConfigurationProperties("socket.server")
 public class SocketServerBuilder {
 
     /** netty boss 线程 多个服务共享 */
-    private int bossThreadSize = 3;
+    @Setter private int bossThreadSize = 3;
     /** netty work 线程 多个服务共享 */
-    private int workerThreadSize = 20;
+    @Setter private int workerThreadSize = 20;
 
-    private Config config;
+    @Setter private Config config;
+    @Setter private Config config1;
+    @Setter private Config config2;
 
     private EventLoopGroup bossLoop;
     private EventLoopGroup workerLoop;
@@ -79,22 +81,48 @@ public class SocketServerBuilder {
         return decode;
     }
 
+    @Primary
     @Bean(name = "socketService")
     @ConditionalOnProperty(prefix = "socket.server.config", name = "port")
     public SocketService socketService(BootstrapBuilder bootstrapBuilder,
                                        ServerMessageDecode serverMessageDecode,
                                        ServerMessageEncode serverMessageEncode) throws Exception {
 
-        if (StringsUtil.emptyOrNull(config.getServiceClass())) {
-            config.setServiceClass(SocketService.class.getName());
+        return createSocketService(bootstrapBuilder, serverMessageDecode, serverMessageEncode, config);
+    }
+
+    @Bean(name = "socketService1")
+    @ConditionalOnProperty(prefix = "socket.server.config1", name = "port")
+    public SocketService socketService1(BootstrapBuilder bootstrapBuilder,
+                                        ServerMessageDecode serverMessageDecode,
+                                        ServerMessageEncode serverMessageEncode) throws Exception {
+
+        return createSocketService(bootstrapBuilder, serverMessageDecode, serverMessageEncode, config1);
+    }
+
+    @Bean(name = "socketService2")
+    @ConditionalOnProperty(prefix = "socket.server.config2", name = "port")
+    public SocketService socketService2(BootstrapBuilder bootstrapBuilder,
+                                        ServerMessageDecode serverMessageDecode,
+                                        ServerMessageEncode serverMessageEncode) throws Exception {
+
+        return createSocketService(bootstrapBuilder, serverMessageDecode, serverMessageEncode, config2);
+    }
+
+    public SocketService createSocketService(BootstrapBuilder bootstrapBuilder,
+                                             ServerMessageDecode serverMessageDecode,
+                                             ServerMessageEncode serverMessageEncode, Config cfg) throws Exception {
+
+        if (StringsUtil.emptyOrNull(cfg.getServiceClass())) {
+            cfg.setServiceClass(SocketService.class.getName());
         }
 
-        Class aClass = Thread.currentThread().getContextClassLoader().loadClass(config.getServiceClass());
+        Class aClass = Thread.currentThread().getContextClassLoader().loadClass(cfg.getServiceClass());
         Constructor<SocketService> declaredConstructor = aClass.getDeclaredConstructors()[0];
         return declaredConstructor.newInstance(
                 bootstrapBuilder,
                 this,
-                config,
+                cfg,
                 serverMessageDecode,
                 serverMessageEncode
         );
