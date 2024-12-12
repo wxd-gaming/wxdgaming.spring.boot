@@ -55,13 +55,12 @@ public class MysqlTest {
     void count0() {
         long start = System.nanoTime();
         long count = jdbcContext.count(MyTestEntity.class);
-        System.out.println(count + ", " + (((System.nanoTime() - start) / 10000 / 100f) + " ms"));
+        System.out.println("查询：" + count + ", " + (((System.nanoTime() - start) / 10000 / 100f) + " ms"));
     }
 
     @Test
     public void insert() {
         IntStream.range(1, 101)
-                // .parallel()
                 .forEach(tk -> {
                     ArrayList<MyTestEntity> logs = new ArrayList<>(10000);
                     for (int i = 0; i < 10000; i++) {
@@ -72,8 +71,29 @@ public class MysqlTest {
                     }
                     long start = System.nanoTime();
                     jdbcContext.batchInsert(logs);
-                    System.out.println(((System.nanoTime() - start) / 10000 / 100f) + " ms");
+                    System.out.println("写入：" + logs.size() + " 条数据 耗时：" + ((System.nanoTime() - start) / 10000 / 100f) + " ms");
                 });
+        count0();
+        count0();
+    }
+
+    @Test
+    public void insertParallel() {
+        IntStream.range(1, 101)
+                .parallel()
+                .forEach(tk -> {
+                    ArrayList<MyTestEntity> logs = new ArrayList<>(10000);
+                    for (int i = 0; i < 10000; i++) {
+                        MyTestEntity slog = new MyTestEntity();
+                        slog.setUid(hexId.newId());
+                        slog.setName(String.valueOf(slog.getUid()));
+                        logs.add(slog);
+                    }
+                    long start = System.nanoTime();
+                    jdbcContext.batchInsert(logs);
+                    System.out.println("写入：" + logs.size() + " 条数据 耗时：" + ((System.nanoTime() - start) / 10000 / 100f) + " ms");
+                });
+        count0();
         count0();
     }
 
@@ -89,7 +109,7 @@ public class MysqlTest {
             }
             long start = System.nanoTime();
             jdbcContext.batchSave(logs);
-            System.out.println(((System.nanoTime() - start) / 10000 / 100f) + " ms");
+            System.out.println("写入：" + logs.size() + " 条数据 耗时：" + ((System.nanoTime() - start) / 10000 / 100f) + " ms");
         }
         List<MyTestEntity> all = jdbcContext.findAll(MyTestEntity.class);
         for (MyTestEntity myTestEntity : all) {
@@ -99,8 +119,11 @@ public class MysqlTest {
 
     @Test
     public void select() {
-        jdbcContext.findAll2Stream("from MyTestEntity as m where m.uid > ?1", MyTestEntity.class, 1L)
-                .forEach(myTestEntity -> System.out.println(myTestEntity.toJson()));
+        long start = System.nanoTime();
+        long count = jdbcContext.findAll2Stream("from MyTestEntity as m where m.uid > ?1", MyTestEntity.class, 1L)
+                .peek(myTestEntity -> System.out.println(myTestEntity.toJson()))
+                .count();
+        System.out.println("查询：" + count + " 条数据 耗时：" + ((System.nanoTime() - start) / 10000 / 100f) + " ms");
     }
 
 }
