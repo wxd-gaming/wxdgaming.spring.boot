@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -24,9 +25,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Accessors(chain = true)
 @Service
 public class DataRepository {
-    @Value("${data.json.path}")
+    @Value("${data.json.path:}")
     @Setter private String jsonPath;
-    @Value("${data.json.scan}")
+    @Value("${data.json.scan:}")
     @Setter private String scanPackageName;
     @Setter private ClassLoader classLoader;
     /** 存储数据表 */
@@ -43,6 +44,10 @@ public class DataRepository {
     @Order(1)
     @Start
     public void load() {
+        if (StringUtils.isBlank(jsonPath) || StringUtils.isBlank(scanPackageName)) {
+            log.warn("扫描器异常：{}, {}", jsonPath, scanPackageName);
+            return;
+        }
         Map<Class<?>, DataTable<?>> tmpDataTableMap = new ConcurrentHashMap<>();
         if (classLoader == null) {
             classLoader = Thread.currentThread().getContextClassLoader();

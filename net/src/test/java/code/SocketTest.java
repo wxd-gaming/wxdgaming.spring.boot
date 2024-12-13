@@ -7,11 +7,9 @@ import org.junit.Before;
 import org.junit.Test;
 import wxdgaming.spring.boot.core.threading.DefaultExecutor;
 import wxdgaming.spring.boot.core.threading.ExecutorBuilder;
-import wxdgaming.spring.boot.net.BootstrapBuilder;
-import wxdgaming.spring.boot.net.ByteBufUtil;
-import wxdgaming.spring.boot.net.SessionGroup;
-import wxdgaming.spring.boot.net.SocketSession;
+import wxdgaming.spring.boot.net.*;
 import wxdgaming.spring.boot.net.client.*;
+import wxdgaming.spring.boot.net.message.inner.InnerMessage;
 import wxdgaming.spring.boot.net.server.*;
 
 import java.io.IOException;
@@ -25,60 +23,55 @@ public class SocketTest {
     DefaultExecutor defaultExecutor;
 
     SocketService socketService;
-    TcpSocketClient tcpSocketClient;
-    WebSocketClient webSocketClient;
+    SocketClient socketClient;
 
     @Before
     public void before() throws Exception {
         defaultExecutor = new ExecutorBuilder().defaultExecutor();
         bootstrapBuilder = new BootstrapBuilder();
+        bootstrapBuilder.setPrintLogger(true);
         bootstrapBuilder.init();
+
         messageDispatcher = new ServerMessageDispatcher(new String[0]);
+        messageDispatcher.registerMessage(InnerMessage.ReqHeart.class);
+        messageDispatcher.registerMessage(InnerMessage.ResHeart.class);
 
         SocketServerBuilder socketServerBuilder = new SocketServerBuilder();
         socketServerBuilder.setConfig(new ServerConfig().setEnableWebSocket(true));
+        ServerMessageDecode socketServerTextWebSocketFrame = new ServerMessageDecode(bootstrapBuilder, messageDispatcher) {
+            @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
+                super.action(session, messageId, messageBytes);
+                // log.info("{}", new String(messageBytes, StandardCharsets.UTF_8));
+                {
+                    long startTime = System.nanoTime();
+                    for (int i = 0; i < 10; i++) {
+                        writeAndFlush(socketService.getSessionGroup(), "socket server writeAndFlush " + i);
+                    }
+                    log.info("writeAndFlush cost: {}", (System.nanoTime() - startTime) / 10000 / 100f);
+                }
+            }
+
+        };
+
+        socketServerTextWebSocketFrame.setDoMessage(new DoMessage() {
+            @Override public void actionString(SocketSession socketSession, String message) throws Exception {
+                log.info("{}", message);
+                socketSession.write("socket server textWebSocketFrame");
+            }
+        });
+
         socketService = socketServerBuilder.socketService(
                 bootstrapBuilder,
-                new ServerMessageDecode(bootstrapBuilder, messageDispatcher) {
-                    @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
-                        super.action(session, messageId, messageBytes);
-                        // log.info("{}", new String(messageBytes, StandardCharsets.UTF_8));
-                        {
-                            long startTime = System.nanoTime();
-                            for (int i = 0; i < 10; i++) {
-                                final int t = i;
-                                writeAndFlush(socketService.getSessionGroup(), "socket server writeAndFlush " + t);
-                            }
-                            System.out.println("writeAndFlush cost: " + ((System.nanoTime() - startTime) / 10000 / 100f));
-                        }
-                        // {
-                        //     long startTime = System.nanoTime();
-                        //     for (int i = 0; i < 10; i++) {
-                        //         final int t = i;
-                        //         write(socketService.getSessionGroup(), "socket server write " + t);
-                        //     }
-                        //     System.out.println("write cost: " + ((System.nanoTime() - startTime) / 10000 / 100f));
-                        // }
-                    }
-
-                    @Override public void action(SocketSession session, String message) throws Exception {
-                        super.action(session, message);
-                        log.info("{}", message);
-                        session.write("socket server textWebSocketFrame");
-                    }
-
-                },
+                socketServerTextWebSocketFrame,
                 new ServerMessageEncode(messageDispatcher)
         );
         socketService.init();
         socketService.start();
 
         SocketClientBuilder socketClientBuilder = new SocketClientBuilder();
-        socketClientBuilder.setTcp(new SocketClientBuilder.Config().setPort(socketServerBuilder.getConfig().getPort()));
-        socketClientBuilder.setWeb(new SocketClientBuilder.Config().setPort(socketServerBuilder.getConfig().getPort()));
-        socketClientBuilder.init();
+        socketClientBuilder.setConfig(new ClientConfig().setPort(socketServerBuilder.getConfig().getPort()).setUseWebSocket(true));
 
-        tcpSocketClient = socketClientBuilder.tcpSocketClient(
+        socketClient = socketClientBuilder.socketClient(
                 defaultExecutor,
                 bootstrapBuilder,
                 new ClientMessageDecode(bootstrapBuilder, messageDispatcher) {
@@ -89,17 +82,7 @@ public class SocketTest {
                 },
                 new ClientMessageEncode(messageDispatcher)
         );
-        tcpSocketClient.init();
-
-        webSocketClient = socketClientBuilder.webSocketClient(
-                defaultExecutor,
-                bootstrapBuilder,
-                new ClientMessageDecode(bootstrapBuilder, messageDispatcher),
-                new ClientMessageEncode(messageDispatcher)
-        );
-
-        webSocketClient.init();
-
+        socketClient.init();
     }
 
     @After
@@ -110,14 +93,14 @@ public class SocketTest {
     @Test
     public void t0() throws Exception {
 
-        for (int i = 0; i < 100; i++) {
-            tcpSocketClient.connect();
+        for (int i = 0; i < 1; i++) {
+            socketClient.connect();
             // webSocketClient.connect();
             Thread.sleep(5);
         }
         for (int i = 0; i < 2; i++) {
             System.in.read();
-            writeAndFlush(tcpSocketClient.getSessionGroup(), "tcp socket client");
+            writeAndFlush(socketClient.getSessionGroup(), "tcp socket client");
         }
         // {
         //     System.in.read();

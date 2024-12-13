@@ -31,18 +31,18 @@ public class SocketServerBuilder {
     private ServerConfig config;
 
     @Primary
-    @Bean(name = "serverDispatcher")
-    @ConditionalOnMissingBean(name = "serverDispatcher")/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public ServerMessageDispatcher serverDispatcher() {
+    @Bean(name = "serverMessageDispatcher")
+    @ConditionalOnMissingBean(name = "serverMessageDispatcher")/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    public ServerMessageDispatcher serverMessageDispatcher() {
         ServerMessageDispatcher messageDispatcher = new ServerMessageDispatcher(config.getScanPkgs());
-        log.debug("init default serverDispatcher = {}", messageDispatcher.hashCode());
+        log.debug("init default serverMessageDispatcher = {}", messageDispatcher.hashCode());
         return messageDispatcher;
     }
 
     @Primary
     @Bean(name = "serverMessageEncode")
     @ConditionalOnMissingBean(name = "serverMessageEncode")/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public ServerMessageEncode serverMessageEncode(@Qualifier("serverDispatcher") ServerMessageDispatcher messageDispatcher) {
+    public ServerMessageEncode serverMessageEncode(@Qualifier("serverMessageDispatcher") ServerMessageDispatcher messageDispatcher) {
         ServerMessageEncode encode = new ServerMessageEncode(messageDispatcher) {};
         log.debug("init default ServerMessageEncode = {}", encode.hashCode());
         return encode;
@@ -52,7 +52,7 @@ public class SocketServerBuilder {
     @Bean(name = "serverMessageDecode")
     @ConditionalOnMissingBean(name = "serverMessageDecode")/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
     public ServerMessageDecode serverMessageDecode(BootstrapBuilder bootstrapBuilder,
-                                                   @Qualifier("serverDispatcher") ServerMessageDispatcher messageDispatcher) {
+                                                   @Qualifier("serverMessageDispatcher") ServerMessageDispatcher messageDispatcher) {
         ServerMessageDecode decode = new ServerMessageDecode(bootstrapBuilder, messageDispatcher) {};
         log.debug("init default ServerMessageDecode = {}", decode.hashCode());
         return decode;

@@ -19,7 +19,7 @@ import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.ISession;
 import wxdgaming.spring.boot.net.SessionGroup;
 import wxdgaming.spring.boot.net.SocketSession;
-import wxdgaming.spring.boot.net.pojo.inner.InnerMessage;
+import wxdgaming.spring.boot.net.message.inner.InnerMessage;
 import wxdgaming.spring.boot.net.ssl.WxdSslHandler;
 
 import javax.net.ssl.SSLEngine;
@@ -47,21 +47,18 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
     protected final ClientMessageDecode clientMessageDecode;
     protected final ClientMessageEncode clientMessageEncode;
 
-    protected final SocketClientBuilder socketClientBuilder;
-    protected final SocketClientBuilder.Config config;
+    protected final ClientConfig config;
     /** 所有的连接 */
     protected final SessionGroup sessionGroup = new SessionGroup();
     protected volatile boolean closed = false;
 
     public SocketClient(BaseScheduledExecutor executor,
                         BootstrapBuilder bootstrapBuilder,
-                        SocketClientBuilder socketClientBuilder,
-                        SocketClientBuilder.Config config,
+                        ClientConfig config,
                         ClientMessageDecode clientMessageDecode,
                         ClientMessageEncode clientMessageEncode) {
         this.executor = executor;
         this.bootstrapBuilder = bootstrapBuilder;
-        this.socketClientBuilder = socketClientBuilder;
         this.config = config;
         this.socketClientDeviceHandler = new SocketClientDeviceHandler(bootstrapBuilder);
         this.clientMessageDecode = clientMessageDecode;
@@ -81,8 +78,8 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
 
     public void init() {
         bootstrap = new Bootstrap();
-        bootstrap.group(socketClientBuilder.getClientLoop())
-                .channel(socketClientBuilder.getClient_Socket_Channel_Class())
+        bootstrap.group(bootstrapBuilder.getClientLoop())
+                .channel(bootstrapBuilder.getClient_Socket_Channel_Class())
                 /*链接超时设置*/
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, this.config.getConnectTimeout())
                 /*是否启用心跳保活机机制*/

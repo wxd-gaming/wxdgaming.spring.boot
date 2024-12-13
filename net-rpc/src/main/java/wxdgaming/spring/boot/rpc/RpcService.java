@@ -35,8 +35,8 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class RpcService implements InitPrint {
 
-    @Value("${socket.rpc-token}")
-    private final String RPC_TOKEN = "getg6jhkopw435dvmkmcvx5y63-40";
+    @Value("${socket.rpc-token:getg6jhkopw435dvmkmcvx5y63-40}")
+    private String RPC_TOKEN = "getg6jhkopw435dvmkmcvx5y63-40";
     private final SpringUtil springUtil;
     private final ConcurrentHashMap<String, RpcActionMapping> rpcHandlerMap = new ConcurrentHashMap<>();
     private final AtomicLong atomicLong = new AtomicLong(0);

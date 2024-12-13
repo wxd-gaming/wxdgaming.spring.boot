@@ -10,7 +10,7 @@ import wxdgaming.spring.boot.core.system.LambdaUtil;
 import wxdgaming.spring.boot.core.system.MethodUtil;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.message.PojoBase;
-import wxdgaming.spring.boot.net.pojo.inner.InnerMessage;
+import wxdgaming.spring.boot.net.message.inner.InnerMessage;
 
 import java.lang.annotation.*;
 import java.lang.reflect.Method;

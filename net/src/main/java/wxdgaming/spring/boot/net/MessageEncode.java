@@ -39,7 +39,7 @@ public abstract class MessageEncode extends ChannelOutboundHandlerAdapter {
             case PojoBase pojoBase -> {
                 Integer msgId = messageDispatcher.getMessageName2Id().get(pojoBase.getClass().getName());
                 if (msgId == null) {
-                    log.error("{} 消息处理异常：{}", ChannelUtil.ctxTostring(ctx), pojoBase.getClass().getName());
+                    log.error("{} 消息未注册，无法编码：{}", ChannelUtil.ctxTostring(ctx), pojoBase.getClass().getName());
                     return;
                 }
                 byte[] bytes = SerializerUtil.encode(pojoBase);
@@ -54,6 +54,13 @@ public abstract class MessageEncode extends ChannelOutboundHandlerAdapter {
                 ByteBuf byteBuf = ByteBufUtil.pooledByteBuf(bytes.length);
                 byteBuf.writeBytes(bytes);
                 super.write(ctx, byteBuf, promise);
+            }
+            case ByteBuf byteBuf -> {
+                if (session.isWebSocket()) {
+                    super.write(ctx, new BinaryWebSocketFrame(byteBuf), promise);
+                } else {
+                    super.write(ctx, byteBuf, promise);
+                }
             }
             case null, default -> super.write(ctx, msg, promise);
         }

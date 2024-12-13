@@ -1,12 +1,16 @@
 spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/my_test?serverTimezone=UTC&autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&rewriteBatchedStatements=true
+  db:
+    url: jdbc:mysql://localhost:3306/test?serverTimezone=UTC&autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&rewriteBatchedStatements=true
     username: root
     password: test
     driver-class-name: com.mysql.cj.jdbc.Driver
+    show-sql: false
+    ddl-auto: "update"
 
   jpa:
     database: mysql
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy

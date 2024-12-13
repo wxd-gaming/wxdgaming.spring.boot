@@ -4,17 +4,15 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
-import wxdgaming.spring.boot.net.MessageDispatcher;
 import wxdgaming.spring.boot.net.SessionGroup;
 import wxdgaming.spring.boot.net.server.ServerConfig;
-import wxdgaming.spring.boot.net.server.ServerMessageEncode;
 import wxdgaming.spring.boot.net.server.SocketServerBuilder;
 
 import java.lang.reflect.Constructor;
@@ -30,37 +28,49 @@ import java.lang.reflect.Constructor;
 @Setter
 @Accessors(chain = true)
 @Configuration
+@ConfigurationProperties("socket.broker")
+@ConditionalOnProperty(prefix = "socket.broker.config", name = "port")
 public class BrokerServerBuilder {
 
-    @Value("${socket.server.broker}")
-    private ServerConfig broker;
+    private ServerConfig config;
     private final SessionGroup sessionGroup = new SessionGroup();
 
     @Bean(name = "brokerMessageDecode")
-    @ConditionalOnMissingBean(BrokerMessageDecode.class)
-    public BrokerMessageDecode brokerMessageDecode(BootstrapBuilder bootstrapBuilder, MessageDispatcher messageDispatcher, DataCenter dataCenter) {
-        return new BrokerMessageDecode(bootstrapBuilder, messageDispatcher, sessionGroup, dataCenter);
+    @ConditionalOnMissingBean(BrokerMessageDispatcher.class)
+    public BrokerMessageDispatcher brokerMessageDispatcher() {
+        return new BrokerMessageDispatcher(config.getScanPkgs());
+    }
+
+    @Bean(name = "brokerMessageDecode")
+    @ConditionalOnMissingBean(name = "brokerMessageDecode")
+    public BrokerMessageDecode brokerMessageDecode(BootstrapBuilder bootstrapBuilder, BrokerMessageDispatcher serverMessageDispatcher, DataCenter dataCenter) {
+        return new BrokerMessageDecode(bootstrapBuilder, serverMessageDispatcher, sessionGroup, dataCenter);
+    }
+
+    @Bean(name = "brokerMessageDecode")
+    @ConditionalOnMissingBean(name = "brokerMessageEncode")
+    public BrokerMessageEncode brokerMessageEncode(BrokerMessageDispatcher serverMessageDispatcher) {
+        return new BrokerMessageEncode(serverMessageDispatcher);
     }
 
     @Bean(name = "brokerService")
-    @ConditionalOnProperty(prefix = "socket.server.broker", name = "port")
     public BrokerService brokerService(BootstrapBuilder bootstrapBuilder,
                                        SocketServerBuilder socketServerBuilder,
                                        BrokerMessageDecode brokerMessageDecode,
-                                       ServerMessageEncode serverMessageEncode) throws Exception {
+                                       BrokerMessageEncode brokerMessageEncode) throws Exception {
 
-        if (StringsUtil.emptyOrNull(broker.getServiceClass())) {
-            broker.setServiceClass(BrokerService.class.getName());
+        if (StringsUtil.emptyOrNull(config.getServiceClass())) {
+            config.setServiceClass(BrokerService.class.getName());
         }
 
-        Class aClass = Thread.currentThread().getContextClassLoader().loadClass(broker.getServiceClass());
+        Class aClass = Thread.currentThread().getContextClassLoader().loadClass(config.getServiceClass());
         Constructor<BrokerService> declaredConstructor = aClass.getDeclaredConstructors()[0];
         BrokerService brokerService = declaredConstructor.newInstance(
                 bootstrapBuilder,
                 socketServerBuilder,
-                broker,
+                config,
                 brokerMessageDecode,
-                serverMessageEncode
+                brokerMessageEncode
         );
         brokerService.setSessionGroup(sessionGroup);
         return brokerService;

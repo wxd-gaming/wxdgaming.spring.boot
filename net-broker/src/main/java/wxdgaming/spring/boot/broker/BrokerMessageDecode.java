@@ -14,21 +14,22 @@ import wxdgaming.spring.boot.net.server.ServerMessageDecode;
  * @version: 2024-09-17 16:36
  **/
 @ChannelHandler.Sharable
-public class BrokerMessageDecode extends ServerMessageDecode implements InitPrint {
+public class BrokerMessageDecode extends ServerMessageDecode implements InitPrint, DoMessage {
 
     final SessionGroup sessionGroup;
     DataCenter dataCenter;
 
     public BrokerMessageDecode(BootstrapBuilder bootstrapBuilder,
-                               MessageDispatcher dispatcher,
+                               BrokerMessageDispatcher dispatcher,
                                SessionGroup sessionGroup,
                                DataCenter dataCenter) {
         super(bootstrapBuilder, dispatcher);
         this.sessionGroup = sessionGroup;
         this.dataCenter = dataCenter;
+        this.doMessage = this;
     }
 
-    @Override protected void notSpi(SocketSession socketSession, int messageId, byte[] messageBytes) {
+    @Override public void notSpi(SocketSession socketSession, int messageId, byte[] messageBytes) {
         Integer sid = socketSession.attribute("sid");
 
         ServerMapping serverMapping = dataCenter.getSessions().get(InnerMessage.Stype.GAME, sid);

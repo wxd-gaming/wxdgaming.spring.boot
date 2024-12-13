@@ -38,11 +38,10 @@ public class WebSocketClient extends SocketClient {
 
     public WebSocketClient(DefaultExecutor defaultExecutor,
                            BootstrapBuilder bootstrapBuilder,
-                           SocketClientBuilder socketClientBuilder,
-                           SocketClientBuilder.Config config,
+                           ClientConfig config,
                            ClientMessageDecode clientMessageDecode,
                            ClientMessageEncode clientMessageEncode) {
-        super(defaultExecutor, bootstrapBuilder, socketClientBuilder, config, clientMessageDecode, clientMessageEncode);
+        super(defaultExecutor, bootstrapBuilder, config, clientMessageDecode, clientMessageEncode);
     }
 
     @PostConstruct

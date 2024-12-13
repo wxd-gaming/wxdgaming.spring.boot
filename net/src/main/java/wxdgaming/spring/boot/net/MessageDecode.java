@@ -6,9 +6,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.AttributeKey;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import wxdgaming.spring.boot.core.LogbackUtil;
 import wxdgaming.spring.boot.net.message.PojoBase;
 import wxdgaming.spring.boot.net.message.SerializerUtil;
 
@@ -26,6 +25,7 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
     protected final boolean autoRelease;
     protected final BootstrapBuilder bootstrapBuilder;
     protected final MessageDispatcher dispatcher;
+    @Setter protected DoMessage doMessage = new DoMessage() {};
 
     public MessageDecode(boolean autoRelease, BootstrapBuilder bootstrapBuilder, MessageDispatcher dispatcher) {
         this.autoRelease = autoRelease;
@@ -87,7 +87,7 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
                     if (!session.checkReceiveMessage(request.length())) {
                         return;
                     }
-                    action(session, request);
+                    doMessage.actionString(session, request);
                 }
                 default -> log.warn("无法处理：{}", frame.getClass().getName());
             }
@@ -161,27 +161,9 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
             doMessageMapping.getMethod().invoke(doMessageMapping.getBean(), socketSession, message);
         } else {
             /*找不到处理接口*/
-            notSpi(socketSession, messageId, messageBytes);
+            doMessage.notSpi(socketSession, messageId, messageBytes);
         }
     }
 
-    /** 当找不到处理接口的时候调用的 */
-    protected void notSpi(SocketSession socketSession, int messageId, byte[] messageBytes) {
-        if (bootstrapBuilder.isPrintLogger() && log.isInfoEnabled()) {
-            log.info(
-                    "收到消息：ctx={}, id={}, len={} (未知消息)",
-                    socketSession.toString(),
-                    messageId,
-                    messageBytes.length
-            );
-        }
-    }
-
-    protected void action(SocketSession socketSession, String message) throws Exception {
-        Logger logger = LogbackUtil.logger();
-        if (logger.isInfoEnabled()) {
-            logger.info("收到消息：ctx={}, message={}", socketSession.toString(), message);
-        }
-    }
 
 }

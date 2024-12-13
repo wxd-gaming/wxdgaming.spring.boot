@@ -17,11 +17,10 @@ public class TcpSocketClient extends SocketClient {
 
     public TcpSocketClient(DefaultExecutor defaultExecutor,
                            BootstrapBuilder bootstrapBuilder,
-                           SocketClientBuilder socketClientBuilder,
-                           SocketClientBuilder.Config config,
+                           ClientConfig config,
                            ClientMessageDecode clientMessageDecode,
                            ClientMessageEncode clientMessageEncode) {
-        super(defaultExecutor, bootstrapBuilder, socketClientBuilder, config, clientMessageDecode, clientMessageEncode);
+        super(defaultExecutor, bootstrapBuilder, config, clientMessageDecode, clientMessageEncode);
     }
 
     @PostConstruct

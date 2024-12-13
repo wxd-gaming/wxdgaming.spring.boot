@@ -97,26 +97,16 @@ public class ApplicationStart {
             log.error("{}", Throw.ofString(e, false));
         }
 
-        try {
-            SocketSession session = run.getBean(WebSocketClient.class).idleSession();
-            Mono<String> rpc = rpcService.request(session, "rpcTest", new JSONObject().fluentPut("type", 1).toString());
-            rpc.subscribe(str -> log.debug("{}", str));
-            rpc.block();
-            session.writeAndFlush("string message");
-        } catch (Exception e) {
-            log.error("{}", Throw.ofString(e, false));
-        }
-
         UserRepository userRepository = run.getBean(UserRepository.class);
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1; i++) {
             long nanoTime = System.nanoTime();
             userRepository.saveAndFlush(new User().setUid(System.nanoTime()).setUserName(RandomStringUtils.randomAlphanumeric(32)));
             log.info("插入 耗时：{} ms", (System.nanoTime() - nanoTime) / 10000 / 100f);
         }
         {
             List<User> users = new ArrayList<>();
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 1; i++) {
                 users.add(new User().setUid(System.nanoTime()).setUserName(RandomStringUtils.randomAlphanumeric(32)));
             }
             long nanoTime = System.nanoTime();

@@ -1,9 +1,10 @@
 socket:
   debugLogger: false
   printLogger: true
+  client-work-size: 2 #netty client work 线程数量
+  bossThreadSize: 2 #线程池的线程数量，共享
+  workerThreadSize: 10 #线程池的线程数量，共享
   server:
-    bossThreadSize: 2 #线程池的线程数量，共享
-    workerThreadSize: 10 #线程池的线程数量，共享
     config:
       port: 18001
       idleTimeout: 30 # 单位秒
@@ -14,25 +15,13 @@ socket:
       jks_pwd_path: "jks/wxdtest-1.8.jks.pwd"
 
   client:
-    client-work-size: 2 #netty client work 线程数量
-    tcp:
+    config:
       host: 127.0.0.1
       port: 18001
       enable-reconnection: true
       idleTimeout: 30 # 单位秒
       connectTimeout: 500 # 单位毫秒
       enable-ssl: false
-      sslProtocolType: TLSV12 # TLSV12  TLSV1 SSLV3 SSL
-      jks_path: "jks/wxdtest-1.8.jks"
-      jks_pwd_path: "jks/wxdtest-1.8.jks.pwd"
-    web:
-      host: 127.0.0.1
-      port: 18001
-      enable-reconnection: true
-      idleTimeout: 30 # 单位秒
-      connectTimeout: 500 # 单位毫秒
-      prefix: "/wxd-gaming"
-      enable-ssl: true
       sslProtocolType: TLSV12 # TLSV12  TLSV1 SSLV3 SSL
       jks_path: "jks/wxdtest-1.8.jks"
       jks_pwd_path: "jks/wxdtest-1.8.jks.pwd"

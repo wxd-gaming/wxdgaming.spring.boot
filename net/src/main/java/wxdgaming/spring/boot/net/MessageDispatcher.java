@@ -12,6 +12,7 @@ import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.message.PojoBase;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 /**
  * 消息派发服务
@@ -36,7 +37,19 @@ public abstract class MessageDispatcher implements InitPrint {
     @ReLoad
     @Order(999)
     public void initMapping(SpringUtil springUtil) {
+        initMapping(springUtil, packages);
+    }
+
+    public void initMapping(SpringUtil springUtil, String[] params) {
+        Predicate<Class<?>> filter = clazz -> {
+            if (params == null || params.length == 0) return true;
+            for (String p : params) {
+                if (clazz.getName().startsWith(p)) return true;
+            }
+            return false;
+        };
         springUtil.withMethodAnnotated(MsgMapper.class)
+                .filter(t -> filter.test(t.getLeft().getClass()))
                 .forEach(t -> {
                     Class parameterType = t.getRight().getParameterTypes()[1];
                     if (PojoBase.class.isAssignableFrom(parameterType)) {

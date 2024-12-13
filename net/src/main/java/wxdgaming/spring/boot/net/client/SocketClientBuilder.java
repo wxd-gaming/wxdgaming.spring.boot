@@ -1,30 +1,18 @@
 package wxdgaming.spring.boot.net.client;
 
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollSocketChannel;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import wxdgaming.spring.boot.core.ssl.SslContextByJks;
-import wxdgaming.spring.boot.core.ssl.SslContextNoFile;
-import wxdgaming.spring.boot.core.ssl.SslProtocolType;
+import org.springframework.context.annotation.Primary;
 import wxdgaming.spring.boot.core.threading.DefaultExecutor;
-import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
-import wxdgaming.spring.boot.net.MessageDispatcher;
-import wxdgaming.spring.boot.net.SessionHandler;
-
-import javax.net.ssl.SSLContext;
 
 /**
  * @author: wxd-gaming(無心道, 15388152619)
@@ -36,110 +24,60 @@ import javax.net.ssl.SSLContext;
 @Accessors(chain = true)
 @Configuration
 @ConfigurationProperties("socket.client")
+@ConditionalOnProperty(prefix = "socket.client.config", name = "port")
 public class SocketClientBuilder {
 
-    /** netty client work 线程数量 */
-    private int clientWorkSize = 2;
+    private ClientConfig config;
 
-    private Config tcp;
-    private Config web;
-
-    private EventLoopGroup clientLoop;
-    private Class<? extends SocketChannel> Client_Socket_Channel_Class;
-
-    @PostConstruct
-    public void init() {
-        clientLoop = BootstrapBuilder.createGroup(clientWorkSize, "client");
-
-        if (Epoll.isAvailable()) {
-            Client_Socket_Channel_Class = EpollSocketChannel.class;
-        } else {
-            Client_Socket_Channel_Class = NioSocketChannel.class;
-        }
+    @Primary
+    @Bean(name = "clientMessageDispatcher")
+    @ConditionalOnMissingBean(name = "clientMessageDispatcher")/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    public ClientMessageDispatcher clientMessageDispatcher() {
+        ClientMessageDispatcher messageDispatcher = new ClientMessageDispatcher(config.getScanPkgs());
+        log.debug("init default clientMessageDispatcher = {}", messageDispatcher.hashCode());
+        return messageDispatcher;
     }
 
     @Bean
-    @ConditionalOnMissingBean(ClientMessageEncode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public ClientMessageEncode clientMessageEncode(MessageDispatcher messageDispatcher) {
-        ClientMessageEncode decode = new ClientMessageEncode(messageDispatcher) {};
+    @ConditionalOnMissingBean(name = "clientMessageEncode")/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    public ClientMessageEncode clientMessageEncode(@Qualifier("clientMessageDispatcher") ClientMessageDispatcher clientMessageDispatcher) {
+        ClientMessageEncode decode = new ClientMessageEncode(clientMessageDispatcher) {};
         log.debug("init default ClientMessageEncode = {}", decode.hashCode());
         return decode;
     }
 
     @Bean
-    @ConditionalOnMissingBean(ClientMessageDecode.class)/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
-    public ClientMessageDecode clientMessageDecode(BootstrapBuilder bootstrapBuilder, MessageDispatcher messageDispatcher) {
-        ClientMessageDecode decode = new ClientMessageDecode(bootstrapBuilder, messageDispatcher) {};
+    @ConditionalOnMissingBean(name = "clientMessageDecode")/*通过扫描器检查，当不存在处理器的时候初始化默认处理器*/
+    public ClientMessageDecode clientMessageDecode(BootstrapBuilder bootstrapBuilder,
+                                                   @Qualifier("clientMessageDispatcher") ClientMessageDispatcher clientMessageDispatcher) {
+        ClientMessageDecode decode = new ClientMessageDecode(bootstrapBuilder, clientMessageDispatcher) {};
         log.debug("init default ClientMessageDecode = {}", decode.hashCode());
         return decode;
     }
 
-    @Bean()
-    @ConditionalOnProperty(prefix = "socket.client.tcp", name = "port")
-    public TcpSocketClient tcpSocketClient(DefaultExecutor defaultExecutor, BootstrapBuilder bootstrapBuilder,
-                                           ClientMessageDecode clientMessageDecode,
-                                           ClientMessageEncode clientMessageEncode) {
+    @Primary
+    @Bean(name = "socketClient")
+    public SocketClient socketClient(DefaultExecutor defaultExecutor,
+                                     BootstrapBuilder bootstrapBuilder,
+                                     @Qualifier("clientMessageDecode") ClientMessageDecode clientMessageDecode,
+                                     @Qualifier("clientMessageEncode") ClientMessageEncode clientMessageEncode) {
+        if (config.isUseWebSocket()) {
+            return new WebSocketClient(
+                    defaultExecutor,
+                    bootstrapBuilder,
+                    config,
+                    clientMessageDecode,
+                    clientMessageEncode
+            );
+        }
+
         return new TcpSocketClient(
                 defaultExecutor,
                 bootstrapBuilder,
-                this,
-                tcp,
+                config,
                 clientMessageDecode,
                 clientMessageEncode
         );
-    }
-
-    @Bean()
-    @ConditionalOnProperty(prefix = "socket.client.web", name = "port")
-    public WebSocketClient webSocketClient(DefaultExecutor defaultExecutor, BootstrapBuilder bootstrapBuilder,
-                                           ClientMessageDecode clientMessageDecode,
-                                           ClientMessageEncode clientMessageEncode) {
-        return new WebSocketClient(
-                defaultExecutor,
-                bootstrapBuilder,
-                this,
-                web,
-                clientMessageDecode,
-                clientMessageEncode
-        );
-    }
-
-
-    @Getter
-    @Setter
-    @Accessors(chain = true)
-    public static class Config {
-
-        protected String host = "127.0.0.1";
-        private int port = 18001;
-        /** 帧最大字节数 */
-        private int maxFrameBytes = 8 * 1024 * 1024;
-        /** 每秒钟帧的最大数量 */
-        private int maxFrameLength = -1;
-        private int idleTimeout = 30;
-        private int connectTimeout = 2000;
-        private boolean enableReconnection = false;
-        private boolean enableSsl = false;
-        private String prefix = "/wxd-gaming";
-        /** 默认的 ssl 类型 */
-        private SslProtocolType sslProtocolType = SslProtocolType.TLSV12;
-        /** jks 路径 */
-        private String jks_path = "";
-        /** jks 密钥 */
-        private String jks_pwd_path = "";
-
-        private SSLContext sslContext = null;
-
-        public SSLContext getSslContext() {
-            if (sslContext == null) {
-                if (StringsUtil.notEmptyOrNull(jks_path)) {
-                    sslContext = SslContextByJks.sslContext(sslProtocolType, jks_path, jks_pwd_path);
-                } else {
-                    sslContext = SslContextNoFile.sslContext(sslProtocolType);
-                }
-            }
-            return sslContext;
-        }
     }
 
 }

@@ -3,7 +3,6 @@ package wxdgaming.spring.boot.net.server;
 import io.netty.channel.ChannelHandler;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.MessageDecode;
-import wxdgaming.spring.boot.net.MessageDispatcher;
 
 /**
  * 消息解码器
@@ -14,8 +13,8 @@ import wxdgaming.spring.boot.net.MessageDispatcher;
 @ChannelHandler.Sharable
 public class ServerMessageDecode extends MessageDecode {
 
-    public ServerMessageDecode(BootstrapBuilder bootstrapBuilder, MessageDispatcher dispatcher) {
-        super(false, bootstrapBuilder, dispatcher);
+    public ServerMessageDecode(BootstrapBuilder bootstrapBuilder, ServerMessageDispatcher serverMessageDispatcher) {
+        super(false, bootstrapBuilder, serverMessageDispatcher);
     }
 }
 
