@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.SpringUtil;
+import wxdgaming.spring.boot.core.ann.ReLoad;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.threading.BaseScheduledExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
@@ -125,6 +126,13 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
     @Order(2000)
     public void start(SpringUtil springUtil) {
         connect();
+    }
+
+    @Start()
+    @ReLoad
+    @Order(1000)
+    public void scanMessage(SpringUtil springUtil) {
+        getClientMessageDecode().getDispatcher().initMapping(springUtil);
     }
 
     @Override public void close() {

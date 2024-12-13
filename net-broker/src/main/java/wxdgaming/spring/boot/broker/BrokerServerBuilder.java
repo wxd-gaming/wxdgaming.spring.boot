@@ -1,21 +1,18 @@
 package wxdgaming.spring.boot.broker;
 
+import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import wxdgaming.spring.boot.core.util.StringsUtil;
-import wxdgaming.spring.boot.net.BootstrapBuilder;
-import wxdgaming.spring.boot.net.SessionGroup;
+import wxdgaming.spring.boot.broker.pojo.inner.InnerMessage;
+import wxdgaming.spring.boot.net.*;
 import wxdgaming.spring.boot.net.server.ServerConfig;
-import wxdgaming.spring.boot.net.server.SocketServerBuilder;
-
-import java.lang.reflect.Constructor;
+import wxdgaming.spring.boot.net.server.SocketService;
 
 /**
  * socket 服务器配置
@@ -35,46 +32,27 @@ public class BrokerServerBuilder {
     private ServerConfig config;
     private final SessionGroup sessionGroup = new SessionGroup();
 
-    @Bean(name = "brokerMessageDecode")
-    @ConditionalOnMissingBean(BrokerMessageDispatcher.class)
-    public BrokerMessageDispatcher brokerMessageDispatcher() {
-        return new BrokerMessageDispatcher(config.getScanPkgs());
-    }
-
-    @Bean(name = "brokerMessageDecode")
-    @ConditionalOnMissingBean(name = "brokerMessageDecode")
-    public BrokerMessageDecode brokerMessageDecode(BootstrapBuilder bootstrapBuilder, BrokerMessageDispatcher serverMessageDispatcher, DataCenter dataCenter) {
-        return new BrokerMessageDecode(bootstrapBuilder, serverMessageDispatcher, sessionGroup, dataCenter);
-    }
-
-    @Bean(name = "brokerMessageDecode")
-    @ConditionalOnMissingBean(name = "brokerMessageEncode")
-    public BrokerMessageEncode brokerMessageEncode(BrokerMessageDispatcher serverMessageDispatcher) {
-        return new BrokerMessageEncode(serverMessageDispatcher);
-    }
-
     @Bean(name = "brokerService")
-    public BrokerService brokerService(BootstrapBuilder bootstrapBuilder,
-                                       SocketServerBuilder socketServerBuilder,
-                                       BrokerMessageDecode brokerMessageDecode,
-                                       BrokerMessageEncode brokerMessageEncode) throws Exception {
+    public SocketService brokerService(BootstrapBuilder bootstrapBuilder, DataCenter dataCenter) throws Exception {
+        SocketService socketService = SocketService.createSocketService(bootstrapBuilder, config);
+        socketService.setSessionGroup(sessionGroup);
+        socketService.getServerMessageDecode().setDoMessage(new DoMessage() {
+            @Override public void actionString(SocketSession socketSession, String message) throws Exception {
+                DoMessage.super.actionString(socketSession, message);
+            }
 
-        if (StringsUtil.emptyOrNull(config.getServiceClass())) {
-            config.setServiceClass(BrokerService.class.getName());
-        }
+            @Override public void notSpi(SocketSession socketSession, int messageId, byte[] messageBytes) {
+                Integer sid = socketSession.attribute("sid");
 
-        Class aClass = Thread.currentThread().getContextClassLoader().loadClass(config.getServiceClass());
-        Constructor<BrokerService> declaredConstructor = aClass.getDeclaredConstructors()[0];
-        BrokerService brokerService = declaredConstructor.newInstance(
-                bootstrapBuilder,
-                socketServerBuilder,
-                config,
-                brokerMessageDecode,
-                brokerMessageEncode
-        );
-        brokerService.setSessionGroup(sessionGroup);
-        return brokerService;
-
+                ServerMapping serverMapping = dataCenter.getSessions().get(InnerMessage.Stype.GAME, sid);
+                if (serverMapping != null && serverMapping.getSession() != null) {
+                    ByteBuf build = MessageEncode.build(messageId, messageBytes);
+                    /*转发消息*/
+                    serverMapping.getSession().writeAndFlush(build);
+                }
+            }
+        });
+        return socketService;
     }
 
 }

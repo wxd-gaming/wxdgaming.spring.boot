@@ -2,12 +2,9 @@ package wxdgaming.spring.boot.net;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ReflectContext;
 import wxdgaming.spring.boot.core.SpringUtil;
-import wxdgaming.spring.boot.core.ann.ReLoad;
-import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.message.PojoBase;
 
@@ -33,9 +30,6 @@ public abstract class MessageDispatcher implements InitPrint {
         this.packages = packages;
     }
 
-    @Start
-    @ReLoad
-    @Order(999)
     public void initMapping(SpringUtil springUtil) {
         initMapping(springUtil, packages);
     }
@@ -43,6 +37,7 @@ public abstract class MessageDispatcher implements InitPrint {
     public void initMapping(SpringUtil springUtil, String[] params) {
         Predicate<Class<?>> filter = clazz -> {
             if (params == null || params.length == 0) return true;
+            if (clazz.getPackageName().startsWith(NetScan.class.getPackageName())) return true;
             for (String p : params) {
                 if (clazz.getName().startsWith(p)) return true;
             }

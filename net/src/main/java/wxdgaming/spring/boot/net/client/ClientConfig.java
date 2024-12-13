@@ -26,6 +26,7 @@ public class ClientConfig {
     /** 断线重连 */
     private boolean enableReconnection = false;
     private boolean enableSsl = false;
+    private boolean enableRpc = true;
     private boolean useWebSocket = false;
     /** 扫描的包名 */
     private String[] scanPkgs = new String[0];

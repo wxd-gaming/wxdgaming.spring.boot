@@ -8,9 +8,14 @@ import org.junit.Test;
 import wxdgaming.spring.boot.core.threading.DefaultExecutor;
 import wxdgaming.spring.boot.core.threading.ExecutorBuilder;
 import wxdgaming.spring.boot.net.*;
-import wxdgaming.spring.boot.net.client.*;
+import wxdgaming.spring.boot.net.client.ClientConfig;
+import wxdgaming.spring.boot.net.client.SocketClient;
+import wxdgaming.spring.boot.net.client.SocketClientBuilder;
 import wxdgaming.spring.boot.net.message.inner.InnerMessage;
-import wxdgaming.spring.boot.net.server.*;
+import wxdgaming.spring.boot.net.server.ServerConfig;
+import wxdgaming.spring.boot.net.server.ServerMessageDispatcher;
+import wxdgaming.spring.boot.net.server.SocketServerBuilder;
+import wxdgaming.spring.boot.net.server.SocketService;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -38,10 +43,10 @@ public class SocketTest {
 
         SocketServerBuilder socketServerBuilder = new SocketServerBuilder();
         socketServerBuilder.setConfig(new ServerConfig().setEnableWebSocket(true));
-        ServerMessageDecode socketServerTextWebSocketFrame = new ServerMessageDecode(bootstrapBuilder, messageDispatcher) {
-            @Override public void action(SocketSession session, int messageId, byte[] messageBytes) throws Exception {
-                super.action(session, messageId, messageBytes);
-                // log.info("{}", new String(messageBytes, StandardCharsets.UTF_8));
+
+        DoMessage webSocketFrame = new DoMessage() {
+
+            @Override public void notSpi(SocketSession socketSession, int messageId, byte[] messageBytes) {
                 {
                     long startTime = System.nanoTime();
                     for (int i = 0; i < 10; i++) {
@@ -51,21 +56,15 @@ public class SocketTest {
                 }
             }
 
-        };
-
-        socketServerTextWebSocketFrame.setDoMessage(new DoMessage() {
             @Override public void actionString(SocketSession socketSession, String message) throws Exception {
                 log.info("{}", message);
                 socketSession.write("socket server textWebSocketFrame");
             }
-        });
+        };
 
-        socketService = socketServerBuilder.socketService(
-                bootstrapBuilder,
-                socketServerTextWebSocketFrame,
-                new ServerMessageEncode(messageDispatcher)
-        );
+        socketService = socketServerBuilder.socketService(bootstrapBuilder);
         socketService.init();
+        socketService.getServerMessageDecode().setDoMessage(webSocketFrame);
         socketService.start();
 
         SocketClientBuilder socketClientBuilder = new SocketClientBuilder();
@@ -73,14 +72,7 @@ public class SocketTest {
 
         socketClient = socketClientBuilder.socketClient(
                 defaultExecutor,
-                bootstrapBuilder,
-                new ClientMessageDecode(bootstrapBuilder, messageDispatcher) {
-                    @Override protected void action(SocketSession socketSession, int messageId, byte[] messageBytes) throws Exception {
-                        super.action(socketSession, messageId, messageBytes);
-                        // log.info("{}", new String(messageBytes, StandardCharsets.UTF_8));
-                    }
-                },
-                new ClientMessageEncode(messageDispatcher)
+                bootstrapBuilder
         );
         socketClient.init();
     }

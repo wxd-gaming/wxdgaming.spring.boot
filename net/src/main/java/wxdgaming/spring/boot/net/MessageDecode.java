@@ -6,6 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.AttributeKey;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.net.message.PojoBase;
@@ -18,6 +19,7 @@ import wxdgaming.spring.boot.net.message.SerializerUtil;
  * @version: 2024-08-20 09:09
  **/
 @Slf4j
+@Getter
 public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
 
     public static final AttributeKey<ByteBuf> byteBufAttributeKey = AttributeKey.<ByteBuf>valueOf("__ctx_byteBuf__");

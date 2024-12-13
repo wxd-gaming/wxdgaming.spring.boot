@@ -1,7 +1,6 @@
 package wxdgaming.spring.boot.net.server;
 
 import io.netty.channel.ChannelHandler;
-import wxdgaming.spring.boot.net.MessageDispatcher;
 import wxdgaming.spring.boot.net.MessageEncode;
 
 /**

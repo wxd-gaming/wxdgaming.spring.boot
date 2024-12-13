@@ -19,13 +19,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.threading.WxdThreadFactory;
-import wxdgaming.spring.boot.core.util.StringsUtil;
-import wxdgaming.spring.boot.net.server.ServerConfig;
-import wxdgaming.spring.boot.net.server.ServerMessageDecode;
-import wxdgaming.spring.boot.net.server.ServerMessageEncode;
-import wxdgaming.spring.boot.net.server.SocketService;
-
-import java.lang.reflect.Constructor;
 
 /**
  * 配置项
@@ -79,24 +72,6 @@ public class BootstrapBuilder implements InitPrint {
         } else {
             return new NioEventLoopGroup(size, new WxdThreadFactory(prefix));
         }
-    }
-
-    public static SocketService createSocketService(BootstrapBuilder bootstrapBuilder,
-                                                    ServerMessageDecode serverMessageDecode,
-                                                    ServerMessageEncode serverMessageEncode, ServerConfig cfg) throws Exception {
-
-        if (StringsUtil.emptyOrNull(cfg.getServiceClass())) {
-            cfg.setServiceClass(SocketService.class.getName());
-        }
-
-        Class aClass = Thread.currentThread().getContextClassLoader().loadClass(cfg.getServiceClass());
-        Constructor<SocketService> declaredConstructor = aClass.getDeclaredConstructors()[0];
-        return declaredConstructor.newInstance(
-                bootstrapBuilder,
-                cfg,
-                serverMessageDecode,
-                serverMessageEncode
-        );
     }
 
 }

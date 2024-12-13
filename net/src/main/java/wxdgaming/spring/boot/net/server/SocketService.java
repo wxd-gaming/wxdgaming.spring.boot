@@ -11,9 +11,12 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
+import wxdgaming.spring.boot.core.SpringUtil;
+import wxdgaming.spring.boot.core.ann.ReLoad;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.system.BytesUnit;
 import wxdgaming.spring.boot.core.threading.Event;
+import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.ISession;
 import wxdgaming.spring.boot.net.SessionGroup;
@@ -22,6 +25,7 @@ import wxdgaming.spring.boot.net.ssl.WxdOptionalSslHandler;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -34,8 +38,28 @@ import java.util.concurrent.TimeUnit;
 @Getter
 public class SocketService implements InitPrint, Closeable, ISession {
 
+    public static SocketService createSocketService(BootstrapBuilder bootstrapBuilder, ServerConfig config) throws Exception {
+
+        if (StringsUtil.emptyOrNull(config.getServiceClass())) {
+            config.setServiceClass(SocketService.class.getName());
+        }
+
+        ServerMessageDispatcher messageDispatcher = new ServerMessageDispatcher(config.getScanPkgs());
+        ServerMessageDecode serverMessageDecode = new ServerMessageDecode(bootstrapBuilder, messageDispatcher);
+        ServerMessageEncode serverMessageEncode = new ServerMessageEncode(messageDispatcher);
+
+        Class aClass = Thread.currentThread().getContextClassLoader().loadClass(config.getServiceClass());
+        Constructor<SocketService> declaredConstructor = aClass.getDeclaredConstructors()[0];
+        return declaredConstructor.newInstance(
+                bootstrapBuilder,
+                config,
+                serverMessageDecode,
+                serverMessageEncode
+        );
+    }
+
     private final BootstrapBuilder bootstrapBuilder;
-    private final ServerConfig serverConfig;
+    private final ServerConfig config;
     private final SocketServerDeviceHandler socketServerDeviceHandler;
     private final ServerMessageDecode serverMessageDecode;
     private final ServerMessageEncode serverMessageEncode;
@@ -45,12 +69,12 @@ public class SocketService implements InitPrint, Closeable, ISession {
     @Setter protected SessionGroup sessionGroup = new SessionGroup();
 
     public SocketService(BootstrapBuilder bootstrapBuilder,
-                         ServerConfig serverConfig,
+                         ServerConfig config,
                          ServerMessageDecode serverMessageDecode,
                          ServerMessageEncode serverMessageEncode) {
 
         this.bootstrapBuilder = bootstrapBuilder;
-        this.serverConfig = serverConfig;
+        this.config = config;
         this.socketServerDeviceHandler = new SocketServerDeviceHandler(bootstrapBuilder, this);
         this.serverMessageDecode = serverMessageDecode;
         this.serverMessageEncode = serverMessageEncode;
@@ -86,15 +110,15 @@ public class SocketService implements InitPrint, Closeable, ISession {
                             pipeline.addLast(new LoggingHandler("DEBUG"));// 设置log监听器，并且日志级别为debug，方便观察运行流程
                         }
 
-                        pipeline.addFirst(new WxdOptionalSslHandler(serverConfig.getSslContext()));
+                        pipeline.addFirst(new WxdOptionalSslHandler(config.getSslContext()));
 
-                        int idleTime = serverConfig.getIdleTimeout();
+                        int idleTime = config.getIdleTimeout();
                         if (idleTime > 0) {
                             /*设置15秒的读取空闲*/
                             pipeline.addLast(new IdleStateHandler(idleTime, 0, 0, TimeUnit.SECONDS));
                         }
                         /* socket 选择器 区分是tcp websocket http*/
-                        pipeline.addLast("socket-choose-handler", new SocketServerChooseHandler(serverConfig));
+                        pipeline.addLast("socket-choose-handler", new SocketServerChooseHandler(config));
                         /*处理链接*/
                         pipeline.addLast("device-handler", socketServerDeviceHandler);
                         /*解码消息*/
@@ -123,11 +147,18 @@ public class SocketService implements InitPrint, Closeable, ISession {
     protected void addChanelHandler(SocketChannel socketChannel, ChannelPipeline pipeline) {}
 
     @Start()
-    @Order(1000)
+    @Order(10000)
     public void start() {
-        this.future = bootstrap.bind(this.serverConfig.getPort());
+        this.future = bootstrap.bind(this.config.getPort());
         this.future.syncUninterruptibly();
-        log.info("open socket service {}", this.serverConfig.getPort());
+        log.info("open socket service {}", this.config.getPort());
+    }
+
+    @Start()
+    @ReLoad
+    @Order(1000)
+    public void scanMessage(SpringUtil springUtil) {
+        getServerMessageDecode().getDispatcher().initMapping(springUtil);
     }
 
     /**
@@ -137,6 +168,6 @@ public class SocketService implements InitPrint, Closeable, ISession {
         if (this.future != null) {
             this.future.channel().close();
         }
-        log.info("shutdown socket service {}", this.serverConfig.getPort());
+        log.info("shutdown socket service {}", this.config.getPort());
     }
 }

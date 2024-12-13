@@ -25,6 +25,7 @@ public class ServerConfig {
     private int idleTimeout = 30;
     /** 是否开启 ssl */
     private boolean enableSsl = false;
+    private boolean enableRpc = true;
     /** 是否开启 web socket */
     private boolean enableWebSocket = false;
     /** 扫描的包名 */

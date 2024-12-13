@@ -6,6 +6,7 @@ import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.net.message.PojoBase;
 import wxdgaming.spring.boot.net.message.SerializerUtil;
@@ -17,6 +18,7 @@ import wxdgaming.spring.boot.net.message.SerializerUtil;
  * @version: 2024-08-20 09:09
  **/
 @Slf4j
+@Getter
 public abstract class MessageEncode extends ChannelOutboundHandlerAdapter {
 
     private final MessageDispatcher messageDispatcher;

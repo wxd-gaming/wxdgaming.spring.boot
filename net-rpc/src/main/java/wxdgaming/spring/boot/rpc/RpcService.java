@@ -17,6 +17,8 @@ import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.SocketSession;
+import wxdgaming.spring.boot.net.client.SocketClient;
+import wxdgaming.spring.boot.net.server.SocketService;
 import wxdgaming.spring.boot.rpc.pojo.RpcMessage;
 
 import java.util.concurrent.CompletableFuture;
@@ -73,6 +75,26 @@ public class RpcService implements InitPrint {
             }
             log.debug("rpc register path={}, {}#{}", value, t.getLeft().getClass().getName(), t.getRight().getName());
         });
+
+        /*注册扫描rpc消息*/
+        springUtil.getBeansOfType(SocketClient.class)
+                .filter(socketClient -> socketClient.getConfig().isEnableRpc())
+                .forEach(socketClient -> {
+                    socketClient.getClientMessageDecode().getDispatcher().initMapping(
+                            springUtil,
+                            new String[]{this.getClass().getPackageName()}
+                    );
+                });
+
+        /*注册扫描rpc消息*/
+        springUtil.getBeansOfType(SocketService.class)
+                .filter(socketClient -> socketClient.getConfig().isEnableRpc())
+                .forEach(socketClient -> {
+                    socketClient.getServerMessageDecode().getDispatcher().initMapping(
+                            springUtil,
+                            new String[]{this.getClass().getPackageName()}
+                    );
+                });
     }
 
     /** rpc test */

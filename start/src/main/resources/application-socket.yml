@@ -8,6 +8,7 @@ socket:
     config:
       port: 18001
       idleTimeout: 30 # 单位秒
+      scanPkgs: com.wxd.gaming.b
       enable-web-socket: true
       web-socket-prefix: "/wxd-gaming"
       sslProtocolType: TLSV12 # TLSV12  TLSV1 SSLV3 SSL
