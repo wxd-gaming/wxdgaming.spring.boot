@@ -32,7 +32,7 @@ public abstract class MessageEncode extends ChannelOutboundHandlerAdapter {
         switch (msg) {
             case String str -> {
                 if (!session.isWebSocket()) {
-                    log.info("{} 不是 websocket 不允许发送 string 类型 {}", ChannelUtil.ctxTostring(ctx), msg);
+                    log.warn("{} 不是 websocket 不允许发送 string 类型 {}", ChannelUtil.ctxTostring(ctx), msg);
                     return;
                 }
                 TextWebSocketFrame textWebSocketFrame = new TextWebSocketFrame(str);
@@ -41,7 +41,7 @@ public abstract class MessageEncode extends ChannelOutboundHandlerAdapter {
             case PojoBase pojoBase -> {
                 Integer msgId = messageDispatcher.getMessageName2Id().get(pojoBase.getClass().getName());
                 if (msgId == null) {
-                    log.error("{} 消息未注册，无法编码：{}", ChannelUtil.ctxTostring(ctx), pojoBase.getClass().getName());
+                    log.warn("{} 消息未注册，无法编码：{}", ChannelUtil.ctxTostring(ctx), pojoBase.getClass().getName());
                     return;
                 }
                 byte[] bytes = SerializerUtil.encode(pojoBase);

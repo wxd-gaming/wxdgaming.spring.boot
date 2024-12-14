@@ -136,34 +136,12 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
                 if (!session.checkReceiveMessage(messageBytes.length)) {
                     return;
                 }
-                action(session, messageId, messageBytes);
+                doMessage.action(dispatcher, session, messageId, messageBytes);
             } else {
                 /*重新设置读取进度*/
                 byteBuf.resetReaderIndex();
                 break;
             }
-        }
-    }
-
-
-    protected void action(SocketSession socketSession, int messageId, byte[] messageBytes) throws Exception {
-        DoMessageMapping doMessageMapping = dispatcher.getMappings().get(messageId);
-        if (doMessageMapping != null) {
-            PojoBase message = (PojoBase) SerializerUtil.decode(messageBytes, doMessageMapping.getMessageType());
-            if (bootstrapBuilder.isPrintLogger() && log.isInfoEnabled()) {
-                log.info(
-                        "收到消息：ctx={}, id={}, len={}, body={}",
-                        socketSession.toString(),
-                        messageId,
-                        messageBytes.length,
-                        message
-                );
-            }
-            /* TODO 这里考虑如何线程规划 */
-            doMessageMapping.getMethod().invoke(doMessageMapping.getBean(), socketSession, message);
-        } else {
-            /*找不到处理接口*/
-            doMessage.notSpi(socketSession, messageId, messageBytes);
         }
     }
 

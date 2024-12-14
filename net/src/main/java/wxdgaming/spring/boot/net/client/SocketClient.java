@@ -20,7 +20,7 @@ import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.ISession;
 import wxdgaming.spring.boot.net.SessionGroup;
 import wxdgaming.spring.boot.net.SocketSession;
-import wxdgaming.spring.boot.net.message.inner.InnerMessage;
+import wxdgaming.spring.boot.net.pojo.inner.InnerMessage;
 import wxdgaming.spring.boot.net.ssl.WxdSslHandler;
 
 import javax.net.ssl.SSLEngine;

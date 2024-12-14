@@ -11,7 +11,7 @@ import wxdgaming.spring.boot.net.*;
 import wxdgaming.spring.boot.net.client.ClientConfig;
 import wxdgaming.spring.boot.net.client.SocketClient;
 import wxdgaming.spring.boot.net.client.SocketClientBuilder;
-import wxdgaming.spring.boot.net.message.inner.InnerMessage;
+import wxdgaming.spring.boot.net.pojo.inner.InnerMessage;
 import wxdgaming.spring.boot.net.server.ServerConfig;
 import wxdgaming.spring.boot.net.server.ServerMessageDispatcher;
 import wxdgaming.spring.boot.net.server.SocketServerBuilder;

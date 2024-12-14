@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.net.message.inner;
+package wxdgaming.spring.boot.net.pojo.inner;
 
 import io.protostuff.Tag;
 import java.util.List;
@@ -14,7 +14,7 @@ import wxdgaming.spring.boot.net.message.PojoBase;
  * rpc.proto
  *
  * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-12-13 15:41:05
+ * @version: 2024-12-14 13:26:11
  */
 public class InnerMessage {
    /** 执行同步等待消息 */
