@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ObjectLockTest.instanceString" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
+    <module name="wxdgaming.spring.boot.core" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="code.system.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="PACKAGE_NAME" value="code.system" />
+    <option name="MAIN_CLASS_NAME" value="code.system.ObjectLockTest" />
+    <option name="METHOD_NAME" value="instanceString" />
+    <option name="TEST_OBJECT" value="method" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
