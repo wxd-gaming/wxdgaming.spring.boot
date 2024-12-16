@@ -7,6 +7,7 @@ import wxdgaming.spring.boot.core.ReflectContext;
 import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.message.PojoBase;
+import wxdgaming.spring.boot.net.message.SerializerUtil;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -70,12 +71,42 @@ public abstract class MessageDispatcher implements InitPrint {
 
     public int registerMessage(Class<? extends PojoBase> pojoClass) {
 
-        int msgId = StringsUtil.hashcode(pojoClass.getName());
+        int msgId = getMessage(pojoClass);
         if (messageName2Id.put(pojoClass.getName(), msgId) == null) {
             log.debug("扫描注册消息：{} = {}", pojoClass.getName(), msgId);
         }
 
         return msgId;
+    }
+
+    public int getMessage(Class<? extends PojoBase> pojoClass) {
+        return StringsUtil.hashcode(pojoClass.getName());
+    }
+
+    public boolean dispatch(SocketSession socketSession, int msgId, byte[] messageBytes) throws Exception {
+        DoMessageMapping doMessageMapping = getMappings().get(msgId);
+        if (doMessageMapping != null) {
+            PojoBase message = (PojoBase) SerializerUtil.decode(messageBytes, doMessageMapping.getMessageType());
+            /* TODO 这里考虑如何线程规划 */
+            doMessageMapping.getMethod().invoke(doMessageMapping.getBean(), socketSession, message);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean dispatch(SocketSession socketSession, PojoBase message) throws Exception {
+        int msgId = getMessage(message.getClass());
+        return dispatch(socketSession, msgId, message);
+    }
+
+    public boolean dispatch(SocketSession socketSession, int msgId, PojoBase message) throws Exception {
+        DoMessageMapping doMessageMapping = getMappings().get(msgId);
+        if (doMessageMapping != null) {
+            /* TODO 这里考虑如何线程规划 */
+            doMessageMapping.getMethod().invoke(doMessageMapping.getBean(), socketSession, message);
+            return true;
+        }
+        return false;
     }
 
 }

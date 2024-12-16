@@ -37,19 +37,21 @@ public class ClassDirLoader extends URLClassLoader implements Serializable {
     /**
      * jar 包 ClassLoader
      *
-     * @param parent  指定的类加载器
-     * @param jarPath jar 路径，可以是jar包也可以是 jar 目录
+     * @param parent   指定的类加载器
+     * @param jarPaths jar 路径，可以是jar包也可以是 jar 目录
      */
-    public static ClassDirLoader bootLib(ClassLoader parent, String jarPath) {
+    public static ClassDirLoader bootLib(ClassLoader parent, String... jarPaths) {
         ClassDirLoader classDirLoader = new ClassDirLoader(parent);
-        FileUtil.walkFiles(jarPath, ".jar")
-                .forEach(lib -> {
-                    try {
-                        classDirLoader.addURL(lib.toUri().toURL());
-                    } catch (Exception e) {
-                        throw new RuntimeException("ClassLoader 附加 jar 包：" + jarPath, e);
-                    }
-                });
+        for (String jarPath : jarPaths) {
+            FileUtil.walkFiles(jarPath, ".jar")
+                    .forEach(lib -> {
+                        try {
+                            classDirLoader.addURL(lib.toUri().toURL());
+                        } catch (Exception e) {
+                            throw new RuntimeException("ClassLoader 附加 jar 包：" + jarPath, e);
+                        }
+                    });
+        }
         return classDirLoader;
     }
 

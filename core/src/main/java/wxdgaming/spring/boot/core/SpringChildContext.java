@@ -23,8 +23,8 @@ import java.util.Collection;
 public class SpringChildContext implements InitPrint {
 
 
-    public ConfigurableApplicationContext newChild4Jar(ClassLoader parentClassLoad, Class<?> scan, String jarPath) {
-        ClassDirLoader classLoader = ClassDirLoader.bootLib(parentClassLoad, jarPath);
+    public ConfigurableApplicationContext newChild4Jar(ClassLoader parentClassLoad, Class<?> scan, String... jarPaths) {
+        ClassDirLoader classLoader = ClassDirLoader.bootLib(parentClassLoad, jarPaths);
         return newChild(scan, classLoader);
     }
 
