@@ -143,6 +143,34 @@ public class JdbcContext {
     }
 
     /** 批量保存数据 ，会先查询数据库是否存在数据，然后决定是插入还是修改，性能较差 */
+    public <T extends EntityUID> void save(T entity) {
+        EntityManager entityManager = context();
+        entityManager.getTransaction().begin();
+        try {
+            boolean isNew = true;
+            Object uid = entity.getUid();
+            if (uid != null && !uid.equals(0)) {
+                if (entityManager.find(entity.getClass(), uid) != null) {
+                    entityManager.merge(entity);
+                    isNew = false;
+                }
+            }
+            if (isNew) {
+                entityManager.persist(entity);
+            }
+            entityManager.getTransaction().commit();
+        } catch (Exception e) {
+            // 如果发生异常，回滚事务
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            throw new RuntimeException(e);
+        } finally {
+            releaseVirtual(entityManager);
+        }
+    }
+
+    /** 批量保存数据 ，会先查询数据库是否存在数据，然后决定是插入还是修改，性能较差 */
     public <T extends EntityUID> void batchSave(List<T> entities) {
         EntityManager entityManager = context();
         entityManager.getTransaction().begin();

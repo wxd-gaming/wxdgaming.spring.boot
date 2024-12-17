@@ -24,7 +24,6 @@ import wxdgaming.spring.boot.data.redis.DataRedisScan;
 import wxdgaming.spring.boot.net.NetScan;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.client.TcpSocketClient;
-import wxdgaming.spring.boot.net.client.WebSocketClient;
 import wxdgaming.spring.boot.rpc.RpcScan;
 import wxdgaming.spring.boot.rpc.RpcService;
 import wxdgaming.spring.boot.rpc.pojo.RpcMessage;
@@ -34,6 +33,7 @@ import wxdgaming.spring.boot.web.WebScan;
 import wxdgaming.spring.boot.weblua.WebLuaScan;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -77,7 +77,14 @@ public class ApplicationStart {
         redisTemplate.opsForValue().setIfAbsent("1", "1");
         RedisTemplate<String, Object> secondRedisTemplate = ins.getBean("secondRedisTemplate");
         secondRedisTemplate.opsForValue().set("2", "2");
-
+        long l = System.nanoTime();
+        HashMap<String, String> putAll = new HashMap<>();
+        for (int i = 0; i < 10000; i++) {
+            // secondRedisTemplate.opsForValue().set(String.valueOf(i), String.valueOf(i));
+            putAll.put(String.valueOf(i), String.valueOf(i));
+        }
+        secondRedisTemplate.opsForHash().putAll("secondRedisTemplate", putAll);
+        log.info("redis 耗时：{} ms", (System.nanoTime() - l) / 10000 / 100f);
         RpcService rpcService = ins.getBean(RpcService.class);
 
         RpcMessage.ReqRemote rpcMessage = new RpcMessage.ReqRemote();

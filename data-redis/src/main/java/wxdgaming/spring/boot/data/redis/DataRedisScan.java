@@ -23,9 +23,9 @@ import wxdgaming.spring.boot.core.timer.MyClock;
 public class DataRedisScan implements InitPrint {
 
 
-    @Scheduled(cron = "*/10 * * * * ?")
-    public void test() {
-        log.info("{}", MyClock.nowString());
-    }
+    // @Scheduled(cron = "*/10 * * * * ?")
+    // public void test() {
+    //     log.info("{}", MyClock.nowString());
+    // }
 
 }

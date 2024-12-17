@@ -7,6 +7,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
+import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import wxdgaming.spring.boot.core.Throw;
@@ -105,28 +107,41 @@ public class DruidSourceConfig extends ObjectBase {
     }
 
     public EntityManager entityManagerFactory(DataSource dataSource, Map<String, Object> jpaConfig) {
-        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(dataSource);
-        em.setPackagesToScan(packageNames); // 替换为你的实体包路径
+        LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
+        entityManagerFactoryBean.setDataSource(dataSource);
+
+        HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
+        jpaVendorAdapter.setGenerateDdl(true);
+        jpaVendorAdapter.setShowSql(showSql);
+        entityManagerFactoryBean.setJpaVendorAdapter(jpaVendorAdapter);
+        entityManagerFactoryBean.setPersistenceProviderClass(HibernatePersistenceProvider.class);
+
+        entityManagerFactoryBean.setPackagesToScan(packageNames); // 替换为你的实体包路径
         // 设置命名策略
-        em.getJpaPropertyMap().put("hibernate.show_sql", showSql);
-        em.getJpaPropertyMap().put("hibernate.hbm2ddl.auto", ddlAuto);
-        em.getJpaPropertyMap().put("hibernate.order_inserts", batchInsert);
-        em.getJpaPropertyMap().put("hibernate.order_updates", batchUpdate);
-        em.getJpaPropertyMap().put("hibernate.jdbc.batch_size", batchSize);
+        entityManagerFactoryBean.getJpaPropertyMap().put("hibernate.show_sql", showSql);
+        entityManagerFactoryBean.getJpaPropertyMap().put("hibernate.hbm2ddl.auto", ddlAuto);
+        entityManagerFactoryBean.getJpaPropertyMap().put("javax.persistence.schema-generation.database.action", ddlAuto);
+        entityManagerFactoryBean.getJpaPropertyMap().put("hibernate.order_inserts", batchInsert);
+        entityManagerFactoryBean.getJpaPropertyMap().put("hibernate.order_updates", batchUpdate);
+        entityManagerFactoryBean.getJpaPropertyMap().put("hibernate.jdbc.batch_size", batchSize);
         if (StringUtils.isNotBlank(dialect)) {
-            em.getJpaPropertyMap().put("hibernate.dialect", dialect);
+            entityManagerFactoryBean.getJpaPropertyMap().put("hibernate.dialect", dialect);
         }
         if (StringUtils.isNotBlank(physical_naming_strategy)) {
-            em.getJpaPropertyMap().put("hibernate.physical_naming_strategy", physical_naming_strategy);
+            entityManagerFactoryBean.getJpaPropertyMap().put("hibernate.physical_naming_strategy", physical_naming_strategy);
         }
         if (jpaConfig != null) {
-            em.getJpaPropertyMap().putAll(jpaConfig);
+            entityManagerFactoryBean.getJpaPropertyMap().putAll(jpaConfig);
         }
-        em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-        em.afterPropertiesSet(); // 初始化 EntityManagerFactory
-        // return em.getNativeEntityManagerFactory().createEntityManager(SynchronizationType.SYNCHRONIZED, Map.of());
-        return em.createNativeEntityManager(Map.of());
+
+        entityManagerFactoryBean.afterPropertiesSet(); // 初始化 EntityManagerFactory
+
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(entityManagerFactoryBean.getObject());
+
+        return transactionManager.getEntityManagerFactory().createEntityManager();
+
+        // return entityManagerFactoryBean.createNativeEntityManager(Map.of());
     }
 
 
