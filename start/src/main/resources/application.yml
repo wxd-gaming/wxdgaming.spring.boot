@@ -22,6 +22,16 @@ spring:
     allow-bean-definition-overriding: true
   profiles:
     active: redis,mysql,socket,broker
+  web:
+    resources:
+      add-mappings: true
+      static-locations: file:public/,file:upload/,classpath:/public/
+      chain:
+        compressed: true    #开启压缩
+        enabled: true       #开启
+        cache: true         #开启缓存
+      cache:
+        period: 186400      # 缓存一天
   mvc:
     static-path-pattern: /**
   thymeleaf:
