@@ -132,7 +132,7 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
     @ReLoad
     @Order(1000)
     public void scanMessage(SpringUtil springUtil) {
-        getClientMessageDecode().getDispatcher().initMapping(springUtil);
+        getClientMessageDecode().getDispatcher().initMapping(springUtil.reflectContext());
     }
 
     @Override public void close() {

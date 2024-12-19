@@ -20,7 +20,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
@@ -45,10 +44,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -63,25 +60,6 @@ import java.util.stream.Stream;
 public class SpringUtil implements InitPrint, ApplicationContextAware {
 
     @Getter private static SpringUtil ins;
-
-    public static final Comparator<Object> OBJECT_COMPARATOR = (o1, o2) -> {
-        int o1Annotation = Optional.ofNullable(o1.getClass().getAnnotation(Order.class)).map(Order::value).orElse(999999);
-        int o2Annotation = Optional.ofNullable(o2.getClass().getAnnotation(Order.class)).map(Order::value).orElse(999999);
-        if (o1Annotation != o2Annotation) {
-            return Integer.compare(o1Annotation, o2Annotation);
-        }
-        return o1.getClass().getName().compareTo(o2.getClass().getName());
-    };
-
-    public static final Comparator<Tuple2<?, Method>> METHOD_COMPARATOR = (o1, o2) -> {
-        int o1Annotation = Optional.ofNullable(o1.getRight().getAnnotation(Order.class)).map(Order::value).orElse(999999);
-        int o2Annotation = Optional.ofNullable(o2.getRight().getAnnotation(Order.class)).map(Order::value).orElse(999999);
-        if (o1Annotation != o2Annotation) {
-            return Integer.compare(o1Annotation, o2Annotation);
-        }
-        return o1.getRight().getName().compareTo(o2.getRight().getName());
-    };
-
 
     /**
      * 判断一个类是否有 Spring 核心注解
@@ -220,15 +198,21 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
     public Stream<Tuple2<Object, Method>> withMethodAnnotated(Class<? extends Annotation> annotationType) {
         return reflectContext()
                 .withMethodAnnotated(annotationType)
-                .sorted(METHOD_COMPARATOR);
+                .sorted(SpringReflectContext.METHOD_COMPARATOR);
     }
 
     public void executor(Class<? extends Annotation> annotationType) {
-        withMethodAnnotated(annotationType)
+        executor(curApplicationContext(), annotationType);
+    }
+
+    public static void executor(ConfigurableApplicationContext configurableApplicationContext, Class<? extends Annotation> annotationType) {
+        SpringReflectContext.build(configurableApplicationContext)
+                .withMethodAnnotated(annotationType)
+                .sorted(SpringReflectContext.METHOD_COMPARATOR)
                 .forEach(t -> {
                     try {
                         t.getRight().setAccessible(true);
-                        Object[] array = springParameters(t.getLeft(), t.getRight());
+                        Object[] array = springParameters(configurableApplicationContext, t.getLeft(), t.getRight());
                         // Object[] array = Arrays.stream(t.getRight().getParameterTypes()).map(curApplicationContext()::getBean).toArray();
                         t.getRight().invoke(t.getLeft(), array);
                     } catch (Exception e) {
@@ -237,7 +221,7 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
                 });
     }
 
-    public Object[] springParameters(Object bean, Method method) {
+    public static Object[] springParameters(ConfigurableApplicationContext configurableApplicationContext, Object bean, Method method) {
         Parameter[] parameters = method.getParameters();
         Object[] params = new Object[parameters.length];
         for (int i = 0; i < params.length; i++) {
@@ -251,15 +235,15 @@ public class SpringUtil implements InitPrint, ApplicationContextAware {
                     if (StringsUtil.emptyOrNull(name)) {
                         throw new RuntimeException(bean.getClass().getName() + "#" + method.getName() + ", 无法识别 " + (i + 1) + " 参数 RequestParam 指定 name " + clazz);
                     }
-                    params[i] = getBean(name);
+                    params[i] = configurableApplicationContext.getBean(name);
                     continue;
                 }
                 Value value = parameter.getAnnotation(Value.class);
                 if (value != null) {
-                    params[i] = curApplicationContext().getEnvironment().getProperty(value.value());
+                    params[i] = configurableApplicationContext.getEnvironment().getProperty(value.value());
                     continue;
                 }
-                params[i] = getBean(clazz);
+                params[i] = configurableApplicationContext.getBean(clazz);
             }
         }
         return params;

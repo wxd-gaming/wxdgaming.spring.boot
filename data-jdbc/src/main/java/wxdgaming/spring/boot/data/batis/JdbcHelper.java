@@ -1,5 +1,6 @@
 package wxdgaming.spring.boot.data.batis;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import jakarta.persistence.EntityManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +34,7 @@ public class JdbcHelper implements InitPrint {
     @Bean
     @Primary
     @ConditionalOnMissingBean(DataSource.class)
-    public DataSource datasource() {
+    public DruidDataSource datasource() {
         db.createDatabase();
         return db.toDataSource();
     }
@@ -41,7 +42,7 @@ public class JdbcHelper implements InitPrint {
     @Bean
     @Primary
     @ConditionalOnMissingBean(JdbcContext.class)
-    public JdbcContext jdbcContext(DataSource dataSource, EntityManager entityManager) {
+    public JdbcContext jdbcContext(DruidDataSource dataSource, EntityManager entityManager) {
         return new JdbcContext(dataSource, entityManager);
     }
 

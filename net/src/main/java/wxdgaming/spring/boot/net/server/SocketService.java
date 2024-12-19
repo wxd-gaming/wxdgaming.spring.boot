@@ -158,7 +158,7 @@ public class SocketService implements InitPrint, Closeable, ISession {
     @ReLoad
     @Order(1000)
     public void scanMessage(SpringUtil springUtil) {
-        getServerMessageDecode().getDispatcher().initMapping(springUtil);
+        getServerMessageDecode().getDispatcher().initMapping(springUtil.reflectContext());
     }
 
     /**

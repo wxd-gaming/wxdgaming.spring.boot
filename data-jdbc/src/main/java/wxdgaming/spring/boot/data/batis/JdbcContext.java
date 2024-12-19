@@ -1,5 +1,6 @@
 package wxdgaming.spring.boot.data.batis;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -8,7 +9,6 @@ import lombok.Getter;
 import wxdgaming.spring.boot.core.function.ConsumerE1;
 import wxdgaming.spring.boot.data.EntityUID;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,11 +24,11 @@ import java.util.stream.Stream;
 @Getter
 public class JdbcContext {
 
-    private final DataSource dataSource;
+    private final DruidDataSource dataSource;
     private final EntityManager em;
     private final ThreadLocal<EntityManager> threadContext = new ThreadLocal<>();
 
-    public JdbcContext(DataSource dataSource, EntityManager em) {
+    public JdbcContext(DruidDataSource dataSource, EntityManager em) {
         this.dataSource = dataSource;
         this.em = em;
     }

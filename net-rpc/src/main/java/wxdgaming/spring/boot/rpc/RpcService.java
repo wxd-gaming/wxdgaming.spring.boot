@@ -81,7 +81,7 @@ public class RpcService implements InitPrint {
                 .filter(socketClient -> socketClient.getConfig().isEnableRpc())
                 .forEach(socketClient -> {
                     socketClient.getClientMessageDecode().getDispatcher().initMapping(
-                            springUtil,
+                            springUtil.reflectContext(),
                             new String[]{this.getClass().getPackageName()}
                     );
                 });
@@ -91,7 +91,7 @@ public class RpcService implements InitPrint {
                 .filter(socketClient -> socketClient.getConfig().isEnableRpc())
                 .forEach(socketClient -> {
                     socketClient.getServerMessageDecode().getDispatcher().initMapping(
-                            springUtil,
+                            springUtil.reflectContext(),
                             new String[]{this.getClass().getPackageName()}
                     );
                 });

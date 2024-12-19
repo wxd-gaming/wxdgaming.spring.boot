@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.core;
 
 import lombok.Getter;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.lang.Tuple2;
 import wxdgaming.spring.boot.core.system.AnnUtil;
 import wxdgaming.spring.boot.core.system.FieldUtil;
@@ -12,6 +13,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -23,6 +26,24 @@ import java.util.stream.Stream;
  **/
 @Getter
 public class SpringReflectContext {
+
+    public static final Comparator<Object> OBJECT_COMPARATOR = (o1, o2) -> {
+        int o1Annotation = Optional.ofNullable(o1.getClass().getAnnotation(Order.class)).map(Order::value).orElse(999999);
+        int o2Annotation = Optional.ofNullable(o2.getClass().getAnnotation(Order.class)).map(Order::value).orElse(999999);
+        if (o1Annotation != o2Annotation) {
+            return Integer.compare(o1Annotation, o2Annotation);
+        }
+        return o1.getClass().getName().compareTo(o2.getClass().getName());
+    };
+
+    public static final Comparator<Tuple2<?, Method>> METHOD_COMPARATOR = (o1, o2) -> {
+        int o1Annotation = Optional.ofNullable(o1.getRight().getAnnotation(Order.class)).map(Order::value).orElse(999999);
+        int o2Annotation = Optional.ofNullable(o2.getRight().getAnnotation(Order.class)).map(Order::value).orElse(999999);
+        if (o1Annotation != o2Annotation) {
+            return Integer.compare(o1Annotation, o2Annotation);
+        }
+        return o1.getRight().getName().compareTo(o2.getRight().getName());
+    };
 
     public static Stream<Object> getBeans(ConfigurableApplicationContext applicationContext) {
         String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
@@ -43,7 +64,7 @@ public class SpringReflectContext {
     private final Stream<Object> instanceList;
 
     public SpringReflectContext(Stream<Object> instanceList) {
-        this.instanceList = instanceList.sorted(SpringUtil.OBJECT_COMPARATOR);
+        this.instanceList = instanceList.sorted(OBJECT_COMPARATOR);
     }
 
     /** 父类或者接口 */
