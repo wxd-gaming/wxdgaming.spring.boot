@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.ReflectContext;
-import wxdgaming.spring.boot.core.SpringUtil;
+import wxdgaming.spring.boot.core.SpringReflectContent;
 import wxdgaming.spring.boot.core.ann.ReLoad;
-import wxdgaming.spring.boot.core.ann.Start;
+import wxdgaming.spring.boot.core.ann.AppStart;
 import wxdgaming.spring.boot.core.collection.Table;
 import wxdgaming.spring.boot.core.util.AssertUtil;
 
@@ -32,11 +32,11 @@ public class ScriptService {
     private Table<String, Serializable, IScriptByKey<Serializable>> keyScriptMap = new Table<>();
 
 
-    @Start
+    @AppStart
     @ReLoad
     @Order(99999999)
-    public void initScript(SpringUtil springUtil) {
-        Stream<IScript> beansOfType = springUtil.getBeansOfType(IScript.class);
+    public void initScript(SpringReflectContent springReflectContent) {
+        Stream<IScript> beansOfType = springReflectContent.withSuper(IScript.class);
 
         HashMap<String, List<IScript>> tmpScriptMap = new HashMap<>();
         Table<String, Serializable, IScriptByKey<Serializable>> tmpKeyScriptMap = new Table<>();

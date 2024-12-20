@@ -49,10 +49,10 @@ public class LuaContext implements Closeable, AutoCloseable {
             L.set(entry.getKey(), entry.getValue());
         }
 
-        SpringUtil.getIns().getBeansOfType(LuaJavaSpi.class)
-                .forEach(spi -> {
-                    L.set(spi.getName(), spi);
-                });
+        // SpringUtil.getIns().getBeansOfType(LuaJavaSpi.class)
+        //         .forEach(spi -> {
+        //             L.set(spi.getName(), spi);
+        //         });
 
         List<ImmutablePair<Path, byte[]>> error = new ArrayList<>();
         for (ImmutablePair<Path, byte[]> immutablePair : luacRuntime.getPathList()) {

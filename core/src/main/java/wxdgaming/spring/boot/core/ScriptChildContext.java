@@ -20,37 +20,33 @@ import java.util.Collection;
  **/
 @Getter
 @Service
-public class SpringChildContext implements InitPrint {
+public class ScriptChildContext implements InitPrint {
 
 
-    public ConfigurableApplicationContext newChild4Jar(ClassLoader parentClassLoad, Class<?> scan, String... jarPaths) {
+    public ConfigurableApplicationContext newChild4Jar(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String... jarPaths) {
         ClassDirLoader classLoader = ClassDirLoader.bootLib(parentClassLoad, jarPaths);
-        return newChild(scan, classLoader);
+        return newChild(parent, scan, classLoader);
     }
 
-    public ConfigurableApplicationContext newChild4JavaCode(ClassLoader parentClassLoad, Class<?> scan, String javaCodePath, String... resourceUrls) throws Exception {
+    public ConfigurableApplicationContext newChild4JavaCode(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String javaCodePath, String... resourceUrls) throws Exception {
         ClassDirLoader classLoader = new JavaCoderCompile()
                 .parentClassLoader(parentClassLoad)
                 .compilerJava(javaCodePath)
                 .classLoader("target/scripts");
 
         classLoader.addURL(resourceUrls);
-        return newChild(scan, classLoader);
+        return newChild(parent, scan, classLoader);
     }
 
-    public ConfigurableApplicationContext newChild4Classes(ClassLoader parentClassLoad, Class<?> scan, String... urls) throws Exception {
+    public ConfigurableApplicationContext newChild4Classes(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String... urls) throws Exception {
         ClassDirLoader classLoader = new ClassDirLoader(parentClassLoad, urls);
-        return newChild(scan, classLoader);
+        return newChild(parent, scan, classLoader);
     }
 
-    public ConfigurableApplicationContext newChild(Class<?> scan, ClassDirLoader classLoader) {
-        if (SpringUtil.getIns().getChildContext() != null) {
-            SpringUtil.getIns().getChildContext().close();
-        }
+    public ConfigurableApplicationContext newChild(ConfigurableApplicationContext parent, Class<?> scan, ClassDirLoader classLoader) {
         Collection<Class<?>> values = classLoader.getLoadClassMap().values();
         // 创建子容器
         AnnotationConfigServletWebApplicationContext childContext = new AnnotationConfigServletWebApplicationContext();
-        ConfigurableApplicationContext parent = SpringUtil.getIns().getApplicationContext();
         childContext.setParent(parent);
         childContext.setEnvironment(parent.getEnvironment());
         childContext.setApplicationStartup(parent.getApplicationStartup());
@@ -66,12 +62,12 @@ public class SpringChildContext implements InitPrint {
             if (!values.contains(bean1.getClass())) {
                 continue;
             }
+            /*把请求注入到主容器*/
             if (bean1.getClass().isAnnotationPresent(Controller.class) || bean1.getClass().isAnnotationPresent(RestController.class)) {
-                SpringUtil.getIns().registerInstance(SpringUtil.getIns().getApplicationContext(), beanDefinitionName, bean1, true);
-                SpringUtil.getIns().registerController(SpringUtil.getIns().getApplicationContext(), beanDefinitionName);
+                SpringUtil.registerInstance(parent, beanDefinitionName, bean1, true);
+                SpringUtil.registerController(parent, beanDefinitionName);
             }
         }
-        SpringUtil.getIns().setChildContext(childContext);
         return childContext;
     }
 

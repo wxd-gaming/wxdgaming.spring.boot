@@ -2,10 +2,10 @@ package wxdgaming.spring.boot.core.threading;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 /**
  * 线程类
@@ -26,26 +26,26 @@ public class ExecutorBuilder {
     /** 虚拟线程并发数量 */
     private int virtualCoreSize = 100;
 
-    DefaultExecutor defaultExecutor;
-    LogicExecutor logicExecutor;
-    VirtualExecutor virtualExecutor;
+    @Getter static DefaultExecutor defaultExecutor;
+    @Getter static LogicExecutor logicExecutor;
+    @Getter static VirtualExecutor virtualExecutor;
 
     @Bean
-    @ConditionalOnMissingBean(DefaultExecutor.class)
+    @Primary
     public DefaultExecutor defaultExecutor() {
         return defaultExecutor = new DefaultExecutor(defaultCoreSize);
     }
 
     /** 逻辑线程池 */
     @Bean
-    @ConditionalOnMissingBean(LogicExecutor.class)
+    @Primary
     public LogicExecutor logicExecutor() {
         return logicExecutor = new LogicExecutor(logicCoreSize);
     }
 
     /** 虚拟线程池 */
     @Bean
-    @ConditionalOnMissingBean(VirtualExecutor.class)
+    @Primary
     public VirtualExecutor virtualExecutor() {
         return virtualExecutor = new VirtualExecutor(virtualCoreSize);
     }

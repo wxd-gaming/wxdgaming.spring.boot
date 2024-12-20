@@ -18,11 +18,9 @@ import java.util.concurrent.CompletableFuture;
 @Controller
 public class ResponseRpcMessageController {
 
-    private final RpcService rpcService;
+    final RpcService rpcService;
 
-    public ResponseRpcMessageController(RpcService rpcService) {
-        this.rpcService = rpcService;
-    }
+    public ResponseRpcMessageController(RpcService rpcService) {this.rpcService = rpcService;}
 
     @MsgMapper
     public void rpcResSocketAction(SocketSession session, RpcMessage.ResRemote resRemote) throws Exception {
@@ -30,7 +28,7 @@ public class ResponseRpcMessageController {
         String rpcToken = resRemote.getRpcToken();
         int code = resRemote.getCode();
         String remoteParams = resRemote.getParams();
-        CompletableFuture<String> completableFuture = rpcService.getRpcEvent().remove(rpcId);
+        CompletableFuture<String> completableFuture = rpcService.getRpcDispatcher().getRpcEvent().remove(rpcId);
         if (code != 1) {
             log.error("rpc 调用异常 rpcId={}, code={}, msg={}", rpcId, code, remoteParams);
             completableFuture.completeExceptionally(new RuntimeException("code=" + code + ", msg=" + remoteParams));

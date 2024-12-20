@@ -14,16 +14,14 @@ import org.springframework.data.redis.core.RedisTemplate;
 import reactor.core.publisher.Mono;
 import wxdgaming.spring.boot.broker.BrokerScan;
 import wxdgaming.spring.boot.core.CoreScan;
-import wxdgaming.spring.boot.core.SpringReflectContext;
-import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.Throw;
-import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.data.batis.DataJdbcScan;
 import wxdgaming.spring.boot.data.excel.DataExcelScan;
 import wxdgaming.spring.boot.data.redis.DataRedisScan;
 import wxdgaming.spring.boot.net.NetScan;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.client.TcpSocketClient;
+import wxdgaming.spring.boot.rpc.RpcDispatcher;
 import wxdgaming.spring.boot.rpc.RpcScan;
 import wxdgaming.spring.boot.rpc.RpcService;
 import wxdgaming.spring.boot.rpc.pojo.RpcMessage;
@@ -67,15 +65,12 @@ public class ApplicationStart {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext run = SpringApplication.run(ApplicationStart.class, args);
+        AppSpringReflect runBean = run.getBean(AppSpringReflect.class);
+        runBean.content().executorAppStartMethod();
 
-        SpringReflectContext.build(run);
-
-        SpringUtil ins = SpringUtil.getIns();
-        ins.executor(Start.class);
-
-        RedisTemplate<String, Object> redisTemplate = ins.getBean(RedisTemplate.class);
+        RedisTemplate<String, Object> redisTemplate = runBean.getBean(RedisTemplate.class);
         redisTemplate.opsForValue().setIfAbsent("1", "1");
-        RedisTemplate<String, Object> secondRedisTemplate = ins.getBean("secondRedisTemplate");
+        RedisTemplate<String, Object> secondRedisTemplate = runBean.getBean("secondRedisTemplate");
         secondRedisTemplate.opsForValue().set("2", "2");
         long l = System.nanoTime();
         HashMap<String, String> putAll = new HashMap<>();
@@ -85,19 +80,20 @@ public class ApplicationStart {
         }
         secondRedisTemplate.opsForHash().putAll("secondRedisTemplate", putAll);
         log.info("redis 耗时：{} ms", (System.nanoTime() - l) / 10000 / 100f);
-        RpcService rpcService = ins.getBean(RpcService.class);
+        RpcService rpcService = runBean.getBean(RpcService.class);
+        RpcDispatcher rpcDispatcher = runBean.getBean(RpcDispatcher.class);
 
         RpcMessage.ReqRemote rpcMessage = new RpcMessage.ReqRemote();
         rpcMessage
                 .setRpcId(1)
                 .setPath("rpcTest")
-                .setRpcToken(rpcService.getRPC_TOKEN())
+                .setRpcToken(rpcDispatcher.getRPC_TOKEN())
                 .setParams(new JSONObject().fluentPut("type", 1).toString())
         ;
 
         try {
             SocketSession session = run.getBean(TcpSocketClient.class).idleSession();
-            Mono<String> rpc = rpcService.request(session, "rpcTest", new JSONObject().fluentPut("type", 1).toString());
+            Mono<String> rpc = rpcDispatcher.request(session, 0, "rpcTest", new JSONObject().fluentPut("type", 1).toString());
             rpc.subscribe(str -> log.debug("{}", str));
             rpc.block();
         } catch (Exception e) {

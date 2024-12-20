@@ -10,16 +10,13 @@ import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
-import wxdgaming.spring.boot.core.SpringUtil;
+import wxdgaming.spring.boot.core.SpringReflect;
 import wxdgaming.spring.boot.core.ann.ReLoad;
-import wxdgaming.spring.boot.core.ann.Start;
+import wxdgaming.spring.boot.core.ann.AppStart;
 import wxdgaming.spring.boot.core.threading.BaseScheduledExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.timer.MyClock;
-import wxdgaming.spring.boot.net.BootstrapBuilder;
-import wxdgaming.spring.boot.net.ISession;
-import wxdgaming.spring.boot.net.SessionGroup;
-import wxdgaming.spring.boot.net.SocketSession;
+import wxdgaming.spring.boot.net.*;
 import wxdgaming.spring.boot.net.pojo.inner.InnerMessage;
 import wxdgaming.spring.boot.net.ssl.WxdSslHandler;
 
@@ -51,6 +48,7 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
     protected final ClientConfig config;
     /** 所有的连接 */
     protected final SessionGroup sessionGroup = new SessionGroup();
+    protected volatile boolean started = false;
     protected volatile boolean closed = false;
 
     public SocketClient(BaseScheduledExecutor executor,
@@ -122,17 +120,19 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
 
     protected void addChanelHandler(SocketChannel socketChannel, ChannelPipeline pipeline) {}
 
-    @Start
+    @AppStart
     @Order(2000)
-    public void start(SpringUtil springUtil) {
-        connect();
+    public synchronized void start() throws InterruptedException {
+        if (started) return;
+        started = true;
+        ChannelFuture channelFuture = connect();
     }
 
-    @Start()
+    @AppStart
     @ReLoad
-    @Order(1000)
-    public void scanMessage(SpringUtil springUtil) {
-        getClientMessageDecode().getDispatcher().initMapping(springUtil.reflectContext());
+    public void scanMessage(SpringReflect springReflect) {
+        getClientMessageDecode().getDispatcher().initMapping(springReflect.content(), new String[]{NetScan.class.getPackageName()});
+        getClientMessageDecode().getDispatcher().initMapping(springReflect.content());
     }
 
     @Override public void close() {

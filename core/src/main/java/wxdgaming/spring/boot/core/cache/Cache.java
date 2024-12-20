@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.core.collection.concurrent.ConcurrentTable;
 import wxdgaming.spring.boot.core.function.Consumer2;
 import wxdgaming.spring.boot.core.function.Function1;
@@ -18,6 +17,7 @@ import wxdgaming.spring.boot.core.function.Function2;
 import wxdgaming.spring.boot.core.lang.Tuple2;
 import wxdgaming.spring.boot.core.lang.Tuple3;
 import wxdgaming.spring.boot.core.threading.DefaultExecutor;
+import wxdgaming.spring.boot.core.threading.ExecutorBuilder;
 import wxdgaming.spring.boot.core.timer.MyClock;
 
 import java.io.Closeable;
@@ -171,7 +171,7 @@ public class Cache<K, V> implements Closeable {
      * @param delay 缓存容器check间隔时间
      */
     protected Cache(long delay) {
-        DefaultExecutor defaultExecutor = SpringUtil.getIns().getBean(DefaultExecutor.class);
+        DefaultExecutor defaultExecutor = ExecutorBuilder.getDefaultExecutor();
         timerJob = defaultExecutor.scheduleWithFixedDelay(
                 () -> {
                     long now = MyClock.millis();
@@ -326,8 +326,8 @@ public class Cache<K, V> implements Closeable {
 
     @Override public String toString() {
         return "Cache{" +
-                "cacheName='" + cacheName + '\'' +
-                '}';
+               "cacheName='" + cacheName + '\'' +
+               '}';
     }
 
 }

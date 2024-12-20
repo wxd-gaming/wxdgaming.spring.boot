@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ReflectContext;
-import wxdgaming.spring.boot.core.SpringReflectContext;
+import wxdgaming.spring.boot.core.SpringReflectContent;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.message.PojoBase;
 import wxdgaming.spring.boot.net.message.SerializerUtil;
@@ -31,20 +31,19 @@ public abstract class MessageDispatcher implements InitPrint {
         this.packages = packages;
     }
 
-    public void initMapping(SpringReflectContext springReflectContext) {
-        initMapping(springReflectContext, packages);
+    public void initMapping(SpringReflectContent springReflectContent) {
+        initMapping(springReflectContent, packages);
     }
 
-    public void initMapping(SpringReflectContext springReflectContext, String[] params) {
+    public void initMapping(SpringReflectContent springReflectContent, String[] params) {
         Predicate<Class<?>> filter = clazz -> {
             if (params == null || params.length == 0) return true;
-            if (clazz.getPackageName().startsWith(NetScan.class.getPackageName())) return true;
             for (String p : params) {
                 if (clazz.getName().startsWith(p)) return true;
             }
             return false;
         };
-        springReflectContext.withMethodAnnotated(MsgMapper.class)
+        springReflectContent.withMethodAnnotated(MsgMapper.class)
                 .filter(t -> filter.test(t.getLeft().getClass()))
                 .forEach(t -> {
                     Class parameterType = t.getRight().getParameterTypes()[1];

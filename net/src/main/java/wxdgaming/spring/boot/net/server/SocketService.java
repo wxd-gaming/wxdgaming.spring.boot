@@ -11,16 +11,13 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
-import wxdgaming.spring.boot.core.SpringUtil;
+import wxdgaming.spring.boot.core.SpringReflectContent;
 import wxdgaming.spring.boot.core.ann.ReLoad;
-import wxdgaming.spring.boot.core.ann.Start;
+import wxdgaming.spring.boot.core.ann.AppStart;
 import wxdgaming.spring.boot.core.system.BytesUnit;
 import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.util.StringsUtil;
-import wxdgaming.spring.boot.net.BootstrapBuilder;
-import wxdgaming.spring.boot.net.ISession;
-import wxdgaming.spring.boot.net.SessionGroup;
-import wxdgaming.spring.boot.net.SocketSession;
+import wxdgaming.spring.boot.net.*;
 import wxdgaming.spring.boot.net.ssl.WxdOptionalSslHandler;
 
 import java.io.Closeable;
@@ -146,19 +143,20 @@ public class SocketService implements InitPrint, Closeable, ISession {
 
     protected void addChanelHandler(SocketChannel socketChannel, ChannelPipeline pipeline) {}
 
-    @Start()
-    @Order(10000)
+    @AppStart()
+    @Order(1000)
     public void start() {
+        if (this.future != null) return;
         this.future = bootstrap.bind(this.config.getPort());
         this.future.syncUninterruptibly();
         log.info("open socket service {}", this.config.getPort());
     }
 
-    @Start()
+    @AppStart
     @ReLoad
-    @Order(1000)
-    public void scanMessage(SpringUtil springUtil) {
-        getServerMessageDecode().getDispatcher().initMapping(springUtil.reflectContext());
+    public void scanMessage(SpringReflectContent springReflectContent) {
+        getServerMessageDecode().getDispatcher().initMapping(springReflectContent, new String[]{NetScan.class.getPackageName()});
+        getServerMessageDecode().getDispatcher().initMapping(springReflectContent);
     }
 
     /**

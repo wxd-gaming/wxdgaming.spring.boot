@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.ReflectContext;
-import wxdgaming.spring.boot.core.ann.Start;
+import wxdgaming.spring.boot.core.ann.AppStart;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,7 +42,7 @@ public class DataRepository {
     }
 
     @Order(1)
-    @Start
+    @AppStart
     public void load() {
         if (StringUtils.isBlank(jsonPath) || StringUtils.isBlank(scanPackageName)) {
             log.warn("扫描器异常：{}, {}", jsonPath, scanPackageName);

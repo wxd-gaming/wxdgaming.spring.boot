@@ -1,9 +1,12 @@
 package wxdgaming.spring.boot.rpc.pojo;
 
 import io.protostuff.Tag;
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import wxdgaming.spring.boot.core.collection.MapOf;
 import wxdgaming.spring.boot.net.message.PojoBase;
 
 
@@ -11,19 +14,21 @@ import wxdgaming.spring.boot.net.message.PojoBase;
  * rpc.proto
  *
  * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-08-20 11:30:19
+ * @version: 2024-12-20 21:39:57
  */
 public class RpcMessage {
-
    /** 执行同步等待消息 */
    @Getter
    @Setter
    @Accessors(chain = true)
    public static class ReqRemote extends PojoBase {
-
+   
        /**  */
        @Tag(1)
        private long rpcId;
+       /** 目标id */
+       @Tag(2)
+       private long targetId;
        /** 执行的命令 */
        @Tag(3)
        private String path;
@@ -41,10 +46,13 @@ public class RpcMessage {
    @Setter
    @Accessors(chain = true)
    public static class ResRemote extends PojoBase {
-
+   
        /**  */
        @Tag(1)
        private long rpcId;
+       /** 目标id */
+       @Tag(2)
+       private long targetId;
        /** 用于验证的消息 */
        @Tag(3)
        private String rpcToken;
@@ -56,4 +64,5 @@ public class RpcMessage {
        private String params;
 
    }
+
 }
