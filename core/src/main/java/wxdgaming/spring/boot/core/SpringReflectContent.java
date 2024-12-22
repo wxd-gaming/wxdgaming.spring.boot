@@ -223,6 +223,9 @@ public class SpringReflectContent {
             return fieldStream().filter(f -> AnnUtil.ann(f, annotation) != null);
         }
 
+        @Override public String toString() {
+            return instance.getClass().getName();
+        }
     }
 
 }

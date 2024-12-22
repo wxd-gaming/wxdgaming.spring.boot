@@ -13,8 +13,8 @@ import wxdgaming.spring.boot.net.MessageDecode;
 @ChannelHandler.Sharable
 public class ServerMessageDecode extends MessageDecode {
 
-    public ServerMessageDecode(BootstrapBuilder bootstrapBuilder, ServerMessageDispatcher serverMessageDispatcher) {
-        super(false, bootstrapBuilder, serverMessageDispatcher);
+    public ServerMessageDecode(ServerMessageDispatcher serverMessageDispatcher) {
+        super(false, serverMessageDispatcher);
     }
 }
 

@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.rpc;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Predicate;
 
 /**
  * rpc 派发
@@ -28,9 +30,11 @@ import java.util.concurrent.atomic.AtomicLong;
  **/
 @Slf4j
 @Getter
+@Setter
 public class RpcDispatcher implements InitPrint {
 
-    String RPC_TOKEN;
+    private String RPC_TOKEN;
+    private String[] packages = null;
     private final ConcurrentHashMap<String, RpcActionMapping> rpcHandlerMap = new ConcurrentHashMap<>();
     private final AtomicLong atomicLong = new AtomicLong(0);
     private final ConcurrentSkipListMap<Long, CompletableFuture<String>> rpcEvent = new ConcurrentSkipListMap<>();
@@ -39,29 +43,47 @@ public class RpcDispatcher implements InitPrint {
         this.RPC_TOKEN = RPC_TOKEN;
     }
 
+    public RpcDispatcher(String RPC_TOKEN, String[] packages) {
+        this.RPC_TOKEN = RPC_TOKEN;
+        this.packages = packages;
+    }
+
     public void initMapping(SpringReflectContent springReflectContent) {
-        springReflectContent.withMethodAnnotated(RPC.class).forEach(t -> {
-            t.getRight().setAccessible(true);
-            String value = "";
-            RequestMapping requestMapping = t.getLeft().getClass().getAnnotation(RequestMapping.class);
-            if (requestMapping != null && requestMapping.value().length > 0) {
-                value = requestMapping.value()[0];
+        initMapping(springReflectContent, packages);
+    }
+
+    public void initMapping(SpringReflectContent springReflectContent, String[] params) {
+        Predicate<Class<?>> filter = clazz -> {
+            if (params == null || params.length == 0) return true;
+            for (String p : params) {
+                if (clazz.getName().startsWith(p)) return true;
             }
-            RPC annotation = t.getRight().getAnnotation(RPC.class);
-            String mapping = annotation.value();
-            if (StringsUtil.emptyOrNull(mapping)) {
-                value += "/" + t.getRight().getName();
-            } else {
-                value += mapping;
-            }
-            RpcActionMapping oldMapping = rpcHandlerMap.put(value, new RpcActionMapping(annotation, t.getLeft(), t.getRight()));
-            if (oldMapping != null) {
-                if (!oldMapping.getBean().getClass().getName().endsWith(t.getLeft().getClass().getName())) {
-                    throw new RuntimeException("RPC 处理器重复：" + oldMapping.getBean().getClass().getName() + " - " + t.getLeft().getClass().getName());
-                }
-            }
-            log.debug("rpc register path={}, {}#{}", value, t.getLeft().getClass().getName(), t.getRight().getName());
-        });
+            return false;
+        };
+        springReflectContent.withMethodAnnotated(RPC.class)
+                .filter(t -> filter.test(t.getLeft().getClass()))
+                .forEach(t -> {
+                    t.getRight().setAccessible(true);
+                    String value = "";
+                    RequestMapping requestMapping = t.getLeft().getClass().getAnnotation(RequestMapping.class);
+                    if (requestMapping != null && requestMapping.value().length > 0) {
+                        value = requestMapping.value()[0];
+                    }
+                    RPC annotation = t.getRight().getAnnotation(RPC.class);
+                    String mapping = annotation.value();
+                    if (StringsUtil.emptyOrNull(mapping)) {
+                        value += "/" + t.getRight().getName();
+                    } else {
+                        value += mapping;
+                    }
+                    RpcActionMapping oldMapping = rpcHandlerMap.put(value, new RpcActionMapping(annotation, t.getLeft(), t.getRight()));
+                    if (oldMapping != null) {
+                        if (!oldMapping.getBean().getClass().getName().endsWith(t.getLeft().getClass().getName())) {
+                            throw new RuntimeException("RPC 处理器重复：" + oldMapping.getBean().getClass().getName() + " - " + t.getLeft().getClass().getName());
+                        }
+                    }
+                    log.debug("rpc register path={}, {}#{}", value, t.getLeft().getClass().getName(), t.getRight().getName());
+                });
     }
 
     public Object rpcReqSocketAction(SocketSession session, String rpcToken, long rpcId, long targetId, String path, String remoteParams) throws Exception {
@@ -115,12 +137,6 @@ public class RpcDispatcher implements InitPrint {
         return rpcActionMapping.getMethod().invoke(rpcActionMapping.getBean(), params);
     }
 
-    /** rpc test */
-    @RPC("rpcTest")
-    public String rpcTest(SocketSession session, JSONObject jsonObject, @RequestParam(name = "type") int type) throws Exception {
-        log.debug("rpc action rpcTest {}, {}, {}", session, jsonObject, type);
-        return "ok";
-    }
 
     /**
      * 请求 rpc 执行

@@ -52,7 +52,7 @@ public class RequestRpcMessageController {
             session.writeAndFlush(res);
 
         } catch (Throwable t) {
-            log.error("{}, rpcId={}, path={}, params={}", session, rpcId, path, remoteParams, t);
+            log.error("{}, rpcId={}, targetId={}, path={}, params={}", session, rpcId, targetId, path, remoteParams, t);
             rpcService.getRpcDispatcher().response(session, rpcId, targetId, 500, t.getMessage());
         }
     }

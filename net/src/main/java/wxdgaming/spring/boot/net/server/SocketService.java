@@ -42,7 +42,7 @@ public class SocketService implements InitPrint, Closeable, ISession {
         }
 
         ServerMessageDispatcher messageDispatcher = new ServerMessageDispatcher(config.getScanPkgs());
-        ServerMessageDecode serverMessageDecode = new ServerMessageDecode(bootstrapBuilder, messageDispatcher);
+        ServerMessageDecode serverMessageDecode = new ServerMessageDecode(messageDispatcher);
         ServerMessageEncode serverMessageEncode = new ServerMessageEncode(messageDispatcher);
 
         Class aClass = Thread.currentThread().getContextClassLoader().loadClass(config.getServiceClass());

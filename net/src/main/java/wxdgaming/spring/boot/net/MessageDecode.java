@@ -25,13 +25,11 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
     public static final AttributeKey<ByteBuf> byteBufAttributeKey = AttributeKey.<ByteBuf>valueOf("__ctx_byteBuf__");
 
     protected final boolean autoRelease;
-    protected final BootstrapBuilder bootstrapBuilder;
     protected final MessageDispatcher dispatcher;
     @Setter protected DoMessage doMessage = new DoMessage() {};
 
-    public MessageDecode(boolean autoRelease, BootstrapBuilder bootstrapBuilder, MessageDispatcher dispatcher) {
+    public MessageDecode(boolean autoRelease, MessageDispatcher dispatcher) {
         this.autoRelease = autoRelease;
-        this.bootstrapBuilder = bootstrapBuilder;
         this.dispatcher = dispatcher;
     }
 

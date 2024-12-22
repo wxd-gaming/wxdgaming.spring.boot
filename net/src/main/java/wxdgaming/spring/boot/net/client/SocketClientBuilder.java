@@ -32,7 +32,7 @@ public class SocketClientBuilder {
     public SocketClient socketClient(DefaultExecutor defaultExecutor, BootstrapBuilder bootstrapBuilder) {
 
         ClientMessageDispatcher clientMessageDispatcher = new ClientMessageDispatcher(config.getScanPkgs());
-        ClientMessageDecode clientMessageDecode = new ClientMessageDecode(bootstrapBuilder, clientMessageDispatcher);
+        ClientMessageDecode clientMessageDecode = new ClientMessageDecode(clientMessageDispatcher);
         ClientMessageEncode clientMessageEncode = new ClientMessageEncode(clientMessageDispatcher);
 
         if (config.isUseWebSocket()) {

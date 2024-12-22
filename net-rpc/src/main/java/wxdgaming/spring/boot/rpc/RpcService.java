@@ -1,15 +1,18 @@
 package wxdgaming.spring.boot.rpc;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.SpringReflectContent;
 import wxdgaming.spring.boot.core.ann.AppStart;
 import wxdgaming.spring.boot.core.ann.ReLoad;
+import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.client.SocketClient;
 import wxdgaming.spring.boot.net.server.SocketService;
 
@@ -59,5 +62,11 @@ public class RpcService implements InitPrint {
 
     }
 
+    /** rpc test */
+    @RPC("rpcTest")
+    public String rpcTest(SocketSession session, JSONObject jsonObject, @RequestParam(name = "type") int type) throws Exception {
+        log.debug("rpc action rpcTest {}, {}, {}", session, jsonObject, type);
+        return "ok";
+    }
 
 }

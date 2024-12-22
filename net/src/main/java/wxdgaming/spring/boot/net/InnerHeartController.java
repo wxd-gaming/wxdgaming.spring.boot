@@ -1,6 +1,7 @@
 package wxdgaming.spring.boot.net;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import wxdgaming.spring.boot.net.pojo.inner.InnerMessage;
 
@@ -14,19 +15,22 @@ import wxdgaming.spring.boot.net.pojo.inner.InnerMessage;
 @Controller
 public class InnerHeartController {
 
-    final BootstrapBuilder bootstrapBuilder;
+    @Value("${socket.printLogger:false}")
+    boolean printLogger = false;
 
-    public InnerHeartController(BootstrapBuilder bootstrapBuilder) {this.bootstrapBuilder = bootstrapBuilder;}
+    public InnerHeartController() {
+
+    }
 
     @MsgMapper
     public void reqHeartAction(SocketSession session, InnerMessage.ReqHeart reqHeart) throws Exception {
-        if (bootstrapBuilder.isPrintLogger())
+        if (printLogger)
             log.info("心跳包{} {}", session, reqHeart.getMilli());
     }
 
     @MsgMapper
     public void resHeartAction(SocketSession session, InnerMessage.ResHeart resHeart) throws Exception {
-        if (bootstrapBuilder.isPrintLogger())
+        if (printLogger)
             log.info("心跳包{} {}", session, resHeart.getMilli());
     }
 

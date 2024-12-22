@@ -14,7 +14,7 @@ import wxdgaming.spring.boot.net.MessageDispatcher;
 @ChannelHandler.Sharable
 public class ClientMessageDecode extends MessageDecode {
 
-    public ClientMessageDecode(BootstrapBuilder bootstrapBuilder, MessageDispatcher dispatcher) {
-        super(false, bootstrapBuilder, dispatcher);
+    public ClientMessageDecode(MessageDispatcher dispatcher) {
+        super(false, dispatcher);
     }
 }

@@ -38,7 +38,7 @@ public class BrokerServerBuilder {
         socketService.setSessionGroup(sessionGroup);
         socketService.getServerMessageDecode().setDoMessage(new DoMessage() {
             @Override public void actionString(SocketSession socketSession, String message) throws Exception {
-                DoMessage.super.actionString(socketSession, message);
+                super.actionString(socketSession, message);
             }
 
             @Override public void notSpi(SocketSession socketSession, int messageId, byte[] messageBytes) {

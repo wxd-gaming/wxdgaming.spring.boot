@@ -1,6 +1,7 @@
 package wxdgaming.spring.boot.rpc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import wxdgaming.spring.boot.net.MsgMapper;
 import wxdgaming.spring.boot.net.SocketSession;
@@ -18,6 +19,9 @@ import java.util.concurrent.CompletableFuture;
 @Controller
 public class ResponseRpcMessageController {
 
+    @Value("${socket.printLogger:false}")
+    boolean printLogger = false;
+
     final RpcService rpcService;
 
     public ResponseRpcMessageController(RpcService rpcService) {this.rpcService = rpcService;}
@@ -25,16 +29,21 @@ public class ResponseRpcMessageController {
     @MsgMapper
     public void rpcResSocketAction(SocketSession session, RpcMessage.ResRemote resRemote) throws Exception {
         long rpcId = resRemote.getRpcId();
+        long targetId = resRemote.getTargetId();
         String rpcToken = resRemote.getRpcToken();
         int code = resRemote.getCode();
         String remoteParams = resRemote.getParams();
         CompletableFuture<String> completableFuture = rpcService.getRpcDispatcher().getRpcEvent().remove(rpcId);
         if (code != 1) {
-            log.error("rpc 调用异常 rpcId={}, code={}, msg={}", rpcId, code, remoteParams);
+            if (printLogger) {
+                log.error("rpc 调用异常 rpcId={}, targetId={}, code={}, msg={}", rpcId, targetId, code, remoteParams);
+            }
             completableFuture.completeExceptionally(new RuntimeException("code=" + code + ", msg=" + remoteParams));
             return;
         }
-        log.debug("rpc 调用完成 rpcId={}, param={}", rpcId, remoteParams);
+        if (printLogger) {
+            log.info("rpc 调用完成 rpcId={}, targetId={}, param={}", rpcId, targetId, remoteParams);
+        }
         completableFuture.complete(remoteParams);
     }
 
