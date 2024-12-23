@@ -3,6 +3,7 @@ package wxdgaming.spring.boot.loader;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 
@@ -18,8 +19,35 @@ public class BootClassLoader extends URLClassLoader {
 
     private ExtendLoader extendLoader;
 
-    public BootClassLoader(ClassLoader parent, URL[] urls) {
+    public BootClassLoader() {
+        super(new URL[0], Thread.currentThread().getContextClassLoader());
+    }
+
+    public BootClassLoader(ClassLoader parent) {
+        super(new URL[0], parent);
+    }
+
+    public BootClassLoader(ClassLoader parent, String... paths) {
+        super(URLUtil.stringsToURLs(paths), parent);
+    }
+
+    public BootClassLoader(ClassLoader parent, URL... urls) {
         super(urls, parent);
+    }
+
+    public void addURLs(String... paths) {
+        URL[] urls = URLUtil.stringsToURLs(paths);
+        for (int i = 0; i < urls.length; i++) {
+            URL url = urls[i];
+            addURL(url);
+        }
+    }
+
+    public void addURL(URL... urls) {
+        for (int i = 0; i < urls.length; i++) {
+            URL url = urls[i];
+            addURL(url);
+        }
     }
 
     @Override public void addURL(URL url) {
@@ -30,16 +58,44 @@ public class BootClassLoader extends URLClassLoader {
         if (extendLoader != null && extendLoader.isExtendPackage(name)) {
             return extendLoader.loadClass(name);
         }
-        System.out.println("loadClass: " + name);
+        // System.out.println("loadClass: " + name);
         return super.loadClass(name);
     }
 
     @Override protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        if (extendLoader != null && extendLoader.isExtendPackage(name)) {
+            return extendLoader.loadClass(name, resolve);
+        }
         return super.loadClass(name, resolve);
     }
 
     @Override protected Class<?> findClass(String name) throws ClassNotFoundException {
+        if (extendLoader != null && extendLoader.isExtendPackage(name)) {
+            return extendLoader.findClass(name);
+        }
         return super.findClass(name);
     }
 
+    @Override public InputStream getResourceAsStream(String name) {
+        if (extendLoader != null && extendLoader.isExtendPackage(name)) {
+            return extendLoader.getResourceAsStream(name);
+        }
+        return super.getResourceAsStream(name);
+    }
+
+    @Override public URL getResource(String name) {
+        if (extendLoader != null && extendLoader.isExtendPackage(name)) {
+            return extendLoader.getResource(name);
+        }
+        return super.getResource(name);
+    }
+
+
+    @Override public URL findResource(String name) {
+        if (extendLoader != null && extendLoader.isExtendPackage(name)) {
+            return extendLoader.findResource(name);
+        }
+        System.out.println("BootClassLoader findResource: " + name);
+        return super.findResource(name);
+    }
 }

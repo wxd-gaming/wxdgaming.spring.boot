@@ -9,6 +9,6 @@
         <version>1.0.1</version>
     </parent>
 
-    <artifactId>loader</artifactId>
+    <artifactId>wxdgaming.spring.boot.loader</artifactId>
 
 </project>

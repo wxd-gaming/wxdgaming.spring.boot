@@ -3,8 +3,8 @@ package code;
 import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.loader.BootClassLoader;
 import wxdgaming.spring.boot.loader.ExtendLoader;
+import wxdgaming.spring.boot.loader.LogbackExtendLoader;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -28,9 +28,9 @@ public class LogClassLoadTest {
     public static void loadLogic(int sid) throws Exception {
         BootClassLoader bootClassLoader = new BootClassLoader(
                 LogClassLoadTest.class.getClassLoader(),
-                new URL[]{new File("F:\\log-code").toURI().toURL()}
+                "F:\\log-code"
         );
-        bootClassLoader.setExtendLoader(getExtendLoader());
+        bootClassLoader.setExtendLoader(new LogbackExtendLoader(bootClassLoader));
         Class<?> aClass = bootClassLoader.loadClass("logic.LogicMain");
         System.out.println(aClass.hashCode() + " - " + aClass.getClassLoader().hashCode());
         aClass.getMethod("init", int.class).invoke(null, sid);
@@ -46,11 +46,10 @@ public class LogClassLoadTest {
                     }
                 }).toArray(URL[]::new);
         ExtendLoader extendLoader = new ExtendLoader(null, array);
-        extendLoader.setExtendPackages(new String[]{
-                        "org.slf4j",
-                        "ch.qos.logback.classic.Logger",
-                        "org.apache.logging.log4j"
-                }
+        extendLoader.addExtendPackages(
+                "org.slf4j",
+                "ch.qos.logback.classic.Logger",
+                "org.apache.logging.log4j"
         );
         return extendLoader;
     }

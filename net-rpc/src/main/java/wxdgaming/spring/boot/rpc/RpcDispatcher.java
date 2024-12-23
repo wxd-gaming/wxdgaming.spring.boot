@@ -160,9 +160,9 @@ public class RpcDispatcher implements InitPrint {
      * @version: 2024-08-22 19:41
      */
     public Mono<String> request(SocketSession session, long targetId, String path, String params) {
-        if (!checkRpcToken(session)) {
-            throw new RuntimeException("rpcToken 验证失败");
-        }
+        // if (!checkRpcToken(session)) {
+        //     throw new RuntimeException("rpcToken 验证失败");
+        // }
         long rpcId = atomicLong.incrementAndGet();
         RpcMessage.ReqRPC rpcMessage = new RpcMessage.ReqRPC()
                 .setRpcId(rpcId)
