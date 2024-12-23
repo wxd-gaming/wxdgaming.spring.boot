@@ -86,19 +86,12 @@ public class RpcDispatcher implements InitPrint {
                 });
     }
 
-    public Object rpcReqSocketAction(SocketSession session, String rpcToken, long rpcId, long targetId, String path, String remoteParams) throws Exception {
+    public Object rpcReqSocketAction(SocketSession session, long rpcId, long targetId, String path, String remoteParams) throws Exception {
         RpcActionMapping rpcActionMapping = getRpcHandlerMap().get(path);
         if (rpcActionMapping == null) {
             log.error("rpc 调用异常 rpcId={}, path={}, params={}", rpcId, path, remoteParams);
             response(session, rpcId, targetId, 9, "Not found path=【" + path + "】!");
             return null;
-        }
-        if (rpcActionMapping.getAnnotation().checkToken()) {
-            if (!getRPC_TOKEN().equalsIgnoreCase(rpcToken)) {
-                log.error("rpc 调用验签失败 rpcId={}, path={}, params={}", rpcId, path, remoteParams);
-                response(session, rpcId, targetId, 10, "token error path=【" + path + "】!");
-                return null;
-            }
         }
         Parameter[] parameters = rpcActionMapping.getMethod().getParameters();
         Object[] params = new Object[parameters.length];
@@ -138,6 +131,10 @@ public class RpcDispatcher implements InitPrint {
     }
 
 
+    public boolean checkRpcToken(SocketSession session) {
+        return Boolean.TRUE.equals(session.attribute("checkRpcToken"));
+    }
+
     /**
      * 请求 rpc 执行
      *
@@ -163,12 +160,14 @@ public class RpcDispatcher implements InitPrint {
      * @version: 2024-08-22 19:41
      */
     public Mono<String> request(SocketSession session, long targetId, String path, String params) {
+        if (!checkRpcToken(session)) {
+            throw new RuntimeException("rpcToken 验证失败");
+        }
         long rpcId = atomicLong.incrementAndGet();
-        RpcMessage.ReqRemote rpcMessage = new RpcMessage.ReqRemote()
+        RpcMessage.ReqRPC rpcMessage = new RpcMessage.ReqRPC()
                 .setRpcId(rpcId)
                 .setTargetId(targetId)
                 .setPath(path)
-                .setRpcToken(RPC_TOKEN)
                 .setParams(params);
         CompletableFuture<String> completableFuture = new CompletableFuture<>();
         rpcEvent.put(rpcId, completableFuture);
@@ -187,13 +186,12 @@ public class RpcDispatcher implements InitPrint {
      * @version: 2024-08-22 19:41
      */
     public void response(SocketSession session, long rpcId, long targetId, int code, String params) {
-        RpcMessage.ResRemote resRemote = new RpcMessage.ResRemote()
+        RpcMessage.ResRPC resRPC = new RpcMessage.ResRPC()
                 .setRpcId(rpcId)
                 .setTargetId(targetId)
-                .setRpcToken(RPC_TOKEN)
                 .setCode(code)
                 .setParams(params);
-        session.writeAndFlush(resRemote);
+        session.writeAndFlush(resRPC);
     }
 
 }

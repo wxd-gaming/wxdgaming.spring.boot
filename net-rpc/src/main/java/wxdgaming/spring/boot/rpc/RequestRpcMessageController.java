@@ -25,30 +25,28 @@ public class RequestRpcMessageController {
     public RequestRpcMessageController(RpcService rpcService) {this.rpcService = rpcService;}
 
     @MsgMapper
-    public void rpcReqSocketAction(SocketSession session, RpcMessage.ReqRemote reqRemote) throws Exception {
-        String rpcToken = reqRemote.getRpcToken();
+    public void rpcReqSocketAction(SocketSession session, RpcMessage.ReqRPC reqRemote) throws Exception {
         long rpcId = reqRemote.getRpcId();
         long targetId = reqRemote.getTargetId();
         String remoteParams = reqRemote.getParams();
         String path = reqRemote.getPath();
         try {
-            Object invoke = rpcService.getRpcDispatcher().rpcReqSocketAction(session, rpcToken, rpcId, targetId, path, remoteParams);
+            Object invoke = rpcService.getRpcDispatcher().rpcReqSocketAction(session, rpcId, targetId, path, remoteParams);
 
             if (rpcId < 1) {
                 return;
             }
-            RpcMessage.ResRemote res;
-            if (invoke instanceof RpcMessage.ResRemote resRemote) {
+            RpcMessage.ResRPC res;
+            if (invoke instanceof RpcMessage.ResRPC resRemote) {
                 res = resRemote;
             } else {
-                res = new RpcMessage.ResRemote();
+                res = new RpcMessage.ResRPC();
                 res.setCode(1);
                 if (invoke != null) {
                     res.setParams(String.valueOf(invoke));
                 }
             }
             res.setRpcId(rpcId);
-            res.setRpcToken(rpcService.getRpcDispatcher().getRPC_TOKEN());
             session.writeAndFlush(res);
 
         } catch (Throwable t) {

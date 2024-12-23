@@ -258,6 +258,10 @@ public class ProtoBuf2Pojo {
                     field = "";
                 }
                 break;
+                case "bytes": {
+                    field = "byte[]";
+                }
+                break;
                 default: {
                     if (string.startsWith("map<") && string.endsWith(">")) {
                         field = String.class.getSimpleName();
@@ -266,6 +270,7 @@ public class ProtoBuf2Pojo {
                                 .replace("bool", Boolean.class.getSimpleName())
                                 .replace("int32", Integer.class.getSimpleName())
                                 .replace("int64", Long.class.getSimpleName())
+                                .replace("bytes", byte[].class.getSimpleName())
                                 .replace("string", String.class.getSimpleName())
                         ;
                     } else {

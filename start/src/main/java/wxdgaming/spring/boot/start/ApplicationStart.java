@@ -83,11 +83,10 @@ public class ApplicationStart {
         RpcService rpcService = runBean.getBean(RpcService.class);
         RpcDispatcher rpcDispatcher = runBean.getBean(RpcDispatcher.class);
 
-        RpcMessage.ReqRemote rpcMessage = new RpcMessage.ReqRemote();
+        RpcMessage.ReqRPC rpcMessage = new RpcMessage.ReqRPC();
         rpcMessage
                 .setRpcId(1)
                 .setPath("rpcTest")
-                .setRpcToken(rpcDispatcher.getRPC_TOKEN())
                 .setParams(new JSONObject().fluentPut("type", 1).toString())
         ;
 

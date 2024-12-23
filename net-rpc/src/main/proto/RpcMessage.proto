@@ -4,20 +4,44 @@ syntax = "proto3";
 //导出包名
 option java_package = "wxdgaming.spring.boot.rpc.pojo";
 
+//创建连接后验证token
+message ReqRPCCheckToken {
+    string token                   = 1;
+}
+
+//创建连接后验证token
+message ResRPCCheckToken {
+    string token                   = 1;
+}
+
 //执行同步等待消息
-message ReqRemote {
+message ReqRPC {
     int64 rpcId                     = 1;
     int64 targetId                  = 2;//目标id
     string path                     = 3;//执行的命令
     string params                   = 4;//用JsonObject来解析
-    string rpcToken                 = 5;//用于验证的消息
 }
 
 //执行同步等待消息
-message ResRemote {
+message ResRPC {
     int64 rpcId                     = 1;
     int64 targetId                  = 2;//目标id
-    string rpcToken                 = 3;//用于验证的消息
     int32 code                      = 4;//code==1 params 是正常参数，如果非1是错误码
     string params                   = 5;//用JsonObject来解析
+}
+
+//转发消息
+message ReqBroker {
+    int64 uId                       = 1;
+    repeated int64 targetId         = 2;//目标id
+    int32 msgId                     = 3;//消息id
+    bytes msgData                   = 4;//消息报文
+}
+
+//转发消息 回执
+message ResBroker {
+    int64 uId                       = 1;
+    repeated int64 targetId         = 2;//目标id
+    int32 msgId                     = 3;//消息id
+    bytes msgData                   = 4;//消息报文
 }

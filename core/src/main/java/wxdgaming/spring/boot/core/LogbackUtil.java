@@ -28,17 +28,19 @@ public class LogbackUtil {
     }
 
     public static void resetLogback(ClassLoader classLoader, String userDir) throws JoranException {
+
+        if (userDir != null && !userDir.isBlank() && !userDir.isEmpty()) {
+            if (!userDir.endsWith("/")) {
+                userDir += "/";
+            }
+        }
+
         System.setProperty("LOG_PATH", "");
         // 加载logback.xml配置文件
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
         lc.reset();
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(lc);
-        if (userDir != null && !userDir.isBlank() && !userDir.isEmpty()) {
-            if (!userDir.endsWith("/")) {
-                userDir += "/";
-            }
-        }
         lc.putProperty("LOG_PATH", userDir);
         Record2<Path, byte[]> inputStream = FileUtil.findInputStream(classLoader, "logback.xml");
         if (inputStream == null) {

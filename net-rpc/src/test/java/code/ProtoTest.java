@@ -24,11 +24,10 @@ public class ProtoTest {
 
     @Test
     public void t1() {
-        RpcMessage.ReqRemote builder = new RpcMessage.ReqRemote();
+        RpcMessage.ReqRPC builder = new RpcMessage.ReqRPC();
         builder.setRpcId(1);
         builder.setPath("ss");
         builder.setParams("1");
-        builder.setRpcToken("1");
         System.out.println(builder.toString());
         byte[] encode1 = SerializerUtil.encode(builder);
         Tq tq = new Tq();
