@@ -1,16 +1,12 @@
-package wxdgaming.spring.boot.core.loader;
+package wxdgaming.spring.boot.loader;
 
 
 import lombok.Getter;
 import lombok.Setter;
-import org.slf4j.LoggerFactory;
-import wxdgaming.spring.boot.core.JDKVersion;
-import wxdgaming.spring.boot.core.Throw;
-import wxdgaming.spring.boot.core.io.FileReadUtil;
-import wxdgaming.spring.boot.core.io.FileUtil;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -42,15 +38,9 @@ public class ClassDirLoader extends URLClassLoader implements Serializable {
      */
     public static ClassDirLoader bootLib(ClassLoader parent, String... jarPaths) {
         ClassDirLoader classDirLoader = new ClassDirLoader(parent);
-        for (String jarPath : jarPaths) {
-            FileUtil.walkFiles(jarPath, ".jar")
-                    .forEach(lib -> {
-                        try {
-                            classDirLoader.addURL(lib.toUri().toURL());
-                        } catch (Exception e) {
-                            throw new RuntimeException("ClassLoader 附加 jar 包：" + jarPath, e);
-                        }
-                    });
+        List<URL> list = URLUtil.scanJarURLList(jarPaths);
+        for (URL url : list) {
+            classDirLoader.addURL(url);
         }
         return classDirLoader;
     }
@@ -146,21 +136,16 @@ public class ClassDirLoader extends URLClassLoader implements Serializable {
 
     public ClassDirLoader(ClassLoader parent, String... urls) {
         super(new URL[0], parent);
-        for (String url : urls) {
-            addURL(url);
-        }
+        addURL(urls);
         JDKVersion jdkVersion = JDKVersion.runTimeJDKVersion();
         System.out.println("class loader jdk_version：" + jdkVersion.getCurVersionString());
     }
 
     /** 可以添加资源文件夹 */
     public void addURL(String... urls) {
-        try {
-            for (String url : urls) {
-                this.addURL(new File(url).toURI().toURL());
-            }
-        } catch (Exception e) {
-            throw Throw.of(e);
+        URL[] toURLs = URLUtil.stringsToURLArray(urls);
+        for (URL toURL : toURLs) {
+            addURL(toURL);
         }
     }
 
@@ -174,15 +159,19 @@ public class ClassDirLoader extends URLClassLoader implements Serializable {
         try {
             File file = new File(url.toURI());
             int pathLen = file.getPath().length() + 1;
-            FileReadUtil.readBytesAll(file.getPath(), ".class", ".CLASS").forEach((p, bytes) -> {
-                String className = p.toString();
-                className = className.substring(pathLen, className.length() - 6);
-                // 将/替换成. 得到全路径类名
-                className = className.replace(File.separatorChar, '.').replace('/', '.');
-                classFileMap.put(className, bytes);
-            });
-        } catch (Exception e) {
-            throw Throw.of(e);
+            Files.walk(file.toPath(), 99)
+                    .filter(v -> v.toString().endsWith(".class") || v.toString().endsWith(".CLASS"))
+                    .forEach(path -> {
+                        String className = path.toString();
+                        className = className.substring(pathLen, className.length() - 6);
+                        // 将/替换成. 得到全路径类名
+                        className = className.replace(File.separatorChar, '.').replace('/', '.');
+                        byte[] bytes = URLUtil.readBytes(path);
+                        classFileMap.put(className, bytes);
+                    });
+
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -231,9 +220,10 @@ public class ClassDirLoader extends URLClassLoader implements Serializable {
                 this.findClass(className);
             } catch (Throwable e) {
                 if (errorContinue) {
-                    LoggerFactory.getLogger(ClassDirLoader.class).error("load class bytes error " + className, e);
+                    System.out.println("load class bytes error " + className);
+                    e.printStackTrace(System.out);
                 } else {
-                    throw Throw.of("load class bytes error " + className, e);
+                    throw new RuntimeException("load class bytes error " + className, e);
                 }
             }
         }
@@ -258,7 +248,7 @@ public class ClassDirLoader extends URLClassLoader implements Serializable {
             try {
                 return new ByteArrayInputStream(loadClassInfoMap.get(name).getLoadClassBytes());
             } catch (Exception e) {
-                e.printStackTrace();
+                e.printStackTrace(System.out);
             }
         }
         return super.getResourceAsStream(name);
@@ -272,7 +262,7 @@ public class ClassDirLoader extends URLClassLoader implements Serializable {
                         new ResourceURLStreamHandler(new ByteArrayInputStream(loadClassInfoMap.get(name).getLoadClassBytes()))
                 );
             } catch (Exception e) {
-                e.printStackTrace();
+                e.printStackTrace(System.out);
             }
         }
         return super.findResource(name);

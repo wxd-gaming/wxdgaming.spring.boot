@@ -7,8 +7,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
-import wxdgaming.spring.boot.core.loader.ClassDirLoader;
-import wxdgaming.spring.boot.core.loader.JavaCoderCompile;
+import wxdgaming.spring.boot.loader.ClassDirLoader;
+import wxdgaming.spring.boot.loader.JavaCoderCompile;
 
 import java.util.Collection;
 

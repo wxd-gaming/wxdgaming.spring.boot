@@ -36,7 +36,7 @@ public class LogbackExtendLoader extends ExtendLoader {
     }
 
     public LogbackExtendLoader(ClassLoader mainClassLoader, String... paths) {
-        super(mainClassLoader, URLUtil.javaClassPaths());
+        super(mainClassLoader, URLUtil.javaClassPathArray());
         addURLs(paths);
         addExtendPackages(
                 this.getClass().getName(),

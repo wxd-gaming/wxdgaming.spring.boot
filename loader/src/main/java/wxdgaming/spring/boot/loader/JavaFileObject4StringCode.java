@@ -1,7 +1,5 @@
-package wxdgaming.spring.boot.core.loader;
+package wxdgaming.spring.boot.loader;
 
-
-import wxdgaming.spring.boot.core.Throw;
 
 import javax.tools.SimpleJavaFileObject;
 import java.io.BufferedReader;
@@ -60,7 +58,7 @@ public class JavaFileObject4StringCode extends SimpleJavaFileObject {
                 throw new UnsupportedOperationException("并未找到的 类名");
             }
         } catch (Exception e) {
-            throw Throw.of(e);
+            throw new RuntimeException(e);
         }
     }
 

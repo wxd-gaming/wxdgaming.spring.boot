@@ -89,9 +89,7 @@ public class RpcDispatcher implements InitPrint {
     public Object rpcReqSocketAction(SocketSession session, long rpcId, long targetId, String path, String remoteParams) throws Exception {
         RpcActionMapping rpcActionMapping = getRpcHandlerMap().get(path);
         if (rpcActionMapping == null) {
-            log.error("rpc 调用异常 rpcId={}, path={}, params={}", rpcId, path, remoteParams);
-            response(session, rpcId, targetId, 9, "Not found path=【" + path + "】!");
-            return null;
+            return buildResponse(9, "Not found path=【" + path + "】!");
         }
         Parameter[] parameters = rpcActionMapping.getMethod().getParameters();
         Object[] params = new Object[parameters.length];
@@ -186,12 +184,24 @@ public class RpcDispatcher implements InitPrint {
      * @version: 2024-08-22 19:41
      */
     public void response(SocketSession session, long rpcId, long targetId, int code, String params) {
-        RpcMessage.ResRPC resRPC = new RpcMessage.ResRPC()
+        RpcMessage.ResRPC resRPC = buildResponse(code, params)
                 .setRpcId(rpcId)
-                .setTargetId(targetId)
+                .setTargetId(targetId);
+        session.writeAndFlush(resRPC);
+    }
+
+    /**
+     * 回应 rpc 执行结果
+     *
+     * @param code   执行状态
+     * @param params 参数
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2024-08-22 19:41
+     */
+    public RpcMessage.ResRPC buildResponse(int code, String params) {
+        return new RpcMessage.ResRPC()
                 .setCode(code)
                 .setParams(params);
-        session.writeAndFlush(resRPC);
     }
 
 }

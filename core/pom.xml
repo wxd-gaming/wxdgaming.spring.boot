@@ -17,7 +17,11 @@
             <groupId>org.openjdk.jol</groupId>
             <artifactId>jol-core</artifactId>
         </dependency>
-        <!--创建代理对象-->
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>wxdgaming.spring.boot.loader</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

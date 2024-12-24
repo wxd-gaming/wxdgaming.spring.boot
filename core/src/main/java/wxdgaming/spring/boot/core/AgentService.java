@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.core.io.FileReadUtil;
 import wxdgaming.spring.boot.core.io.FileUtil;
 import wxdgaming.spring.boot.core.io.FileWriteUtil;
-import wxdgaming.spring.boot.core.loader.ClassDirLoader;
+import wxdgaming.spring.boot.loader.ClassDirLoader;
 
 import java.io.File;
 import java.io.IOException;

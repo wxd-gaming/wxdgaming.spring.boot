@@ -1,16 +1,14 @@
-package wxdgaming.spring.boot.core.loader;
+package wxdgaming.spring.boot.loader;
 
-import wxdgaming.spring.boot.core.JDKVersion;
-import wxdgaming.spring.boot.core.LogbackUtil;
-import wxdgaming.spring.boot.core.io.FileUtil;
-import wxdgaming.spring.boot.core.io.FileWriteUtil;
+import lombok.experimental.Accessors;
 
 import javax.tools.*;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * java 文件编译
@@ -18,6 +16,7 @@ import java.util.stream.Collectors;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2020-12-30 20:33
  **/
+@Accessors(chain = true)
 public class JavaCoderCompile {
 
     /*获取编译器实例*/
@@ -74,9 +73,10 @@ public class JavaCoderCompile {
      * @param sourceDir 需要编译的文件路径
      */
     public JavaCoderCompile compilerJava(String sourceDir) throws Exception {
-        final Collection<File> sourceFileList = FileUtil.walkFiles(sourceDir, ".java")
+        final Collection<File> sourceFileList = Files.walk(Paths.get(sourceDir), 99)
+                .filter(v -> v.toString().endsWith(".java"))
                 .map(Path::toFile)
-                .collect(Collectors.toList());
+                .toList();
         compilerJava(sourceDir, sourceFileList);
         return this;
     }
@@ -89,7 +89,8 @@ public class JavaCoderCompile {
      * @return
      */
     public JavaCoderCompile compilerJava(String sourceDir, Collection<File> sourceFileList) throws Exception {
-        LogbackUtil.logger().info("目录：{}/{}, 文件数量：{}", System.getProperty("user.dir"), sourceDir, sourceFileList.size());
+        if (URLUtil.printLogger)
+            System.out.println(String.format("compiler 目录：%s/%s, 文件数量：%s", System.getProperty("user.dir"), sourceDir, sourceFileList.size()));
         if (!sourceFileList.isEmpty()) {
             final Iterable<? extends JavaFileObject> compilerFiles = javaFileManager().getSuperFileManager().getJavaFileObjectsFromFiles(sourceFileList);
             this.compilerJava(sourceDir, compilerFiles);
@@ -103,12 +104,13 @@ public class JavaCoderCompile {
      */
     public JavaCoderCompile compilerJava(String sourceDir, Iterable<? extends JavaFileObject> compilerFiles) throws Exception {
         JDKVersion jdkVersion = JDKVersion.runTimeJDKVersion();
-        LogbackUtil.logger().info(
-                "目录：{}/{}, compiler java file jdk_version：{}",
-                System.getProperty("user.dir"),
-                sourceDir,
-                jdkVersion.getCurVersionString()
-        );
+        if (URLUtil.printLogger)
+            System.out.println(String.format(
+                    "目录：%s/%s, compiler java file jdk_version：%s",
+                    System.getProperty("user.dir"),
+                    sourceDir,
+                    jdkVersion.getCurVersionString())
+            );
         /**
          * 编译选项，在编译java文件时，
          * <p>
@@ -179,12 +181,12 @@ public class JavaCoderCompile {
      */
     public JavaCoderCompile outPutFile(String outPath, boolean forceClear) {
         if (forceClear) {
-            FileUtil.del(outPath);
+            URLUtil.deleteFile(outPath);
         }
         final Map<String, byte[]> stringMap = toBytesMap();
-        LogbackUtil.logger().info("输出 class文件 目录：{} 数量：{}", outPath, stringMap.size());
-        FileWriteUtil.writeClassFile(outPath, stringMap);
-        LogbackUtil.logger().info("输出 class文件 目录：{} 数量：{}", outPath, stringMap.size());
+        if (URLUtil.printLogger)
+            System.out.println(String.format("输出 class文件 目录：%s 数量：%s", outPath, stringMap.size()));
+        URLUtil.writeClassFile(outPath, stringMap);
         return this;
     }
 

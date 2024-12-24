@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.loader;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -15,6 +16,7 @@ import java.net.URLClassLoader;
  **/
 @Getter
 @Setter
+@Accessors(chain = true)
 public class BootClassLoader extends URLClassLoader {
 
     private ExtendLoader extendLoader;
@@ -28,7 +30,7 @@ public class BootClassLoader extends URLClassLoader {
     }
 
     public BootClassLoader(ClassLoader parent, String... paths) {
-        super(URLUtil.stringsToURLs(paths), parent);
+        super(URLUtil.stringsToURLArray(paths), parent);
     }
 
     public BootClassLoader(ClassLoader parent, URL... urls) {
@@ -36,7 +38,7 @@ public class BootClassLoader extends URLClassLoader {
     }
 
     public void addURLs(String... paths) {
-        URL[] urls = URLUtil.stringsToURLs(paths);
+        URL[] urls = URLUtil.stringsToURLArray(paths);
         for (int i = 0; i < urls.length; i++) {
             URL url = urls[i];
             addURL(url);
@@ -58,7 +60,6 @@ public class BootClassLoader extends URLClassLoader {
         if (extendLoader != null && extendLoader.isExtendPackage(name)) {
             return extendLoader.loadClass(name);
         }
-        // System.out.println("loadClass: " + name);
         return super.loadClass(name);
     }
 
@@ -72,6 +73,9 @@ public class BootClassLoader extends URLClassLoader {
     @Override protected Class<?> findClass(String name) throws ClassNotFoundException {
         if (extendLoader != null && extendLoader.isExtendPackage(name)) {
             return extendLoader.findClass(name);
+        }
+        if (URLUtil.printLogger) {
+            System.out.println("BootClassLoader findClass: " + name);
         }
         return super.findClass(name);
     }
@@ -95,7 +99,9 @@ public class BootClassLoader extends URLClassLoader {
         if (extendLoader != null && extendLoader.isExtendPackage(name)) {
             return extendLoader.findResource(name);
         }
-        System.out.println("BootClassLoader findResource: " + name);
+        if (URLUtil.printLogger) {
+            System.out.println("BootClassLoader findResource: " + name);
+        }
         return super.findResource(name);
     }
 }

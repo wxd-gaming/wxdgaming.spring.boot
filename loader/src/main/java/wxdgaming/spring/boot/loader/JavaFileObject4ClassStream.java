@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.core.loader;
+package wxdgaming.spring.boot.loader;
 
 import javax.tools.SimpleJavaFileObject;
 import java.io.ByteArrayOutputStream;
@@ -7,6 +7,8 @@ import java.io.OutputStream;
 import java.net.URI;
 
 /**
+ * java 文件编译
+ *
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2021-08-10 10:55
  **/

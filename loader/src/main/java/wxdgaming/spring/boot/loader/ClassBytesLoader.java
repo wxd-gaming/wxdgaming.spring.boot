@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.core.loader;
+package wxdgaming.spring.boot.loader;
 
 
 import javax.tools.JavaFileObject;

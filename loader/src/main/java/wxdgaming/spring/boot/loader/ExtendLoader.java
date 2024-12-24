@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.loader;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -17,13 +18,14 @@ import java.util.List;
  **/
 @Getter
 @Setter
+@Accessors(chain = true)
 public class ExtendLoader extends URLClassLoader {
 
-    private ClassLoader mainClassLoader;
-    private List<String> extendPackages = new ArrayList<>();
+    protected ClassLoader mainClassLoader;
+    protected List<String> extendPackages = new ArrayList<>();
 
     public ExtendLoader(ClassLoader mainClassLoader) {
-        super(URLUtil.javaClassPaths(), null);
+        super(URLUtil.javaClassPathArray(), null);
         this.mainClassLoader = mainClassLoader;
     }
 
@@ -40,7 +42,7 @@ public class ExtendLoader extends URLClassLoader {
     }
 
     public void addURLs(String... paths) {
-        URL[] urls = URLUtil.stringsToURLs(paths);
+        URL[] urls = URLUtil.stringsToURLArray(paths);
         for (int i = 0; i < urls.length; i++) {
             URL url = urls[i];
             addURL(url);
@@ -85,7 +87,9 @@ public class ExtendLoader extends URLClassLoader {
     }
 
     @Override protected Class<?> findClass(String name) throws ClassNotFoundException {
-        System.out.println("ExtendLoader findClass: " + name);
+        if (URLUtil.printLogger) {
+            System.out.println("ExtendLoader findClass: " + name);
+        }
         return super.findClass(name);
     }
 
@@ -98,7 +102,9 @@ public class ExtendLoader extends URLClassLoader {
     }
 
     @Override public URL findResource(String name) {
-        System.out.println("ExtendLoader findResource: " + name);
+        if (URLUtil.printLogger) {
+            System.out.println("ExtendLoader findResource: " + name);
+        }
         return super.findResource(name);
     }
 }

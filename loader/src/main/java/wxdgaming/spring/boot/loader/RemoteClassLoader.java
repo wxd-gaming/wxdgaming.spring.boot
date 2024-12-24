@@ -1,7 +1,6 @@
-package wxdgaming.spring.boot.core.loader;
+package wxdgaming.spring.boot.loader;
 
 import lombok.Getter;
-import wxdgaming.spring.boot.core.ReflectContext;
 
 import javax.tools.JavaFileObject;
 import java.io.InputStream;
@@ -25,20 +24,6 @@ import java.util.zip.ZipInputStream;
  **/
 @Getter
 public class RemoteClassLoader extends URLClassLoader {
-
-    public void t0(String[] args) {
-        RemoteClassLoader remoteClassLoader = RemoteClassLoader.build(
-                RemoteClassLoader.class.getClassLoader(),
-                "http://localhost/qj5/a.jar",
-                "http://localhost/qj5/b.jar"
-        );
-
-        ReflectContext.Builder
-                .of(remoteClassLoader, "gvm").build()
-                .classStream()
-                .forEach(c -> System.out.println("读取资源：" + c));
-
-    }
 
     public static RemoteClassLoader build(ClassLoader parent, String... urls) {
         try {
@@ -126,8 +111,7 @@ public class RemoteClassLoader extends URLClassLoader {
         if (classResources.containsKey(name)) {
             byte[] bytes = classResources.get(name);
             System.out.println(name + " - " + bytes.length);
-            Class<?> defineClass = super.defineClass(null, bytes, 0, bytes.length);
-            return defineClass;
+            return super.defineClass(null, bytes, 0, bytes.length);
         }
         return super.findClass(name);
     }

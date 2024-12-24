@@ -1,14 +1,22 @@
-package wxdgaming.spring.boot.core.loader;
+package wxdgaming.spring.boot.loader;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2021-08-06 17:10
  **/
+@Getter
+@Setter
+@Accessors(chain = true)
 public class ClassInfo implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     private Class<?> loadClass;
     private byte[] loadClassBytes;
@@ -21,23 +29,6 @@ public class ClassInfo implements Serializable {
         return loadClass.getName();
     }
 
-    public Class<?> getLoadClass() {
-        return loadClass;
-    }
-
-    public ClassInfo setLoadClass(Class<?> loadClass) {
-        this.loadClass = loadClass;
-        return this;
-    }
-
-    public byte[] getLoadClassBytes() {
-        return loadClassBytes;
-    }
-
-    public ClassInfo setLoadClassBytes(byte[] loadClassBytes) {
-        this.loadClassBytes = loadClassBytes;
-        return this;
-    }
 
     /**
      * 判断是否是继承关系

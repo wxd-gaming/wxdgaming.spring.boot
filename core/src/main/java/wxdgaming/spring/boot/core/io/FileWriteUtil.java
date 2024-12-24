@@ -118,23 +118,6 @@ public class FileWriteUtil implements Serializable {
     }
 
     /**
-     * 保存 class 文件
-     *
-     * @param outPath
-     * @param stringMap
-     */
-    public static void writeClassFile(String outPath, Map<String, byte[]> stringMap) {
-        final File file_dir = new File(outPath);
-        boolean mkdirs = file_dir.mkdirs();
-        for (Map.Entry<String, byte[]> stringEntry : stringMap.entrySet()) {
-            final String replace = stringEntry.getKey().replace(".", "/");
-            final File file = new File(outPath + "/" + replace + ".class");
-            writeBytes(file, stringEntry.getValue());
-            log.warn("output file：{}", FileUtil.getCanonicalPath(file));
-        }
-    }
-
-    /**
      * 拷贝当前文件
      *
      * @param file

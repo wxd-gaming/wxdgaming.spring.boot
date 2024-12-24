@@ -24,15 +24,23 @@ public class ResponseRpcMessageController {
 
     final RpcService rpcService;
 
-    public ResponseRpcMessageController(RpcService rpcService) {this.rpcService = rpcService;}
+    public ResponseRpcMessageController(RpcService rpcService) {
+        this.rpcService = rpcService;
+    }
 
     @MsgMapper
-    public void rpcResSocketAction(SocketSession session, RpcMessage.ResRPC resRemote) throws Exception {
-        long rpcId = resRemote.getRpcId();
-        long targetId = resRemote.getTargetId();
-        int code = resRemote.getCode();
-        String remoteParams = resRemote.getParams();
+    public void rpcResSocketAction(SocketSession session, RpcMessage.ResRPC resRPC) throws Exception {
+        long rpcId = resRPC.getRpcId();
+        long targetId = resRPC.getTargetId();
+        int code = resRPC.getCode();
+        String remoteParams = resRPC.getParams();
         CompletableFuture<String> completableFuture = rpcService.getRpcDispatcher().getRpcEvent().remove(rpcId);
+        if (completableFuture == null) {
+            if (printLogger) {
+                log.warn("rpc 调用异常 rpcId={}, targetId={}, code={}, msg={}", rpcId, targetId, code, remoteParams);
+            }
+            return;
+        }
         if (code != 1) {
             if (printLogger) {
                 log.error("rpc 调用异常 rpcId={}, targetId={}, code={}, msg={}", rpcId, targetId, code, remoteParams);

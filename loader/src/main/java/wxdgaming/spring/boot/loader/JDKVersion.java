@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.core;
+package wxdgaming.spring.boot.loader;
 
 /**
  * @author: wxd-gaming(無心道, 15388152619)

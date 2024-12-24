@@ -3,6 +3,7 @@ package wxdgaming.spring.boot.rpc;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import wxdgaming.spring.boot.net.MsgMapper;
 import wxdgaming.spring.boot.net.SocketSession;
@@ -20,9 +21,13 @@ import wxdgaming.spring.boot.rpc.pojo.RpcMessage;
 @Controller
 public class RequestRpcMessageController {
 
+    @Value("${socket.printLogger:false}")
+    boolean printLogger = false;
     final RpcService rpcService;
 
-    public RequestRpcMessageController(RpcService rpcService) {this.rpcService = rpcService;}
+    public RequestRpcMessageController(RpcService rpcService) {
+        this.rpcService = rpcService;
+    }
 
     @MsgMapper
     public void rpcReqSocketAction(SocketSession session, RpcMessage.ReqRPC reqRemote) throws Exception {
@@ -47,8 +52,11 @@ public class RequestRpcMessageController {
                 }
             }
             res.setRpcId(rpcId);
+            res.setTargetId(targetId);
             session.writeAndFlush(res);
-
+            if (printLogger) {
+                log.info("{}, rpcId={}, targetId={}, path={}, params={}, res={}", session, rpcId, targetId, path, remoteParams, res);
+            }
         } catch (Throwable t) {
             log.error("{}, rpcId={}, targetId={}, path={}, params={}", session, rpcId, targetId, path, remoteParams, t);
             rpcService.getRpcDispatcher().response(session, rpcId, targetId, 500, t.getMessage());
