@@ -53,11 +53,12 @@ public class JdbcContext {
         }
     }
 
-    public int nativeQuery(String query, Object... params) {
+    /** 执行语句 */
+    public int executeUpdate(String updateSql, Object... params) {
         EntityManager entityManager = context();
         entityManager.getTransaction().begin();
         try {
-            Query nativeQuery = entityManager.createNativeQuery(query);
+            Query nativeQuery = entityManager.createNativeQuery(updateSql);
             for (int i = 0; i < params.length; i++) {
                 nativeQuery.setParameter(i + 1, params[i]);
             }
@@ -90,18 +91,50 @@ public class JdbcContext {
 
     public <T extends EntityUID> void delete(Class<T> clazz, Object uid) {
         T t = find(clazz, uid);
-        EntityManager entityManager = context();
-        try {
-            entityManager.remove(t);
-        } finally {
-            releaseVirtual(entityManager);
-        }
+        delete(t);
     }
 
+    // public Integer delete0(Class<?> clazz, Object uid) {
+    //     EntityManager entityManager = context();
+    //     entityManager.getTransaction().begin();
+    //     try {
+    //         Query nativeQuery = entityManager.createNativeQuery("delete from " + clazz.getSimpleName() + " t where t.uid=?1", Integer.class);
+    //         nativeQuery.setParameter(1, uid);
+    //         Integer singleResult = nativeQuery.executeUpdate();
+    //         entityManager.getTransaction().commit();
+    //         return singleResult;
+    //     } catch (Exception e) {
+    //         // 如果发生异常，回滚事务
+    //         if (entityManager.getTransaction().isActive()) {
+    //             entityManager.getTransaction().rollback();
+    //         }
+    //         throw new RuntimeException(e);
+    //     } finally {
+    //         releaseVirtual(entityManager);
+    //     }
+    // }
+
+    /**
+     * 删除一条数据
+     *
+     * @param t   数据
+     * @param <T> 实体类
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2024-12-25 13:54
+     */
     public <T extends EntityUID> void delete(T t) {
         EntityManager entityManager = context();
+        entityManager.getTransaction().begin();
         try {
-            entityManager.remove(t);
+            T merge = entityManager.merge(t);
+            entityManager.remove(merge);
+            entityManager.getTransaction().commit();
+        } catch (Exception e) {
+            // 如果发生异常，回滚事务
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            throw new RuntimeException(e);
         } finally {
             releaseVirtual(entityManager);
         }
@@ -226,6 +259,29 @@ public class JdbcContext {
         try {
             for (T entity : entities) {
                 entityManager.merge(entity);
+            }
+            entityManager.getTransaction().commit();
+        } catch (Exception e) {
+            // 如果发生异常，回滚事务
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            throw new RuntimeException(e);
+        } finally {
+            releaseVirtual(entityManager);
+        }
+    }
+
+    public <T extends EntityUID> void batchDelete(List<T> entities) {
+        EntityManager entityManager = context();
+        entityManager.getTransaction().begin();
+        try {
+            for (T entity : entities) {
+                T merge = entityManager.merge(entity);
+                if (merge == null) {
+                    continue;
+                }
+                entityManager.remove(merge);
             }
             entityManager.getTransaction().commit();
         } catch (Exception e) {

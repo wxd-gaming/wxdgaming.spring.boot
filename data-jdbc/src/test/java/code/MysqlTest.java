@@ -41,7 +41,7 @@ public class MysqlTest {
     @Test
     public void clearTable() {
         long start = System.nanoTime();
-        int deleteFromMyTestEntity = jdbcContext.nativeQuery("delete from my_test_entity");
+        int deleteFromMyTestEntity = jdbcContext.executeUpdate("delete from my_test_entity");
         System.out.println(deleteFromMyTestEntity + ", " + (((System.nanoTime() - start) / 10000 / 100f) + " ms"));
     }
 

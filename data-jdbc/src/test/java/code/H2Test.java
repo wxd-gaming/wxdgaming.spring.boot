@@ -49,7 +49,7 @@ public class H2Test {
     @Test
     public void clearTable() {
         long start = System.nanoTime();
-        int deleteFromMyTestEntity = jdbcContext.nativeQuery("delete from MY_TEST_ENTITY");
+        int deleteFromMyTestEntity = jdbcContext.executeUpdate("delete from MY_TEST_ENTITY");
         System.out.println(deleteFromMyTestEntity + ", " + (((System.nanoTime() - start) / 10000 / 100f) + " ms"));
     }
 

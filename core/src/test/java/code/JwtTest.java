@@ -19,7 +19,7 @@ public class JwtTest {
 
     @Test
     public void generateJWT() {
-        String jwt = JwtUtils.createJwt()
+        String jwt = JwtUtils.createJwtBuilder()
                 .expiration(new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(6)))
                 .header().add("token", "3")
                 .and()

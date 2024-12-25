@@ -18,7 +18,7 @@ public class SpringReflect implements InitPrint, ApplicationContextAware {
 
     /** 上下文对象实例 */
     private ApplicationContext applicationContext;
-    SpringReflectContent springReflectContent;
+    private SpringReflectContent springReflectContent;
 
 
     @Override public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -46,8 +46,8 @@ public class SpringReflect implements InitPrint, ApplicationContextAware {
     /**
      * 通过class获取Bean.
      *
-     * @param clazz
-     * @param <T>
+     * @param clazz 获取的实例的类
+     * @param <T>   实例
      */
     public <T> T getBean(Class<T> clazz) {
         return applicationContext.getBean(clazz);
@@ -56,9 +56,9 @@ public class SpringReflect implements InitPrint, ApplicationContextAware {
     /**
      * 通过name,以及Clazz返回指定的Bean
      *
-     * @param name
-     * @param clazz
-     * @param <T>
+     * @param name  获取的实例的名称
+     * @param clazz 获取的实例的类
+     * @param <T>   实例
      */
     public <T> T getBean(String name, Class<T> clazz) {
         return applicationContext.getBean(name, clazz);
