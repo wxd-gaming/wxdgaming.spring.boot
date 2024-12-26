@@ -130,7 +130,7 @@ public class SocketService implements InitPrint, Closeable, ISession {
 
         this.bootstrapBuilder.getWorkerLoop().scheduleAtFixedRate(
                 new Event() {
-                    @Override public void onEvent() throws Throwable {
+                    @Override protected void onEvent() throws Throwable {
                         sessionGroup.forEach(SocketSession::flush);
                     }
                 },

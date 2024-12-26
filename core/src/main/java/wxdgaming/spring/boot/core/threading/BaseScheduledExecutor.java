@@ -1,5 +1,7 @@
 package wxdgaming.spring.boot.core.threading;
 
+import wxdgaming.spring.boot.core.InitPrint;
+
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -9,7 +11,7 @@ import java.util.concurrent.*;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-12 14:10
  **/
-public class BaseScheduledExecutor extends ScheduledThreadPoolExecutor implements Executor, ScheduledExecutorService {
+public class BaseScheduledExecutor extends ScheduledThreadPoolExecutor implements Executor, ScheduledExecutorService, InitPrint {
 
     public BaseScheduledExecutor(String prefix, int coreSize) {
         super(coreSize, new WxdThreadFactory(prefix));

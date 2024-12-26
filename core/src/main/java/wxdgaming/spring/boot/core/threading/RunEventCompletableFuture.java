@@ -26,7 +26,7 @@ class RunEventCompletableFuture extends Event {
 
     }
 
-    @Override public void onEvent() throws Throwable {
+    @Override protected void onEvent() throws Throwable {
         try {
             Object object = runnable.get();
             future.complete(object);

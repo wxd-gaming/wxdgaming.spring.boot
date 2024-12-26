@@ -25,7 +25,7 @@ class RunEvent extends Event {
         this.runnable = runnable;
     }
 
-    @Override public void onEvent() throws Throwable {
+    @Override protected void onEvent() throws Throwable {
         runnable.run();
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import wxdgaming.spring.boot.core.InitPrint;
 
 /**
  * 线程类
@@ -17,7 +18,7 @@ import org.springframework.context.annotation.Primary;
 @Setter
 @Configuration
 @ConfigurationProperties("server.executor")
-public class ExecutorBuilder {
+public class ExecutorBuilder implements InitPrint {
 
     /** 核心线程数量 */
     private int defaultCoreSize = 2;
@@ -26,27 +27,23 @@ public class ExecutorBuilder {
     /** 虚拟线程并发数量 */
     private int virtualCoreSize = 100;
 
-    @Getter static DefaultExecutor defaultExecutor;
-    @Getter static LogicExecutor logicExecutor;
-    @Getter static VirtualExecutor virtualExecutor;
-
     @Bean
     @Primary
     public DefaultExecutor defaultExecutor() {
-        return defaultExecutor = new DefaultExecutor(defaultCoreSize);
+        return new DefaultExecutor(defaultCoreSize);
     }
 
     /** 逻辑线程池 */
     @Bean
     @Primary
     public LogicExecutor logicExecutor() {
-        return logicExecutor = new LogicExecutor(logicCoreSize);
+        return new LogicExecutor(logicCoreSize);
     }
 
     /** 虚拟线程池 */
     @Bean
     @Primary
     public VirtualExecutor virtualExecutor() {
-        return virtualExecutor = new VirtualExecutor(virtualCoreSize);
+        return new VirtualExecutor(virtualCoreSize);
     }
 }

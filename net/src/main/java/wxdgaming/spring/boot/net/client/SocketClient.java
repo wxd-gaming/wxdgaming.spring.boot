@@ -65,7 +65,7 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
 
         this.executor.scheduleAtFixedRate(
                 new Event() {
-                    @Override public void onEvent() throws Throwable {
+                    @Override protected void onEvent() throws Throwable {
                         InnerMessage.ReqHeart reqHeart = new InnerMessage.ReqHeart().setMilli(MyClock.millis());
                         writeAndFlush(reqHeart);
                     }

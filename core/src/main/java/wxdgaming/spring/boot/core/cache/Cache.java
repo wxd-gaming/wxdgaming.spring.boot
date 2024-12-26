@@ -171,8 +171,7 @@ public class Cache<K, V> implements Closeable {
      * @param delay 缓存容器check间隔时间
      */
     protected Cache(long delay) {
-        DefaultExecutor defaultExecutor = ExecutorBuilder.getDefaultExecutor();
-        timerJob = defaultExecutor.scheduleWithFixedDelay(
+        timerJob = DefaultExecutor.getIns().scheduleWithFixedDelay(
                 () -> {
                     long now = MyClock.millis();
                     for (Map.Entry<Integer, ConcurrentHashMap<K, Tuple3<V, Long, Long>>> next : kv.entrySet()) {

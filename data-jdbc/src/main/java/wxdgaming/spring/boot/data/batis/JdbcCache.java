@@ -72,4 +72,14 @@ public class JdbcCache<ID, V extends EntityUID<ID>> {
         return cache.getIfPresent(ID);
     }
 
+    public void put(ID key, V value) {
+        jdbcContext.save(value);
+        cache.put(key, value);
+    }
+
+    /** 强制缓存过期 */
+    public void invalidate(ID key) {
+        cache.invalidate(key);
+    }
+
 }

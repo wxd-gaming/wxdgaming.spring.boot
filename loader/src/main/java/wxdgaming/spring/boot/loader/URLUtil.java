@@ -153,7 +153,9 @@ public class URLUtil {
 
     protected static void deleteFile(String path) {
         try {
-            Files.walkFileTree(Paths.get(path), new SimpleFileVisitor<Path>() {
+            Path start = Paths.get(path);
+            if (Files.notExists(start)) return;
+            Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Files.delete(file);

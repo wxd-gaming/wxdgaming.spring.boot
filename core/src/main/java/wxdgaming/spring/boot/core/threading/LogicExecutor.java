@@ -12,7 +12,7 @@ public class LogicExecutor extends BaseScheduledExecutor {
 
     @Getter private static LogicExecutor ins = null;
 
-    public LogicExecutor(int coreSize) {
+    protected LogicExecutor(int coreSize) {
         super("logic", coreSize);
         ins = this;
     }

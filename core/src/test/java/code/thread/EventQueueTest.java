@@ -4,7 +4,7 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import wxdgaming.spring.boot.core.threading.BaseExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
-import wxdgaming.spring.boot.core.threading.QueueEvent;
+import wxdgaming.spring.boot.core.threading.EventQueue;
 import wxdgaming.spring.boot.core.threading.ThreadContext;
 
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-12 16:21
  **/
-public class QueueEventTest {
+public class EventQueueTest {
 
     @Test
     public void t0() throws IOException {
@@ -30,7 +30,7 @@ public class QueueEventTest {
             final int index = i + 1;
             ThreadContext.putContent("1", index);
             test.execute(new Event() {
-                @Override public void onEvent() throws Throwable {
+                @Override protected void onEvent() throws Throwable {
                     Thread.sleep(7000);
                     System.out.println(Thread.currentThread().getName()
                             + " - " + index
@@ -51,13 +51,13 @@ public class QueueEventTest {
 
     @Test
     public void t1() throws IOException {
-        QueueEvent queueEvent = new QueueEvent("测试队列", "test");
+        EventQueue eventQueue = new EventQueue("测试队列", "test");
         long start = System.currentTimeMillis();
         for (int i = 0; i < 10; i++) {
             final int index = i + 1;
             ThreadContext.putContent("1", index);
-            queueEvent.execute(new Event() {
-                @Override public void onEvent() throws Throwable {
+            eventQueue.execute(new Event() {
+                @Override protected void onEvent() throws Throwable {
                     Thread.sleep(9000);
                     System.out.println(Thread.currentThread().getName()
                             + " - " + index

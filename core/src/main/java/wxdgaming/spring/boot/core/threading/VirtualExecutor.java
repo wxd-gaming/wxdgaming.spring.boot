@@ -28,7 +28,7 @@ public class VirtualExecutor extends LockBase implements Executor {
     private final BlockingQueue<VirtualEvent> runnableBlockingQueue;
     Thread.Builder.OfVirtual virtual;
 
-    public VirtualExecutor(int coreSize) {
+    protected VirtualExecutor(int coreSize) {
         this.coreSize = coreSize;
         this.runnableBlockingQueue = new ArrayBlockingQueue<>(30000);
         virtual = Thread.ofVirtual().name("virtual-", 1);
@@ -70,7 +70,7 @@ public class VirtualExecutor extends LockBase implements Executor {
             this.command = command;
         }
 
-        @Override public void onEvent() throws Throwable {
+        @Override protected void onEvent() throws Throwable {
             try {
                 command.run();
             } finally {

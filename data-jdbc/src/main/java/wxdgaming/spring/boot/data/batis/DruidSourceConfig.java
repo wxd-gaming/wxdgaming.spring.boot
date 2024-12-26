@@ -107,6 +107,10 @@ public class DruidSourceConfig extends ObjectBase {
     }
 
     public EntityManager entityManagerFactory(DataSource dataSource, Map<String, Object> jpaConfig) {
+        return entityManagerFactory(Thread.currentThread().getContextClassLoader(), dataSource, jpaConfig);
+    }
+
+    public EntityManager entityManagerFactory(ClassLoader beanClassLoader, DataSource dataSource, Map<String, Object> jpaConfig) {
         LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
         entityManagerFactoryBean.setDataSource(dataSource);
 
@@ -133,7 +137,7 @@ public class DruidSourceConfig extends ObjectBase {
         if (jpaConfig != null) {
             entityManagerFactoryBean.getJpaPropertyMap().putAll(jpaConfig);
         }
-
+        entityManagerFactoryBean.setBeanClassLoader(beanClassLoader);
         entityManagerFactoryBean.afterPropertiesSet(); // 初始化 EntityManagerFactory
 
         JpaTransactionManager transactionManager = new JpaTransactionManager();

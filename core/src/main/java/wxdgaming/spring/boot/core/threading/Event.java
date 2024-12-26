@@ -1,7 +1,6 @@
 package wxdgaming.spring.boot.core.threading;
 
 import wxdgaming.spring.boot.core.GlobalUtil;
-import wxdgaming.spring.boot.core.Throw;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 
 /**
@@ -63,6 +62,6 @@ public abstract class Event implements Runnable {
     }
 
     /** 事件执行器 */
-    public abstract void onEvent() throws Throwable;
+    protected abstract void onEvent() throws Throwable;
 
 }

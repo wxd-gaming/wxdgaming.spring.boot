@@ -81,7 +81,7 @@ public class ApplicationStart {
         secondRedisTemplate.opsForHash().putAll("secondRedisTemplate", putAll);
         log.info("redis 耗时：{} ms", (System.nanoTime() - l) / 10000 / 100f);
         RpcService rpcService = runBean.getBean(RpcService.class);
-        RpcDispatcher rpcDispatcher = runBean.getBean(RpcDispatcher.class);
+        RpcDispatcher rpcDispatcher = rpcService.getRpcDispatcher();
 
         RpcMessage.ReqRPC rpcMessage = new RpcMessage.ReqRPC();
         rpcMessage

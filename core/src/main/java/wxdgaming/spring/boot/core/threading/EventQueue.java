@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * @version: 2024-08-12 15:04
  **/
 @Getter
-public class QueueEvent extends Event implements Executor {
+public class EventQueue extends Event implements Executor {
 
     private final String queueName;
     private final ScheduledExecutorService scheduledExecutorService;
@@ -28,7 +28,7 @@ public class QueueEvent extends Event implements Executor {
      *
      * @param threadPrefix 线程名称
      */
-    public QueueEvent(String queueName, String threadPrefix) {
+    public EventQueue(String queueName, String threadPrefix) {
         this(queueName, new BaseScheduledExecutor(threadPrefix, 1), 3000);
     }
 
@@ -38,7 +38,7 @@ public class QueueEvent extends Event implements Executor {
      * @param threadPrefix 线程名称
      * @param queueMaxSize 队列最大长度
      */
-    public QueueEvent(String queueName, String threadPrefix, int queueMaxSize) {
+    public EventQueue(String queueName, String threadPrefix, int queueMaxSize) {
         this(queueName, new BaseScheduledExecutor(threadPrefix, 1), queueMaxSize);
     }
 
@@ -48,7 +48,7 @@ public class QueueEvent extends Event implements Executor {
      * @param queueName                队列名称
      * @param scheduledExecutorService 执行器
      */
-    public QueueEvent(String queueName, ScheduledExecutorService scheduledExecutorService) {
+    public EventQueue(String queueName, ScheduledExecutorService scheduledExecutorService) {
         this(queueName, scheduledExecutorService, 3000);
     }
 
@@ -59,7 +59,7 @@ public class QueueEvent extends Event implements Executor {
      * @param scheduledExecutorService 执行器
      * @param queueMaxSize             队列最大长度
      */
-    public QueueEvent(String queueName, ScheduledExecutorService scheduledExecutorService, int queueMaxSize) {
+    public EventQueue(String queueName, ScheduledExecutorService scheduledExecutorService, int queueMaxSize) {
         this.queueName = queueName;
         this.scheduledExecutorService = scheduledExecutorService;
         this.runnableBlockingQueue = new ArrayBlockingQueue<>(queueMaxSize);
@@ -67,7 +67,7 @@ public class QueueEvent extends Event implements Executor {
 
     Event curPoll = null;
 
-    @Override public void onEvent() throws Throwable {
+    @Override protected void onEvent() throws Throwable {
         try {
             curPoll = runnableBlockingQueue.poll();
             if (curPoll != null) {
@@ -133,8 +133,8 @@ public class QueueEvent extends Event implements Executor {
     Event createScheduledEvent(Runnable runnable) {
         Event event = RunEvent.of(6, runnable);
         return new Event(5) {
-            @Override public void onEvent() throws Throwable {
-                QueueEvent.this.execute(event);
+            @Override protected void onEvent() throws Throwable {
+                EventQueue.this.execute(event);
             }
         };
     }
