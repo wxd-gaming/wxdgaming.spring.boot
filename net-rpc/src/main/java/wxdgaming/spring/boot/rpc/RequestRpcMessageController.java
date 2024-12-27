@@ -38,7 +38,7 @@ public class RequestRpcMessageController {
         try {
             Object invoke = rpcService.getRpcDispatcher().rpcReqSocketAction(session, rpcId, targetId, path, remoteParams);
 
-            if (rpcId < 1) {
+            if (rpcId < 1 || invoke == RpcService.IGNORE) {
                 return;
             }
             RpcMessage.ResRPC res;

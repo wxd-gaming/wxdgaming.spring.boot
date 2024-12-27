@@ -28,6 +28,8 @@ import wxdgaming.spring.boot.net.server.SocketService;
 @Service
 public class RpcService implements InitPrint {
 
+    public static final Object IGNORE = new Object();
+
     RpcDispatcher rpcDispatcher;
 
     public RpcService(@Value("${socket.rpc-token:getg6jhkopw435dvmkmcvx5y63-40}")

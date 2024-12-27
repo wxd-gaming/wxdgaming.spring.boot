@@ -6,11 +6,11 @@ import lombok.experimental.Accessors;
 import org.slf4j.LoggerFactory;
 import wxdgaming.spring.boot.core.io.FileUtil;
 import wxdgaming.spring.boot.core.lang.Tuple2;
-import wxdgaming.spring.boot.loader.ClassDirLoader;
-import wxdgaming.spring.boot.loader.RemoteClassLoader;
 import wxdgaming.spring.boot.core.system.AnnUtil;
 import wxdgaming.spring.boot.core.system.FieldUtil;
 import wxdgaming.spring.boot.core.system.MethodUtil;
+import wxdgaming.spring.boot.loader.ClassDirLoader;
+import wxdgaming.spring.boot.loader.RemoteClassLoader;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -37,6 +37,14 @@ import java.util.stream.Stream;
  **/
 @Getter
 public class ReflectContext {
+
+    public static <T> T newInstance(Class<?> cls) {
+        try {
+            return (T) cls.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /** 判定 接口, 枚举, 注解, 抽象类 返回 false */
     public static boolean checked(Class<?> aClass) {

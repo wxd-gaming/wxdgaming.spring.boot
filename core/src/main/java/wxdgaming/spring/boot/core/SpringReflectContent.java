@@ -1,12 +1,14 @@
 package wxdgaming.spring.boot.core;
 
+import com.alibaba.fastjson.util.TypeUtils;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
-import wxdgaming.spring.boot.core.ann.ReLoad;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import wxdgaming.spring.boot.core.ann.AppStart;
+import wxdgaming.spring.boot.core.ann.ReLoad;
 import wxdgaming.spring.boot.core.lang.Tuple2;
 import wxdgaming.spring.boot.core.system.AnnUtil;
 import wxdgaming.spring.boot.core.system.FieldUtil;
@@ -121,7 +123,16 @@ public class SpringReflectContent {
                 }
                 Value value = parameter.getAnnotation(Value.class);
                 if (value != null) {
-                    params[i] = applicationContext.getEnvironment().getProperty(value.value());
+                    String valueKey = value.value();
+
+                    Object o;
+                    if (valueKey.startsWith("${")) {
+                        String v2 = applicationContext.getEnvironment().resolvePlaceholders(valueKey);
+                        o = TypeUtils.castToJavaBean(v2, clazz);
+                    } else {
+                        o = applicationContext.getEnvironment().getProperty(valueKey, clazz);
+                    }
+                    params[i] = o;
                     continue;
                 }
                 params[i] = applicationContext.getBean(clazz);

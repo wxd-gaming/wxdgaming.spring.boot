@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version: 2024-10-15 09:06
  **/
 @Slf4j
-@Service
 class GuardThread implements Runnable, InitPrint, Closeable {
 
     @Getter static final GuardThread ins = new GuardThread();
