@@ -65,14 +65,15 @@ public class SocketServerChooseHandler extends ByteToMessageDecoder {
     }
 
     public void websocketAdd(ChannelHandlerContext ctx) {
+        int maxContentLength = (int) BytesUnit.Mb.toBytes(64);
         // HttpServerCodec：将请求和应答消息解码为HTTP消息
         ctx.pipeline().addBefore("device-handler", "http-codec", new HttpServerCodec());
-        ctx.pipeline().addBefore("device-handler", "http-object-aggregator", new HttpObjectAggregator((int) BytesUnit.Mb.toBytes(64)));/*接受完整的http消息 64mb*/
+        ctx.pipeline().addBefore("device-handler", "http-object-aggregator", new HttpObjectAggregator(maxContentLength));/*接受完整的http消息 64mb*/
         // ChunkedWriteHandler：向客户端发送HTML5文件,文件过大会将内存撑爆
         ctx.pipeline().addBefore("device-handler", "http-chunked", new ChunkedWriteHandler());
-        ctx.pipeline().addBefore("device-handler", "WebSocketAggregator", new WebSocketFrameAggregator((int) BytesUnit.Mb.toBytes(64)));
+        ctx.pipeline().addBefore("device-handler", "WebSocketAggregator", new WebSocketFrameAggregator(maxContentLength));
         // 用于处理websocket, /ws为访问websocket时的uri
-        ctx.pipeline().addBefore("device-handler", "ProtocolHandler", new WebSocketServerProtocolHandler(serverConfig.getWebSocketPrefix(), null, false, 64 * 1024 * 1024));
+        ctx.pipeline().addBefore("device-handler", "ProtocolHandler", new WebSocketServerProtocolHandler(serverConfig.getWebSocketPrefix(), null, false, maxContentLength));
         ChannelUtil.session(ctx.channel()).setWebSocket(true);
     }
 
