@@ -2,7 +2,7 @@ package wxdgaming.spring.boot.net;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import wxdgaming.spring.boot.core.LogbackUtil;
+import ch.qos.logback.core.LogbackUtil;
 import wxdgaming.spring.boot.net.message.PojoBase;
 import wxdgaming.spring.boot.net.message.SerializerUtil;
 

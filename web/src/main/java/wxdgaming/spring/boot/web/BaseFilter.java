@@ -9,7 +9,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import wxdgaming.spring.boot.core.LogbackUtil;
+import ch.qos.logback.core.LogbackUtil;
 import wxdgaming.spring.boot.core.SpringUtil;
 import wxdgaming.spring.boot.web.service.ResponseService;
 

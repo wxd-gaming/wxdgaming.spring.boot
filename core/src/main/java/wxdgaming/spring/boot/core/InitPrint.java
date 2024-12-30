@@ -1,5 +1,6 @@
 package wxdgaming.spring.boot.core;
 
+import ch.qos.logback.core.LogbackUtil;
 import jakarta.annotation.PostConstruct;
 
 /**
