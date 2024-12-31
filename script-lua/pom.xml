@@ -40,15 +40,6 @@
             <artifactId>lua54-platform</artifactId>
             <classifier>natives-desktop</classifier>
         </dependency>
-        <dependency>
-            <groupId>party.iroiro.luajava</groupId>
-            <artifactId>luajit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>party.iroiro.luajava</groupId>
-            <artifactId>luajit-platform</artifactId>
-            <classifier>natives-desktop</classifier>
-        </dependency>
     </dependencies>
 
     <build>

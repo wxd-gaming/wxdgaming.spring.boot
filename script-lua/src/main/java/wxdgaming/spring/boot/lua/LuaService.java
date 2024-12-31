@@ -1,14 +1,17 @@
 package wxdgaming.spring.boot.lua;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import party.iroiro.luajava.Lua;
-import wxdgaming.spring.boot.core.threading.DefaultExecutor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Service;
+import wxdgaming.spring.boot.core.SpringReflect;
+import wxdgaming.spring.boot.core.ann.AppStart;
+import wxdgaming.spring.boot.lua.luac.spi.LuaSpi;
 
 import java.io.Closeable;
-import java.lang.reflect.Method;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * lua 服务
@@ -17,66 +20,58 @@ import java.util.concurrent.TimeUnit;
  * @version: 2024-10-21 16:11
  */
 @Slf4j
+@Getter
+@Service
 public class LuaService implements AutoCloseable, Closeable {
 
+    final ConcurrentHashMap<String, Object> globals = new ConcurrentHashMap<>();
     LuaRuntime luaRuntime;
 
-    public static LuaService of(LuacType luacType, boolean xpcall, String paths) {
-        LuaService luaService = new LuaService(luacType, xpcall, paths);
-        luaService.init();
-        return luaService;
-    }
-
-    LuacType luacType;
+    @Value("${lua.xpcall:true}")
     boolean xpcall;
+    @Value("${lua.paths:}")
     String paths;
 
-    private LuaService(LuacType luacType, boolean xpcall, String paths) {
-        this.luacType = luacType;
-        this.xpcall = xpcall;
-        this.paths = paths;
+    @Order(100)
+    @AppStart
+    public void init(SpringReflect springReflect) {
+        springReflect.content().withSuper(LuaSpi.class)
+                .forEach(luaFunction -> {
+                    globals.put(luaFunction.name(), luaFunction);
+                });
     }
 
-    public void init() {
 
-        LuaRuntime _luaRuntime = new LuaRuntime(luacType, "root", xpcall, new Path[]{Paths.get(paths)});
-        final LuaRuntime old = luaRuntime;
+    @AppStart
+    public void init() {
+        LuaRuntime _luaRuntime = new LuaRuntime(LuaType.LUA54, "root", xpcall, paths, globals);
+        LuaRuntime old = luaRuntime;
         luaRuntime = _luaRuntime;
 
         if (old != null) {
-            DefaultExecutor.getIns().schedule(old::close, 30_000, TimeUnit.MILLISECONDS);
+            new Thread(() -> {
+                try {
+                    Thread.sleep(30_000);
+                    old.close();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }).start();
         }
     }
 
-    public LuaRuntime getRuntime() {
-        return luaRuntime;
+    public void putGlobal(String key, Object value) {
+        globals.put(key, value);
     }
 
-    public void set(String key, LuaFunction value) {
-        luaRuntime.getGlobals().put(key, value);
+    public long memory() {
+        AtomicLong atomicLong = new AtomicLong();
+        luaRuntime.memory(atomicLong);
+        return atomicLong.get();
     }
 
-    public void set(String key, Object value) {
-        luaRuntime.getGlobals().put(key, value);
-    }
-
-    /** 把一个方法转化成函数传递给lua */
-    public void pushJavaFunction(Object bean, Method method) {
-        pushJavaFunction(bean, method.getName(), method);
-    }
-
-    /** 把一个方法转化成函数传递给lua */
-    public void pushJavaFunction(final Object bean, String key, Method method) {
-        LuaFunction jFunction = new LuaFunction() {
-            @Override public Object doAction(Lua L, Object[] args) {
-                try {
-                    return method.invoke(bean, args);
-                } catch (Throwable e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-        set(key, jFunction);
+    public long size() {
+        return luaRuntime.size();
     }
 
     @Override public void close() {

@@ -7,7 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import party.iroiro.luajava.value.LuaValue;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
-import wxdgaming.spring.boot.lua.LuaUtils;
+import wxdgaming.spring.boot.lua.luac.LuaUtils;
 import wxdgaming.spring.boot.web.service.ResponseService;
 
 /**

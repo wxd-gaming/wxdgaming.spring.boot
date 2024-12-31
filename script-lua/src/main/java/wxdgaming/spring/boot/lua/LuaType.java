@@ -1,6 +1,8 @@
 package wxdgaming.spring.boot.lua;
 
-public enum LuacType {
+public enum LuaType {
+
+    LUAJ,
     LUA54,
-    LUAJit,
+
 }

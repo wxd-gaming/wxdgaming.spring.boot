@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.lua;
+package wxdgaming.spring.boot.lua.luac;
 
 import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.value.ImmutableLuaValue;

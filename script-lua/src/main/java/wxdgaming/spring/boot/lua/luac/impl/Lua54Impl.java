@@ -1,33 +1,38 @@
-package wxdgaming.spring.boot.lua.impl;
+package wxdgaming.spring.boot.lua.luac.impl;
 
 import party.iroiro.luajava.AbstractLua;
 import party.iroiro.luajava.LuaException;
 import party.iroiro.luajava.cleaner.LuaReference;
-import party.iroiro.luajava.luajit.LuaJit;
+import party.iroiro.luajava.lua54.Lua54;
 import party.iroiro.luajava.value.LuaValue;
-import wxdgaming.spring.boot.lua.LuaLong;
+import wxdgaming.spring.boot.lua.luac.LuaLong;
 
 /**
- * 子类，重写 Lua54 pushArray to pushJavaArray
+ * lua54 重写 Lua54 pushArray to pushJavaArray
  *
  * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-08-28 20:29
+ * @version: 2024-10-21 16:16
  */
-public class LuaJitImpl extends LuaJit {
+public class Lua54Impl extends Lua54 {
 
     private final String name;
     private boolean closed = false;
 
-    public LuaJitImpl() throws LinkageError {
+    public Lua54Impl() throws LinkageError {
         this.name = Thread.currentThread().getName();
     }
 
-    @Override public LuaJitImpl newThread() {
-        throw new UnsupportedOperationException("不允许");
+    public Lua54Impl(long L, int id, AbstractLua main) {
+        super(L, id, main);
+        this.name = Thread.currentThread().getName();
     }
 
-    @Override protected LuaJitImpl newThread(long L, int id, AbstractLua mainThread) {
-        throw new UnsupportedOperationException("不允许");
+    @Override public Lua54Impl newThread() {
+        return (Lua54Impl) super.newThread();
+    }
+
+    @Override protected Lua54Impl newThread(long L, int id, AbstractLua mainThread) {
+        return new Lua54Impl(L, id, mainThread);
     }
 
     @Override public LuaValue get() {
@@ -57,7 +62,8 @@ public class LuaJitImpl extends LuaJit {
         super.checkError(code, runtime);
     }
 
-    @Override public void close() {
+    @Override public synchronized void close() {
+        if (closed) return;
         try {
             super.close();
         } catch (Throwable ignore) {}
@@ -65,6 +71,9 @@ public class LuaJitImpl extends LuaJit {
     }
 
     @Override public String toString() {
-        return "Luajit{" + "name='" + name + '\'' + ", closed=" + closed + '}';
+        return "Lua54{" +
+               "name='" + name + '\'' +
+               ", closed=" + closed +
+               '}';
     }
 }

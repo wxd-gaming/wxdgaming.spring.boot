@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.lua;
+package wxdgaming.spring.boot.lua.luac;
 
 import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.value.LuaTableValue;
@@ -16,7 +16,7 @@ public class LuaUtils {
 
     public static Object luaValue2Object(LuaValue luaValue) {
         if (luaValue.type() == Lua.LuaType.NUMBER) {
-            if(luaValue instanceof LuaLong) {
+            if (luaValue instanceof LuaLong) {
                 long int64 = luaValue.toInteger();
                 int int32 = (int) int64;
                 if (int64 == int32) {
@@ -35,6 +35,8 @@ public class LuaUtils {
             return map;
         } else if (luaValue.type() == Lua.LuaType.NONE || luaValue.type() == Lua.LuaType.NIL) {
             return null;
+        } else if (luaValue.type() == Lua.LuaType.FUNCTION) {
+            return "lua method";
         }
         return luaValue.toJavaObject();
     }

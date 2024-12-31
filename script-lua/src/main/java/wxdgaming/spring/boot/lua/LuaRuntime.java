@@ -2,22 +2,12 @@ package wxdgaming.spring.boot.lua;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import party.iroiro.luajava.Lua;
-import party.iroiro.luajava.value.LuaValue;
-import wxdgaming.spring.boot.core.io.FileUtil;
-import wxdgaming.spring.boot.core.lang.Record2;
+import wxdgaming.spring.boot.lua.luac.LuacContext;
 
 import java.io.Closeable;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 /**
  * lua 装载器
@@ -29,77 +19,31 @@ import java.util.stream.Collectors;
 @Getter
 public class LuaRuntime implements Closeable {
 
-    final LuacType luacType;
+    final LuaType luaType;
     final boolean xpcall;
     final String name;
-    /** 系统扩展 */
-    final List<Record2<Path, byte[]>> extendList;
-    final List<ImmutablePair<Path, byte[]>> pathList;
-    final ConcurrentHashMap<String, Object> globals = new ConcurrentHashMap<>();
-    volatile ConcurrentHashMap<Thread, LuaContext> contexts = new ConcurrentHashMap<>();
 
+    final LuaFileRequire luaFileRequire;
+    final LuaFileCache luaFileCache;
 
-    public LuaRuntime(LuacType luacType, String name, boolean xpcall, Path[] paths) {
-        this.luacType = luacType;
+    final Map<String, Object> globals;
+    volatile ILuaContext luajContext;
+    volatile ConcurrentHashMap<Thread, ILuaContext> contexts = new ConcurrentHashMap<>();
+
+    public LuaRuntime(LuaType luaType, String name, boolean xpcall, String dir, Map<String, Object> globals) {
+        this.luaType = luaType;
         this.xpcall = xpcall;
         this.name = name;
-
-        extendList = FileUtil.resourceStreams("lua-extend", new String[]{"lua", "LUA"}).toList();
-
-        this.pathList = Arrays.stream(paths)
-                .filter(Files::exists)
-                .flatMap(path -> {
-                    try {
-                        return Files.walk(path, 99).filter(Files::isRegularFile);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .sorted((o1, o2) -> o1.toString().compareToIgnoreCase(o2.toString()))
-                .map(path -> {
-                    try {
-                        byte[] bytes = Files.readAllBytes(path);
-                        return ImmutablePair.of(path, bytes);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toList());
+        this.globals = Map.copyOf(globals);
+        luaFileCache = new LuaFileCache(dir);
+        luaFileRequire = new LuaFileRequire(luaFileCache);
     }
 
-
-    /** 把一个方法转化成函数传递给lua */
-    public void pushJavaFunction(Object bean, Method method) {
-        pushJavaFunction(bean, method.getName(), method);
-    }
-
-    /** 把一个方法转化成函数传递给lua */
-    public void pushJavaFunction(final Object bean, String key, Method method) {
-        LuaFunction jFunction = new LuaFunction() {
-            @Override public Object doAction(Lua L, Object[] args) {
-                try {
-                    return method.invoke(bean, args);
-                } catch (Throwable e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-        set(key, jFunction);
-    }
-
-    public void set(String key, Object value) {
-        getGlobals().put(key, value);
-        contexts.values().forEach(c -> c.getL().set(key, value));
-    }
-
-    public LuaContext newContext() {
-        return new LuaContext(this);
-    }
-
-    public LuaContext context() {
-        LuaContext luaContext = contexts.get(Thread.currentThread());
+    public ILuaContext context() {
+        ILuaContext luaContext = contexts.get(Thread.currentThread());
         if (luaContext == null || luaContext.isClosed()) {
-            luaContext = newContext();
+            luaContext = new LuacContext(this);
+            luaContext.call(true, "luainit");
             contexts.put(Thread.currentThread(), luaContext);
         }
         return luaContext;
@@ -114,40 +58,35 @@ public class LuaRuntime implements Closeable {
      */
     public long memory() {
         AtomicLong memory = new AtomicLong();
-        contexts.values().forEach(context -> {
-            synchronized (context) {
-                LuaValue memory0 = context.findLuaValue("memory0");
-                Object pcall = context.pcall(memory0);
-                memory.addAndGet(((Number) pcall).longValue());
-            }
-        });
+        memory(memory);
         return memory.get();
     }
 
-    public Object call(String key, Object... args) {
-        LuaContext context = context();
-        LuaValue luaValue = context.findLuaValue(key);
-        if (luaValue == null) {
-            return null;
-        }
+    public void memory(AtomicLong memory) {
+        if (luajContext != null) memory0(memory, luajContext);
+        contexts.values().forEach(luacContext -> memory0(memory, luacContext));
+    }
+
+    void memory0(AtomicLong memory, ILuaContext context) {
         synchronized (context) {
-            if (xpcall) {
-                LuaValue dispatchLua = context.findLuaValue("dispatch");
-                if (dispatchLua == null) throw new RuntimeException("lua function dispatch not found");
-                Object[] args2 = new Object[args.length + 1];
-                System.arraycopy(args, 0, args2, 1, args.length);
-                args2[0] = key;
-                return context.pcall(dispatchLua, args2);
-            } else {
-                return context.pcall(luaValue, args);
-            }
+            context.memory(memory);
         }
+    }
+
+    public Object call(String key, Object... args) {
+        return context().call(xpcall, key, args);
+    }
+
+    public long size() {
+        int size = contexts.size();
+        if (luajContext != null) size++;
+        return size;
     }
 
     /** 关闭资源 */
     @Override public void close() {
         if (contexts == null) return;
-        contexts.values().forEach(LuaContext::close);
+        contexts.values().forEach(ILuaContext::close);
         contexts = null;
     }
 

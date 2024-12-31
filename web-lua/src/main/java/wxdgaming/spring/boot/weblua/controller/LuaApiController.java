@@ -58,7 +58,7 @@ public class LuaApiController implements InitPrint {
         Thread x = Thread.currentThread();
         System.out.println(x + " - " + x.isVirtual());
 
-        Object obj = luaService.getRuntime().call(servletPath, request, response, body);
+        Object obj = luaService.getLuaRuntime().call(servletPath, request, response, body);
 
     }
 
