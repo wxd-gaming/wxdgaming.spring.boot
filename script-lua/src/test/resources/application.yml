@@ -1,0 +1,56 @@
+server:
+  port: 18801   #端口号
+  tomcat:
+    initial-size: 64 #初始化内存
+    min-free-size: 64 #最小内存
+    max-size: 128     #最小内存
+    max-threads: 100
+    min-spare-threads: 10
+  #  undertow: #替代tomcat配置
+  #    threads:
+  #      io: 4
+  #      worker: 200 #任务线程池
+  #    buffer-size: 1024 #每个块的大小
+  #    direct-buffers: true #直接内存
+  executor:
+    defaultCoreSize: 2 #默认线程池
+    logicCoreSize: 10 #逻辑线程池
+    virtual-core-size: 200 # 启用虚拟线程 控制并发线程数量
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  profiles:
+    active: redis,mysql
+  web:
+    resources:
+      add-mappings: true
+      static-locations: file:public/,file:upload/,classpath:/public/
+      chain:
+        compressed: true    #开启压缩
+        enabled: true       #开启
+        cache: true         #开启缓存
+      cache:
+        period: 186400      # 缓存一天
+  mvc:
+    static-path-pattern: /**
+  thymeleaf:
+    cache: false                            # 是否开启缓存默认为true
+    prefix: classpath:/templates/           #设置thymeleaf路径默认为src/main/resources/templates
+    suffix: .html                           # 设置thymeleaf模板后缀
+    content-type: text/html
+    mode: LEGACYHTML5                       # 设置thymeleaf严格校验
+    encoding: UTF-8                         # 设置编码
+
+  servlet:
+    multipart: # 文件上传配置
+      max-file-size: 20MB
+      max-request-size: 100MB
+      enabled: true
+  task:
+    scheduling: # 定时任务线程池配置
+      pool:
+        size: 2
+  threads:
+    virtual:
+      enabled: true # 启用虚拟线程
