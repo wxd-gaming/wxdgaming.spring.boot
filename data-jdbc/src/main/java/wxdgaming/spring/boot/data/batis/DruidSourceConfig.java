@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.data.batis;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -106,11 +107,11 @@ public class DruidSourceConfig extends ObjectBase {
         return dataSource;
     }
 
-    public EntityManager entityManagerFactory(DataSource dataSource, Map<String, Object> jpaConfig) {
-        return entityManagerFactory(Thread.currentThread().getContextClassLoader(), dataSource, jpaConfig);
+    public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean(DataSource dataSource, Map<String, Object> jpaConfig) {
+        return localContainerEntityManagerFactoryBean(Thread.currentThread().getContextClassLoader(), dataSource, jpaConfig);
     }
 
-    public EntityManager entityManagerFactory(ClassLoader beanClassLoader, DataSource dataSource, Map<String, Object> jpaConfig) {
+    public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean(ClassLoader beanClassLoader, DataSource dataSource, Map<String, Object> jpaConfig) {
         LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
         entityManagerFactoryBean.setDataSource(dataSource);
 
@@ -139,13 +140,22 @@ public class DruidSourceConfig extends ObjectBase {
         }
         entityManagerFactoryBean.setBeanClassLoader(beanClassLoader);
         entityManagerFactoryBean.afterPropertiesSet(); // 初始化 EntityManagerFactory
+        return entityManagerFactoryBean;
+    }
 
+    public EntityManager entityManager(DataSource dataSource, Map<String, Object> jpaConfig) {
+        return entityManager(Thread.currentThread().getContextClassLoader(), dataSource, jpaConfig);
+    }
+
+    public EntityManager entityManager(ClassLoader beanClassLoader, DataSource dataSource, Map<String, Object> jpaConfig) {
+        LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean = localContainerEntityManagerFactoryBean(beanClassLoader, dataSource, jpaConfig);
+        return entityManager(localContainerEntityManagerFactoryBean.getObject());
+    }
+
+    public EntityManager entityManager(EntityManagerFactory entityManagerFactory) {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(entityManagerFactoryBean.getObject());
-
+        transactionManager.setEntityManagerFactory(entityManagerFactory);
         return transactionManager.getEntityManagerFactory().createEntityManager();
-
-        // return entityManagerFactoryBean.createNativeEntityManager(Map.of());
     }
 
 

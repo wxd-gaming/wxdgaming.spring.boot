@@ -33,7 +33,7 @@ public class MysqlTest {
         dataSourceConfig.createDatabase();
 
         DruidDataSource dataSource = dataSourceConfig.toDataSource();
-        EntityManager entityManager = dataSourceConfig.entityManagerFactory(dataSource, Map.of());
+        EntityManager entityManager = dataSourceConfig.entityManager(dataSource, Map.of());
 
         jdbcContext = new JdbcContext(dataSource, entityManager);
     }

@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import wxdgaming.spring.boot.core.CoreScan;
@@ -28,7 +27,7 @@ import wxdgaming.spring.boot.lua.bean.LuaActor;
 @ExtendWith(SpringExtension.class)
 @SpringBootApplication
 @SpringBootTest(classes = {CoreScan.class, DataRedisScan.class, LuaScan.class, LuaSpringReflect.class})
-public class LuaTest {
+public class SpringLuaTest {
 
     @Autowired LuaService luaService;
     @Autowired LuaSpringReflect luaReflect;

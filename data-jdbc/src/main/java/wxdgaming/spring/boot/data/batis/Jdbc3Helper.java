@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import wxdgaming.spring.boot.core.InitPrint;
 
 import java.util.Map;
@@ -24,23 +23,19 @@ import java.util.Map;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties("spring.db")
-@ConditionalOnProperty("spring.db.config.url")
-public class JdbcHelper implements InitPrint {
+@ConfigurationProperties("spring.db3")
+@ConditionalOnProperty("spring.db3.config.url")
+public class Jdbc3Helper implements InitPrint {
 
     DruidSourceConfig config;
+    DruidDataSource dataSource;
+    EntityManager entityManager;
 
-    @Bean
-    @Primary
-    public DruidDataSource datasource() {
+    @Bean("jdbcContext3")
+    public JdbcContext jdbcContext() {
         config.createDatabase();
-        return config.toDataSource();
-    }
-
-    @Bean
-    @Primary
-    public JdbcContext jdbcContext(DruidDataSource dataSource) {
-        EntityManager entityManager = config.entityManager(dataSource, Map.of());
+        dataSource = config.toDataSource();
+        entityManager = config.entityManager(dataSource, Map.of());
         return new JdbcContext(dataSource, entityManager);
     }
 

@@ -30,7 +30,7 @@ public class H2Test {
         dataSourceConfig.setDialect(org.hibernate.dialect.H2Dialect.class.getName());
 
         DruidDataSource dataSource = dataSourceConfig.toDataSource();
-        EntityManager entityManager = dataSourceConfig.entityManagerFactory(dataSource, Map.of());
+        EntityManager entityManager = dataSourceConfig.entityManager(dataSource, Map.of());
 
         jdbcContext = new JdbcContext(dataSource, entityManager);
     }
