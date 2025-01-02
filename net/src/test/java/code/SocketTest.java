@@ -10,6 +10,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import wxdgaming.spring.boot.core.CoreScan;
+import wxdgaming.spring.boot.core.function.Consumer2;
+import wxdgaming.spring.boot.core.function.Consumer3;
 import wxdgaming.spring.boot.core.threading.DefaultExecutor;
 import wxdgaming.spring.boot.net.*;
 import wxdgaming.spring.boot.net.client.ClientConfig;
@@ -44,26 +46,25 @@ public class SocketTest {
         bootstrapBuilder.setPrintLogger(true);
         bootstrapBuilder.init();
 
-        messageDispatcher = new ServerMessageDispatcher(new String[0]);
+        messageDispatcher = new ServerMessageDispatcher(true, new String[0]);
         messageDispatcher.registerMessage(InnerMessage.ReqHeart.class);
         messageDispatcher.registerMessage(InnerMessage.ResHeart.class);
 
         SocketServerBuilder socketServerBuilder = new SocketServerBuilder();
         socketServerBuilder.setConfig(new ServerConfig().setEnableWebSocket(true));
 
-        DoMessage webSocketFrame = new DoMessage() {
-
-            @Override public void notSpi(SocketSession socketSession, int messageId, byte[] messageBytes) {
-                {
-                    long startTime = System.nanoTime();
-                    for (int i = 0; i < 10; i++) {
-                        writeAndFlush(socketService.getSessionGroup(), "socket server writeAndFlush " + i);
-                    }
-                    log.info("writeAndFlush cost: {}", (System.nanoTime() - startTime) / 10000 / 100f);
+        Consumer3<SocketSession, Integer, byte[]> webSocketFrame = new Consumer3<SocketSession, Integer, byte[]>() {
+            @Override public void accept(SocketSession socketSession, Integer integer, byte[] bytes) {
+                long startTime = System.nanoTime();
+                for (int i = 0; i < 10; i++) {
+                    writeAndFlush(socketService.getSessionGroup(), "socket server writeAndFlush " + i);
                 }
+                log.info("writeAndFlush cost: {}", (System.nanoTime() - startTime) / 10000 / 100f);
             }
+        };
 
-            @Override public void actionString(SocketSession socketSession, String message) throws Exception {
+        Consumer2<SocketSession, String> webSocketText = new Consumer2<SocketSession, String>() {
+            @Override public void accept(SocketSession socketSession, String message) {
                 log.info("{}", message);
                 socketSession.write("socket server textWebSocketFrame");
             }
@@ -71,7 +72,8 @@ public class SocketTest {
 
         socketService = socketServerBuilder.socketService(bootstrapBuilder);
         socketService.init();
-        socketService.getServerMessageDecode().setDoMessage(webSocketFrame);
+        socketService.getServerMessageDecode().getDispatcher().setMsgBytesNotDispatcher(webSocketFrame);
+        socketService.getServerMessageDecode().getDispatcher().setStringDispatcher(webSocketText);
         socketService.start();
 
         SocketClientBuilder socketClientBuilder = new SocketClientBuilder();

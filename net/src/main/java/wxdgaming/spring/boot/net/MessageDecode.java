@@ -7,10 +7,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.AttributeKey;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import wxdgaming.spring.boot.net.message.PojoBase;
-import wxdgaming.spring.boot.net.message.SerializerUtil;
 
 /**
  * 消息解码，收到消息处理
@@ -26,7 +23,6 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
 
     protected final boolean autoRelease;
     protected final MessageDispatcher dispatcher;
-    @Setter protected DoMessage doMessage = new DoMessage() {};
 
     public MessageDecode(boolean autoRelease, MessageDispatcher dispatcher) {
         this.autoRelease = autoRelease;
@@ -87,7 +83,7 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
                     if (!session.checkReceiveMessage(request.length())) {
                         return;
                     }
-                    doMessage.actionString(session, request);
+                    dispatcher.getStringDispatcher().accept(session, request);
                 }
                 default -> log.warn("无法处理：{}", frame.getClass().getName());
             }
@@ -134,7 +130,7 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
                 if (!session.checkReceiveMessage(messageBytes.length)) {
                     return;
                 }
-                doMessage.action(dispatcher, session, messageId, messageBytes);
+                dispatcher.dispatch(session, messageId, messageBytes);
             } else {
                 /*重新设置读取进度*/
                 byteBuf.resetReaderIndex();

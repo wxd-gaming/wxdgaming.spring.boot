@@ -10,7 +10,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import wxdgaming.spring.boot.broker.pojo.inner.InnerMessage;
-import wxdgaming.spring.boot.net.*;
+import wxdgaming.spring.boot.net.BootstrapBuilder;
+import wxdgaming.spring.boot.net.MessageEncode;
+import wxdgaming.spring.boot.net.SessionGroup;
 import wxdgaming.spring.boot.net.server.ServerConfig;
 import wxdgaming.spring.boot.net.server.SocketService;
 
@@ -36,20 +38,17 @@ public class BrokerServerBuilder {
     public SocketService brokerService(BootstrapBuilder bootstrapBuilder, DataCenter dataCenter) throws Exception {
         SocketService socketService = SocketService.createSocketService(bootstrapBuilder, config);
         socketService.setSessionGroup(sessionGroup);
-        socketService.getServerMessageDecode().setDoMessage(new DoMessage() {
-            @Override public void actionString(SocketSession socketSession, String message) throws Exception {
-                super.actionString(socketSession, message);
-            }
+        // socketService.getServerMessageDecode().getDispatcher().setStringDispatcher((socketSession, message) -> {
+        //
+        // });
+        socketService.getServerMessageDecode().getDispatcher().setMsgBytesNotDispatcher((socketSession, messageId, messageBytes) -> {
+            Integer sid = socketSession.attribute("sid");
 
-            @Override public void notSpi(SocketSession socketSession, int messageId, byte[] messageBytes) {
-                Integer sid = socketSession.attribute("sid");
-
-                ServerMapping serverMapping = dataCenter.getSessions().get(InnerMessage.Stype.GAME, sid);
-                if (serverMapping != null && serverMapping.getSession() != null) {
-                    ByteBuf build = MessageEncode.build(messageId, messageBytes);
-                    /*转发消息*/
-                    serverMapping.getSession().writeAndFlush(build);
-                }
+            ServerMapping serverMapping = dataCenter.getSessions().get(InnerMessage.Stype.GAME, sid);
+            if (serverMapping != null && serverMapping.getSession() != null) {
+                ByteBuf build = MessageEncode.build(messageId, messageBytes);
+                /*转发消息*/
+                serverMapping.getSession().writeAndFlush(build);
             }
         });
         return socketService;

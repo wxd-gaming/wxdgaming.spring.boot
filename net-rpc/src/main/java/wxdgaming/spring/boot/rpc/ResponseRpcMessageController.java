@@ -49,7 +49,7 @@ public class ResponseRpcMessageController {
             return;
         }
         if (printLogger) {
-            log.info("rpc 调用完成 rpcId={}, targetId={}, param={}", rpcId, targetId, remoteParams);
+            log.debug("rpc completable rpcId={}, targetId={}, param={}", rpcId, targetId, remoteParams);
         }
         completableFuture.complete(remoteParams);
     }

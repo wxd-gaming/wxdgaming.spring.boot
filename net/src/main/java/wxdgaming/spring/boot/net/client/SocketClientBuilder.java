@@ -31,7 +31,7 @@ public class SocketClientBuilder {
     @Bean(name = "socketClient")
     public SocketClient socketClient(DefaultExecutor defaultExecutor, BootstrapBuilder bootstrapBuilder) {
 
-        ClientMessageDispatcher clientMessageDispatcher = new ClientMessageDispatcher(config.getScanPkgs());
+        ClientMessageDispatcher clientMessageDispatcher = new ClientMessageDispatcher(bootstrapBuilder.isPrintLogger(), config.getScanPkgs());
         ClientMessageDecode clientMessageDecode = new ClientMessageDecode(clientMessageDispatcher);
         ClientMessageEncode clientMessageEncode = new ClientMessageEncode(clientMessageDispatcher);
 

@@ -1,10 +1,18 @@
 package wxdgaming.spring.boot.net;
 
+import ch.qos.logback.core.LogbackUtil;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ReflectContext;
 import wxdgaming.spring.boot.core.SpringReflectContent;
+import wxdgaming.spring.boot.core.function.Consumer2;
+import wxdgaming.spring.boot.core.function.Consumer3;
+import wxdgaming.spring.boot.core.system.AnnUtil;
+import wxdgaming.spring.boot.core.threading.Event;
+import wxdgaming.spring.boot.core.threading.ExecutorWith;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.message.PojoBase;
 import wxdgaming.spring.boot.net.message.SerializerUtil;
@@ -25,9 +33,45 @@ public abstract class MessageDispatcher implements InitPrint {
     protected final ConcurrentHashMap<Integer, DoMessageMapping> mappings = new ConcurrentHashMap<>();
     protected final ConcurrentHashMap<String, Integer> messageName2Id = new ConcurrentHashMap<>();
 
+    private boolean printLogger = false;
     private final String[] packages;
+    @Setter private Consumer3<SocketSession, Integer, byte[]> msgBytesNotDispatcher = (session, msgId, messageBytes) -> {
+        if (printLogger) {
+            Logger logger = LogbackUtil.logger();
+            logger.debug(
+                    "收到消息：ctx={}, id={}, len={} (未知消息)",
+                    session.toString(),
+                    msgId,
+                    messageBytes.length
+            );
+        }
+    };
 
-    public MessageDispatcher(String[] packages) {
+    @Setter private Consumer3<SocketSession, Integer, PojoBase> msgNotDispatcher = (session, msgId, message) -> {
+        if (printLogger) {
+            Logger logger = LogbackUtil.logger();
+            logger.debug(
+                    "收到消息：ctx={}, id={}, mes={}",
+                    session.toString(),
+                    msgId,
+                    message.toString()
+            );
+        }
+    };
+
+    @Setter private Consumer2<SocketSession, String> stringDispatcher = (session, message) -> {
+        if (printLogger) {
+            Logger logger = LogbackUtil.logger();
+            logger.debug(
+                    "收到消息：ctx={}, mes={}",
+                    session.toString(),
+                    message
+            );
+        }
+    };
+
+    public MessageDispatcher(boolean printLogger, String[] packages) {
+        this.printLogger = printLogger;
         this.packages = packages;
     }
 
@@ -48,7 +92,9 @@ public abstract class MessageDispatcher implements InitPrint {
                 .forEach(t -> {
                     Class parameterType = t.getRight().getParameterTypes()[1];
                     if (PojoBase.class.isAssignableFrom(parameterType)) {
-                        DoMessageMapping messageMapping = new DoMessageMapping(t.getLeft(), t.getRight(), parameterType);
+                        MsgMapper msgMapper = AnnUtil.ann(t.getRight(), MsgMapper.class);
+                        ExecutorWith executorWith = AnnUtil.ann(t.getRight(), ExecutorWith.class);
+                        DoMessageMapping messageMapping = new DoMessageMapping(msgMapper, executorWith, t.getLeft(), t.getRight(), parameterType);
                         int msgId = registerMessage(parameterType);
                         mappings.put(msgId, messageMapping);
                         log.debug("扫描消息处理接口 {}#{} {}", t.getLeft().getClass().getName(), t.getRight().getName(), parameterType.getName());
@@ -82,30 +128,40 @@ public abstract class MessageDispatcher implements InitPrint {
         return StringsUtil.hashcode(pojoClass.getName());
     }
 
-    public boolean dispatch(SocketSession socketSession, int msgId, byte[] messageBytes) throws Exception {
+    public void dispatch(SocketSession socketSession, int msgId, byte[] messageBytes) throws Exception {
         DoMessageMapping doMessageMapping = getMappings().get(msgId);
         if (doMessageMapping != null) {
-            PojoBase message = (PojoBase) SerializerUtil.decode(messageBytes, doMessageMapping.getMessageType());
-            /* TODO 这里考虑如何线程规划 */
-            doMessageMapping.getMethod().invoke(doMessageMapping.getBean(), socketSession, message);
-            return true;
+            Event event = new Event() {
+                @Override protected void onEvent() throws Throwable {
+                    PojoBase message = (PojoBase) SerializerUtil.decode(messageBytes, doMessageMapping.messageType());
+                    /* TODO 这里考虑如何线程规划 */
+                    doMessageMapping.method().invoke(doMessageMapping.bean(), socketSession, message);
+                }
+            };
+            doMessageMapping.executor(event);
+        } else {
+            msgBytesNotDispatcher.accept(socketSession, msgId, messageBytes);
         }
-        return false;
     }
 
-    public boolean dispatch(SocketSession socketSession, PojoBase message) throws Exception {
+    public void dispatch(SocketSession socketSession, PojoBase message) throws Exception {
         int msgId = getMessage(message.getClass());
-        return dispatch(socketSession, msgId, message);
+        dispatch(socketSession, msgId, message);
     }
 
-    public boolean dispatch(SocketSession socketSession, int msgId, PojoBase message) throws Exception {
+    public void dispatch(SocketSession socketSession, int msgId, PojoBase message) throws Exception {
         DoMessageMapping doMessageMapping = getMappings().get(msgId);
         if (doMessageMapping != null) {
-            /* TODO 这里考虑如何线程规划 */
-            doMessageMapping.getMethod().invoke(doMessageMapping.getBean(), socketSession, message);
-            return true;
+            Event event = new Event() {
+                @Override protected void onEvent() throws Throwable {
+                    /* TODO 这里考虑如何线程规划 */
+                    doMessageMapping.method().invoke(doMessageMapping.bean(), socketSession, message);
+                }
+            };
+            doMessageMapping.executor(event);
+        } else {
+            msgNotDispatcher.accept(socketSession, msgId, message);
         }
-        return false;
     }
 
 }

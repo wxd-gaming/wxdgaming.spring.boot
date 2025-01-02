@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.SpringReflectContent;
-import wxdgaming.spring.boot.core.ann.ReLoad;
 import wxdgaming.spring.boot.core.ann.AppStart;
+import wxdgaming.spring.boot.core.ann.ReLoad;
 import wxdgaming.spring.boot.core.system.BytesUnit;
 import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.util.StringsUtil;
@@ -41,7 +41,7 @@ public class SocketService implements InitPrint, Closeable, ISession {
             config.setServiceClass(SocketService.class.getName());
         }
 
-        ServerMessageDispatcher messageDispatcher = new ServerMessageDispatcher(config.getScanPkgs());
+        ServerMessageDispatcher messageDispatcher = new ServerMessageDispatcher(bootstrapBuilder.isPrintLogger(), config.getScanPkgs());
         ServerMessageDecode serverMessageDecode = new ServerMessageDecode(messageDispatcher);
         ServerMessageEncode serverMessageEncode = new ServerMessageEncode(messageDispatcher);
 

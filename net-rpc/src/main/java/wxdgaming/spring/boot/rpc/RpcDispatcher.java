@@ -4,16 +4,14 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Mono;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.SpringReflectContent;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
-import wxdgaming.spring.boot.core.threading.BaseScheduledExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
-import wxdgaming.spring.boot.core.threading.ExecutorService;
+import wxdgaming.spring.boot.core.threading.ExecutorWith;
 import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.rpc.pojo.RpcMessage;
@@ -23,7 +21,6 @@ import java.lang.reflect.Type;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
@@ -78,16 +75,17 @@ public class RpcDispatcher implements InitPrint {
                         value = requestMapping.value()[0];
                     }
                     RPC annotation = t.getRight().getAnnotation(RPC.class);
+                    ExecutorWith executorWith = t.getRight().getAnnotation(ExecutorWith.class);
                     String mapping = annotation.value();
                     if (StringsUtil.emptyOrNull(mapping)) {
                         value += "/" + t.getRight().getName();
                     } else {
                         value += mapping;
                     }
-                    RpcActionMapping oldMapping = rpcHandlerMap.put(value, new RpcActionMapping(annotation, t.getLeft(), t.getRight()));
+                    RpcActionMapping oldMapping = rpcHandlerMap.put(value, new RpcActionMapping(annotation, executorWith, t.getLeft(), t.getRight()));
                     if (oldMapping != null) {
-                        if (!oldMapping.getBean().getClass().getName().endsWith(t.getLeft().getClass().getName())) {
-                            throw new RuntimeException("RPC 处理器重复：" + oldMapping.getBean().getClass().getName() + " - " + t.getLeft().getClass().getName());
+                        if (!oldMapping.bean().getClass().getName().endsWith(t.getLeft().getClass().getName())) {
+                            throw new RuntimeException("RPC 处理器重复：" + oldMapping.bean().getClass().getName() + " - " + t.getLeft().getClass().getName());
                         }
                     }
                     log.debug("rpc register path={}, {}#{}", value, t.getLeft().getClass().getName(), t.getRight().getName());
@@ -103,7 +101,7 @@ public class RpcDispatcher implements InitPrint {
 
         Event event = new Event() {
             @Override protected void onEvent() throws Throwable {
-                Parameter[] parameters = rpcActionMapping.getMethod().getParameters();
+                Parameter[] parameters = rpcActionMapping.method().getParameters();
                 Object[] params = new Object[parameters.length];
                 for (int i = 0; i < params.length; i++) {
                     Parameter parameter = parameters[i];
@@ -120,7 +118,7 @@ public class RpcDispatcher implements InitPrint {
                                     name = requestParam.value();
                                 }
                                 if (StringsUtil.emptyOrNull(name)) {
-                                    throw new RuntimeException(rpcActionMapping.getBean().getClass().getName() + "#" + rpcActionMapping.getMethod().getName() + ", 无法识别 " + (i + 1) + " 参数 RequestParam 指定 name " + clazz);
+                                    throw new RuntimeException(rpcActionMapping.bean().getClass().getName() + "#" + rpcActionMapping.method().getName() + ", 无法识别 " + (i + 1) + " 参数 RequestParam 指定 name " + clazz);
                                 }
                                 params[i] = FastJsonUtil.parse(remoteParams).getObject(name, clazz);
                                 continue;
@@ -130,14 +128,14 @@ public class RpcDispatcher implements InitPrint {
                             } else if (clazz.isAssignableFrom(JSONObject.class)) {
                                 params[i] = FastJsonUtil.parse(remoteParams);
                             } else {
-                                throw new RuntimeException(rpcActionMapping.getBean().getClass().getName() + "#" + rpcActionMapping.getMethod().getName() + ", 无法识别 " + (i + 1) + " 参数 " + clazz);
+                                throw new RuntimeException(rpcActionMapping.bean().getClass().getName() + "#" + rpcActionMapping.method().getName() + ", 无法识别 " + (i + 1) + " 参数 " + clazz);
                             }
                         }
                     }
                 }
                 try {
                     /* 调用 */
-                    Object invoke = rpcActionMapping.getMethod().invoke(rpcActionMapping.getBean(), params);
+                    Object invoke = rpcActionMapping.method().invoke(rpcActionMapping.bean(), params);
                     if (rpcId < 1 || invoke == RpcService.IGNORE) {
                         return;
                     }
@@ -155,7 +153,7 @@ public class RpcDispatcher implements InitPrint {
                     res.setTargetId(targetId);
                     session.writeAndFlush(res);
                     if (printLogger) {
-                        log.info("{}, rpcId={}, targetId={}, path={}, params={}, res={}", session, rpcId, targetId, path, remoteParams, res);
+                        log.debug("rpc dispatcher session={}, rpcId={}, targetId={}, path={}, params={}, res={}", session, rpcId, targetId, path, remoteParams, res);
                     }
                 } catch (Throwable t) {
                     log.error("{}, rpcId={}, targetId={}, path={}, params={}", session, rpcId, targetId, path, remoteParams, t);
@@ -168,22 +166,7 @@ public class RpcDispatcher implements InitPrint {
             }
         };
 
-        String threadName = rpcActionMapping.getAnnotation().threadName();
-        String queueName = rpcActionMapping.getAnnotation().queueName();
-
-        if (StringUtils.isBlank(threadName)) {
-            threadName = "logic";
-        }
-
-        Executor executor = ExecutorService.getExecutor(threadName);
-
-        if (StringUtils.isBlank(queueName)) {
-            executor.execute(event);
-        } else if (executor instanceof BaseScheduledExecutor scheduledExecutor) {
-            scheduledExecutor.execute(queueName, event);
-        } else {
-            throw new UnsupportedOperationException("threadName=" + threadName + " 查找失败");
-        }
+        rpcActionMapping.executor(event);
 
     }
 
