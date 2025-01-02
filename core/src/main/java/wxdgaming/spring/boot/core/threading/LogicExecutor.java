@@ -1,6 +1,7 @@
 package wxdgaming.spring.boot.core.threading;
 
-import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 /**
  * logic Executor
@@ -8,13 +9,11 @@ import lombok.Getter;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-12 14:10
  **/
+@Component
 public class LogicExecutor extends BaseScheduledExecutor {
 
-    @Getter private static LogicExecutor ins = null;
-
-    protected LogicExecutor(int coreSize) {
+    public LogicExecutor(@Value("${server.executor.logicCoreSize:10}") int coreSize) {
         super("logic", coreSize);
-        ins = this;
     }
 
 }

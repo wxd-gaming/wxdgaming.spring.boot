@@ -1,12 +1,16 @@
 package code;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Mono;
-import wxdgaming.spring.boot.core.threading.ExecutorBuilder;
-import wxdgaming.spring.boot.webclient.HttpClientBuild;
+import wxdgaming.spring.boot.core.CoreScan;
 import wxdgaming.spring.boot.webclient.HttpClientService;
 import wxdgaming.spring.boot.webclient.HttpGetWork;
+import wxdgaming.spring.boot.webclient.WebClientScan;
 
 /**
  * http client test
@@ -14,16 +18,13 @@ import wxdgaming.spring.boot.webclient.HttpGetWork;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-12 20:53
  **/
+@RunWith(SpringRunner.class)
+@SpringBootApplication
+@SpringBootTest(classes = {CoreScan.class, WebClientScan.class})
 public class HttpClientTest {
 
-    HttpClientService httpClientService;
+    @Autowired HttpClientService httpClientService;
 
-    @Before
-    public void s() {
-        HttpClientBuild httpClientBuild = new HttpClientBuild();
-        ExecutorBuilder executorBuilder = new ExecutorBuilder();
-        httpClientService = new HttpClientService(executorBuilder.virtualExecutor(), httpClientBuild.httpClient());
-    }
 
     @Test
     public void h0() {

@@ -1,6 +1,7 @@
 package wxdgaming.spring.boot.core.threading;
 
-import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import wxdgaming.spring.boot.core.InitPrint;
 
 /**
@@ -9,13 +10,11 @@ import wxdgaming.spring.boot.core.InitPrint;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-12 14:10
  **/
+@Component
 public class DefaultExecutor extends BaseScheduledExecutor implements InitPrint {
 
-    @Getter private static DefaultExecutor ins = null;
-
-    protected DefaultExecutor(int coreSize) {
+    public DefaultExecutor(@Value("${defaultCoreSize:2}") int coreSize) {
         super("default", coreSize);
-        ins = this;
     }
 
 }

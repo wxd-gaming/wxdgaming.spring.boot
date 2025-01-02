@@ -35,32 +35,7 @@ public class RequestRpcMessageController {
         long targetId = reqRemote.getTargetId();
         String remoteParams = reqRemote.getParams();
         String path = reqRemote.getPath();
-        try {
-            Object invoke = rpcService.getRpcDispatcher().rpcReqSocketAction(session, rpcId, targetId, path, remoteParams);
-
-            if (rpcId < 1 || invoke == RpcService.IGNORE) {
-                return;
-            }
-            RpcMessage.ResRPC res;
-            if (invoke instanceof RpcMessage.ResRPC resRemote) {
-                res = resRemote;
-            } else {
-                res = new RpcMessage.ResRPC();
-                res.setCode(1);
-                if (invoke != null) {
-                    res.setParams(String.valueOf(invoke));
-                }
-            }
-            res.setRpcId(rpcId);
-            res.setTargetId(targetId);
-            session.writeAndFlush(res);
-            if (printLogger) {
-                log.info("{}, rpcId={}, targetId={}, path={}, params={}, res={}", session, rpcId, targetId, path, remoteParams, res);
-            }
-        } catch (Throwable t) {
-            log.error("{}, rpcId={}, targetId={}, path={}, params={}", session, rpcId, targetId, path, remoteParams, t);
-            rpcService.getRpcDispatcher().response(session, rpcId, targetId, 500, t.getMessage());
-        }
+        rpcService.getRpcDispatcher().rpcReqSocketAction(session, rpcId, targetId, path, remoteParams);
     }
 
 

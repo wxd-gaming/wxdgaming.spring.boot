@@ -15,6 +15,7 @@ public class BaseScheduledExecutor extends ScheduledThreadPoolExecutor implement
 
     public BaseScheduledExecutor(String prefix, int coreSize) {
         super(coreSize, new WxdThreadFactory(prefix));
+        ExecutorService.put(prefix, this);
     }
 
     @Override protected void beforeExecute(Thread t, Runnable r) {
@@ -38,7 +39,23 @@ public class BaseScheduledExecutor extends ScheduledThreadPoolExecutor implement
     }
 
     @Override public <T> Future<T> submit(Callable<T> task) {
-        return super.submit(task);
+        EventCallable<T> eventCallable = new EventCallable<>(5) {
+            @Override public T call() throws Exception {
+                return task.call();
+            }
+        };
+        super.execute(eventCallable);
+        return eventCallable.future;
+    }
+
+    public <T> CompletableFuture<T> submit(EventCallable<T> task) {
+        super.execute(task);
+        return task.future;
+    }
+
+    public void execute(String queueName, Runnable task) {
+        EventQueue eventQueueOrNew = ExecutorService.getEventQueueOrNew(queueName, this);
+        eventQueueOrNew.execute(task);
     }
 
     @Override public void execute(Runnable command) {

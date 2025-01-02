@@ -16,8 +16,7 @@ import wxdgaming.spring.boot.core.function.Function1;
 import wxdgaming.spring.boot.core.function.Function2;
 import wxdgaming.spring.boot.core.lang.Tuple2;
 import wxdgaming.spring.boot.core.lang.Tuple3;
-import wxdgaming.spring.boot.core.threading.DefaultExecutor;
-import wxdgaming.spring.boot.core.threading.ExecutorBuilder;
+import wxdgaming.spring.boot.core.threading.ExecutorService;
 import wxdgaming.spring.boot.core.timer.MyClock;
 
 import java.io.Closeable;
@@ -171,11 +170,11 @@ public class Cache<K, V> implements Closeable {
      * @param delay 缓存容器check间隔时间
      */
     protected Cache(long delay) {
-        timerJob = DefaultExecutor.getIns().scheduleWithFixedDelay(
+        timerJob = ExecutorService.getDefaultExecutor().scheduleWithFixedDelay(
                 () -> {
                     long now = MyClock.millis();
                     for (Map.Entry<Integer, ConcurrentHashMap<K, Tuple3<V, Long, Long>>> next : kv.entrySet()) {
-                        Integer hk = next.getKey();
+                        Integer hashKey = next.getKey();
                         ConcurrentHashMap<K, Tuple3<V, Long, Long>> nextValue = next.getValue();
                         Iterator<Map.Entry<K, Tuple3<V, Long, Long>>> entryIterator = nextValue.entrySet().iterator();
                         while (entryIterator.hasNext()) {

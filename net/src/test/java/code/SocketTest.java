@@ -5,8 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import wxdgaming.spring.boot.core.CoreScan;
 import wxdgaming.spring.boot.core.threading.DefaultExecutor;
-import wxdgaming.spring.boot.core.threading.ExecutorBuilder;
 import wxdgaming.spring.boot.net.*;
 import wxdgaming.spring.boot.net.client.ClientConfig;
 import wxdgaming.spring.boot.net.client.SocketClient;
@@ -21,6 +25,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
+@RunWith(SpringRunner.class)
+@SpringBootApplication
+@SpringBootTest(classes = {CoreScan.class, NetScan.class})
 public class SocketTest {
 
     BootstrapBuilder bootstrapBuilder;
@@ -32,7 +39,7 @@ public class SocketTest {
 
     @Before
     public void before() throws Exception {
-        defaultExecutor = new ExecutorBuilder().defaultExecutor();
+        defaultExecutor = new DefaultExecutor(2);
         bootstrapBuilder = new BootstrapBuilder();
         bootstrapBuilder.setPrintLogger(true);
         bootstrapBuilder.init();

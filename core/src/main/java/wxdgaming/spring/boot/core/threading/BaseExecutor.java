@@ -13,12 +13,14 @@ import java.util.concurrent.*;
  **/
 public class BaseExecutor extends ThreadPoolExecutor implements InitPrint {
 
+
     public BaseExecutor(String prefix, int coreSize, int maximumPoolSize, int queueSize) {
         super(coreSize, maximumPoolSize,
                 0L, TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<>(queueSize),
                 new WxdThreadFactory(prefix)
         );
+        ExecutorService.put(prefix, this);
     }
 
     @Override protected void beforeExecute(Thread t, Runnable r) {
@@ -42,7 +44,18 @@ public class BaseExecutor extends ThreadPoolExecutor implements InitPrint {
     }
 
     @Override public <T> Future<T> submit(Callable<T> task) {
-        return super.submit(task);
+        EventCallable<T> eventCallable = new EventCallable<>(4) {
+            @Override public T call() throws Exception {
+                return task.call();
+            }
+        };
+        super.execute(eventCallable);
+        return eventCallable.future;
+    }
+
+    public <T> CompletableFuture<T> submit(EventCallable<T> task) {
+        super.execute(task);
+        return task.future;
     }
 
     @Override public void execute(Runnable command) {

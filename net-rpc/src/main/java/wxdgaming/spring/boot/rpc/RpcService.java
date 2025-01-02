@@ -32,9 +32,10 @@ public class RpcService implements InitPrint {
 
     RpcDispatcher rpcDispatcher;
 
-    public RpcService(@Value("${socket.rpc-token:getg6jhkopw435dvmkmcvx5y63-40}")
-                      String RPC_TOKEN) {
-        this.rpcDispatcher = new RpcDispatcher(RPC_TOKEN);
+    public RpcService(
+            @Value("${socket.printLogger:false}") boolean printLogger,
+            @Value("${socket.rpc-token:getg6jhkopw435dvmkmcvx5y63-40}") String RPC_TOKEN) {
+        this.rpcDispatcher = new RpcDispatcher(printLogger, RPC_TOKEN);
     }
 
     @AppStart

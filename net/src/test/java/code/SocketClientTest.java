@@ -5,7 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import wxdgaming.spring.boot.core.threading.DefaultExecutor;
-import wxdgaming.spring.boot.core.threading.ExecutorBuilder;
+import wxdgaming.spring.boot.core.threading.ExecutorService;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.NetScan;
 import wxdgaming.spring.boot.net.client.ClientConfig;
@@ -25,7 +25,7 @@ public class SocketClientTest {
 
     @Before
     public void before() throws Exception {
-        defaultExecutor = new ExecutorBuilder().defaultExecutor();
+        defaultExecutor = new DefaultExecutor(2);
         bootstrapBuilder = new BootstrapBuilder();
         bootstrapBuilder.setPrintLogger(true);
         bootstrapBuilder.init();

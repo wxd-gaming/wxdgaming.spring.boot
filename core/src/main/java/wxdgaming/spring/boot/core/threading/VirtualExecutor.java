@@ -1,6 +1,8 @@
 package wxdgaming.spring.boot.core.threading;
 
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import wxdgaming.spring.boot.core.lang.LockBase;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -16,6 +18,7 @@ import java.util.function.Supplier;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-12 14:10
  **/
+@Component
 public class VirtualExecutor extends LockBase implements Executor {
 
     @Getter private static VirtualExecutor ins = null;
@@ -28,7 +31,7 @@ public class VirtualExecutor extends LockBase implements Executor {
     private final BlockingQueue<VirtualEvent> runnableBlockingQueue;
     Thread.Builder.OfVirtual virtual;
 
-    protected VirtualExecutor(int coreSize) {
+    public VirtualExecutor(@Value("${server.executor.virtualCoreSize:200}") int coreSize) {
         this.coreSize = coreSize;
         this.runnableBlockingQueue = new ArrayBlockingQueue<>(30000);
         virtual = Thread.ofVirtual().name("virtual-", 1);

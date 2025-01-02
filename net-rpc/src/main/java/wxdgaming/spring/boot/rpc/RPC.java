@@ -12,4 +12,8 @@ public @interface RPC {
     /** 路由映射 */
     String value() default "";
 
+    String threadName() default "logic";
+
+    String queueName() default "";
+
 }

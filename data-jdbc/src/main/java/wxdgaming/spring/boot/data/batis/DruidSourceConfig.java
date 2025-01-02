@@ -120,8 +120,8 @@ public class DruidSourceConfig extends ObjectBase {
         jpaVendorAdapter.setShowSql(showSql);
         entityManagerFactoryBean.setJpaVendorAdapter(jpaVendorAdapter);
         entityManagerFactoryBean.setPersistenceProviderClass(HibernatePersistenceProvider.class);
-
-        entityManagerFactoryBean.setPackagesToScan(packageNames); // 替换为你的实体包路径
+        if (packageNames != null && packageNames.length > 0)
+            entityManagerFactoryBean.setPackagesToScan(packageNames); // 替换为你的实体包路径
         // 设置命名策略
         entityManagerFactoryBean.getJpaPropertyMap().put("hibernate.show_sql", showSql);
         entityManagerFactoryBean.getJpaPropertyMap().put("hibernate.hbm2ddl.auto", ddlAuto);

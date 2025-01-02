@@ -12,8 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import wxdgaming.spring.boot.core.InitPrint;
 
-import java.util.Map;
-
 /**
  * 数据源配置
  *
@@ -39,8 +37,7 @@ public class JdbcHelper implements InitPrint {
 
     @Bean
     @Primary
-    public JdbcContext jdbcContext(DruidDataSource dataSource) {
-        EntityManager entityManager = config.entityManager(dataSource, Map.of());
+    public JdbcContext jdbcContext(DruidDataSource dataSource, EntityManager entityManager) {
         return new JdbcContext(dataSource, entityManager);
     }
 

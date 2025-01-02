@@ -61,6 +61,10 @@ public abstract class Event implements Runnable {
         }
     }
 
+    public void onError(Throwable throwable) {
+
+    }
+
     /** 事件执行器 */
     protected abstract void onEvent() throws Throwable;
 

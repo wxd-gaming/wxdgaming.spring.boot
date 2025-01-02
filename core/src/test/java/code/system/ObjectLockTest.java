@@ -4,7 +4,6 @@ import lombok.SneakyThrows;
 import org.junit.Before;
 import org.junit.Test;
 import wxdgaming.spring.boot.core.system.ObjectLock;
-import wxdgaming.spring.boot.core.threading.ExecutorBuilder;
 import wxdgaming.spring.boot.core.threading.LogicExecutor;
 import wxdgaming.spring.boot.core.threading.VirtualExecutor;
 
@@ -21,9 +20,8 @@ public class ObjectLockTest {
 
     @Before
     public void before() {
-        ExecutorBuilder executorBuilder = new ExecutorBuilder();
-        logicExecutor = executorBuilder.logicExecutor();
-        virtualExecutor = executorBuilder.virtualExecutor();
+        logicExecutor = new LogicExecutor(10);
+        virtualExecutor = new VirtualExecutor(200);
     }
 
     @Test

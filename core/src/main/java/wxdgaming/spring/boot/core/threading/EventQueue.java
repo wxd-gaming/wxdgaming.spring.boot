@@ -6,7 +6,6 @@ import wxdgaming.spring.boot.core.GlobalUtil;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
 /**
  * 队列事件
@@ -63,6 +62,7 @@ public class EventQueue extends Event implements Executor {
         this.queueName = queueName;
         this.scheduledExecutorService = scheduledExecutorService;
         this.runnableBlockingQueue = new ArrayBlockingQueue<>(queueMaxSize);
+        ExecutorService.put(queueName, this);
     }
 
     Event curPoll = null;
@@ -106,10 +106,19 @@ public class EventQueue extends Event implements Executor {
         }
     }
 
-    public <R> CompletableFuture<R> submit(Supplier<R> command) {
-        RunEventCompletableFuture event = RunEventCompletableFuture.of(command);
-        this.scheduledExecutorService.execute(event);
-        return event.getFuture();
+    public <T> CompletableFuture<T> submit(Callable<T> task) {
+        EventCallable<T> eventCallable = new EventCallable<>(4) {
+            @Override public T call() throws Exception {
+                return task.call();
+            }
+        };
+        execute(eventCallable);
+        return eventCallable.future;
+    }
+
+    public <T> CompletableFuture<T> submit(EventCallable<T> task) {
+        execute(task);
+        return task.future;
     }
 
     /** 延迟任务 */
