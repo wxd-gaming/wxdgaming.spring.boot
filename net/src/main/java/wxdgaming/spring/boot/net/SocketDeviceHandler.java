@@ -71,6 +71,10 @@ public abstract class SocketDeviceHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        SocketSession session = ChannelUtil.session(ctx.channel());
+        if (session != null) {
+            sessionHandler.exception(session, cause);
+        }
         final String message = Optional.ofNullable(cause.getMessage())
                 .map(String::toLowerCase).orElse("");
         String ctxName = ChannelUtil.ctxTostring(ctx);

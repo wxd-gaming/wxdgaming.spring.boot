@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.core.lang.TickCount;
 import wxdgaming.spring.boot.net.message.PojoBase;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * socket session
  *
@@ -28,6 +30,9 @@ public class SocketSession {
         client,
     }
 
+    private static final AtomicLong ATOMIC_LONG = new AtomicLong();
+
+    private final long uid;
     private final Type type;
     private final Channel channel;
     private boolean webSocket;
@@ -39,6 +44,7 @@ public class SocketSession {
     private final TickCount receiveMessageTick = new TickCount(1000);
 
     public SocketSession(Type type, Channel channel, Boolean webSocket) {
+        this.uid = ATOMIC_LONG.get();
         this.type = type;
         this.channel = channel;
         this.webSocket = Boolean.TRUE.equals(webSocket);

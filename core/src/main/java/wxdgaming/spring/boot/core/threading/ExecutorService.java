@@ -6,6 +6,7 @@ import wxdgaming.spring.boot.core.InitPrint;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -42,7 +43,8 @@ public class ExecutorService implements InitPrint {
     }
 
     public static <T extends EventQueue> T getEventQueueOrNew(String name, ScheduledExecutorService executor) {
-        return (T) eventQueueMap.computeIfAbsent(name, q -> new EventQueue(name, executor));
+        EventQueue eventQueue = eventQueueMap.computeIfAbsent(name, q -> new EventQueue(name, executor, new LinkedBlockingQueue<>(3000), false));
+        return (T) eventQueue;
     }
 
     public static DefaultExecutor getDefaultExecutor() {

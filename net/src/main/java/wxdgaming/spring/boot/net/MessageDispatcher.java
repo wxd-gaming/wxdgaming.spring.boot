@@ -4,6 +4,7 @@ import ch.qos.logback.core.LogbackUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ReflectContext;
@@ -11,6 +12,7 @@ import wxdgaming.spring.boot.core.SpringReflectContent;
 import wxdgaming.spring.boot.core.function.Consumer2;
 import wxdgaming.spring.boot.core.function.Consumer3;
 import wxdgaming.spring.boot.core.system.AnnUtil;
+import wxdgaming.spring.boot.core.threading.BaseScheduledExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.threading.ExecutorWith;
 import wxdgaming.spring.boot.core.util.StringsUtil;
@@ -18,6 +20,7 @@ import wxdgaming.spring.boot.net.message.PojoBase;
 import wxdgaming.spring.boot.net.message.SerializerUtil;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
 /**
@@ -87,14 +90,14 @@ public abstract class MessageDispatcher implements InitPrint {
             }
             return false;
         };
-        springReflectContent.withMethodAnnotated(MsgMapper.class)
+        springReflectContent.withMethodAnnotated(ProtoMapper.class)
                 .filter(t -> filter.test(t.getLeft().getClass()))
                 .forEach(t -> {
                     Class parameterType = t.getRight().getParameterTypes()[1];
                     if (PojoBase.class.isAssignableFrom(parameterType)) {
-                        MsgMapper msgMapper = AnnUtil.ann(t.getRight(), MsgMapper.class);
+                        ProtoMapper protoMapper = AnnUtil.ann(t.getRight(), ProtoMapper.class);
                         ExecutorWith executorWith = AnnUtil.ann(t.getRight(), ExecutorWith.class);
-                        DoMessageMapping messageMapping = new DoMessageMapping(msgMapper, executorWith, t.getLeft(), t.getRight(), parameterType);
+                        DoMessageMapping messageMapping = new DoMessageMapping(protoMapper, executorWith, t.getLeft(), t.getRight(), parameterType);
                         int msgId = registerMessage(parameterType);
                         mappings.put(msgId, messageMapping);
                         log.debug("扫描消息处理接口 {}#{} {}", t.getLeft().getClass().getName(), t.getRight().getName(), parameterType.getName());
@@ -138,7 +141,7 @@ public abstract class MessageDispatcher implements InitPrint {
                     doMessageMapping.method().invoke(doMessageMapping.bean(), socketSession, message);
                 }
             };
-            doMessageMapping.executor(event);
+            executor(socketSession, doMessageMapping.getExecutor(), doMessageMapping.queueName(), event);
         } else {
             msgBytesNotDispatcher.accept(socketSession, msgId, messageBytes);
         }
@@ -158,10 +161,19 @@ public abstract class MessageDispatcher implements InitPrint {
                     doMessageMapping.method().invoke(doMessageMapping.bean(), socketSession, message);
                 }
             };
-            doMessageMapping.executor(event);
+            executor(socketSession, doMessageMapping.getExecutor(), doMessageMapping.queueName(), event);
         } else {
             msgNotDispatcher.accept(socketSession, msgId, message);
         }
     }
 
+    protected void executor(SocketSession socketSession, Executor executor, String queueName, Event event) {
+        if (StringUtils.isBlank(queueName)) {
+            executor.execute(event);
+        } else if (executor instanceof BaseScheduledExecutor scheduledExecutor) {
+            scheduledExecutor.execute(queueName, event);
+        } else {
+            throw new UnsupportedOperationException(executor.getClass().getName() + " - 无法执行队列任务");
+        }
+    }
 }

@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Mono;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.SpringReflectContent;
 import wxdgaming.spring.boot.core.json.FastJsonUtil;
+import wxdgaming.spring.boot.core.threading.BaseScheduledExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.threading.ExecutorWith;
 import wxdgaming.spring.boot.core.util.StringsUtil;
@@ -21,6 +23,7 @@ import java.lang.reflect.Type;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
@@ -166,8 +169,19 @@ public class RpcDispatcher implements InitPrint {
             }
         };
 
-        rpcActionMapping.executor(event);
+        Executor executor = rpcActionMapping.getExecutor();
+        String queueName = rpcActionMapping.queueName();
+        execute(session, executor, queueName, event);
+    }
 
+    protected void execute(SocketSession session, Executor executor, String queueName, Event event) {
+        if (StringUtils.isBlank(queueName)) {
+            executor.execute(event);
+        } else if (executor instanceof BaseScheduledExecutor scheduledExecutor) {
+            scheduledExecutor.execute(queueName, event);
+        } else {
+            throw new UnsupportedOperationException(executor.getClass().getName() + " - 无法执行队列任务");
+        }
     }
 
 

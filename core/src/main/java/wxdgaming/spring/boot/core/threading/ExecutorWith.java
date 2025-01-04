@@ -10,7 +10,7 @@ import java.lang.annotation.*;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.MODULE)
+@Target(ElementType.METHOD)
 public @interface ExecutorWith {
 
     String threadName() default "logic";

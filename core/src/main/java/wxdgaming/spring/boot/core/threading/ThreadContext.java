@@ -28,6 +28,15 @@ public class ThreadContext extends JSONObject {
         return threadContext;
     }
 
+    public static void setQueueName(String queueName) {
+        context().put("queueName", queueName);
+    }
+
+    public static String queueName() {
+        ThreadContext context = contextOrNull();
+        if (context == null) return "";
+        return context.getString("queueName");
+    }
 
     /** 获取当前上下文，如果尚未设置 null */
     public static ThreadContext contextOrNull() {

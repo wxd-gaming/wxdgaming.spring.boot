@@ -9,7 +9,7 @@ import wxdgaming.spring.boot.core.util.StringsUtil;
  **/
 public abstract class Event implements Runnable {
     /** 事件所在的队列 */
-    String queueName;
+    String queueName = "";
     /** 事件名 */
     String runName;
     /** 当前事件的上下文 */
@@ -50,6 +50,7 @@ public abstract class Event implements Runnable {
             try {
                 if (threadContext != null)
                     ThreadContext.set(threadContext);
+                ThreadContext.setQueueName(queueName);
                 onEvent();
             } catch (Throwable throwable) {
                 GlobalUtil.exception(this.getClass().getName(), throwable);

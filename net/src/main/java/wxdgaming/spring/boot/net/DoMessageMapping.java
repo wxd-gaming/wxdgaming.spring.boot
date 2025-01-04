@@ -1,7 +1,5 @@
 package wxdgaming.spring.boot.net;
 
-import org.apache.commons.lang3.StringUtils;
-import wxdgaming.spring.boot.core.threading.BaseScheduledExecutor;
 import wxdgaming.spring.boot.core.threading.ExecutorService;
 import wxdgaming.spring.boot.core.threading.ExecutorWith;
 import wxdgaming.spring.boot.core.util.StringsUtil;
@@ -15,7 +13,7 @@ import java.util.concurrent.Executor;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-19 19:51
  **/
-public record DoMessageMapping(MsgMapper mapper, ExecutorWith executorWith, Object bean, Method method,
+public record DoMessageMapping(ProtoMapper mapper, ExecutorWith executorWith, Object bean, Method method,
         Class<?> messageType) {
     public Executor getExecutor() {
         String executorName = null;
@@ -32,19 +30,12 @@ public record DoMessageMapping(MsgMapper mapper, ExecutorWith executorWith, Obje
         return executor;
     }
 
-    public void executor(Runnable task) {
-        Executor executor = getExecutor();
+    public String queueName() {
         String queueName = null;
         if (executorWith() != null) {
             queueName = executorWith().queueName();
         }
-        if (StringUtils.isBlank(queueName)) {
-            executor.execute(task);
-        } else if (executor instanceof BaseScheduledExecutor scheduledExecutor) {
-            scheduledExecutor.execute(queueName, task);
-        } else {
-            throw new UnsupportedOperationException(executor.getClass().getName() + " - 无法执行队列任务");
-        }
+        return queueName;
     }
 
 }

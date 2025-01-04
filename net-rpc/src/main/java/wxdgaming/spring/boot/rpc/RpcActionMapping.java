@@ -27,19 +27,12 @@ record RpcActionMapping(RPC annotation, ExecutorWith executorWith, Object bean, 
         return executor;
     }
 
-    public void executor(Runnable task) {
-        Executor executor = getExecutor();
+    public String queueName() {
         String queueName = null;
         if (executorWith() != null) {
             queueName = executorWith().queueName();
         }
-        if (StringUtils.isBlank(queueName)) {
-            executor.execute(task);
-        } else if (executor instanceof BaseScheduledExecutor scheduledExecutor) {
-            scheduledExecutor.execute(queueName, task);
-        } else {
-            throw new UnsupportedOperationException(executor.getClass().getName() + " - 无法执行队列任务");
-        }
+        return queueName;
     }
 
 }

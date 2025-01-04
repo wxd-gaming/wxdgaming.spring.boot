@@ -59,14 +59,16 @@ public class EventQueue extends Event implements Executor {
      * @param queueMaxSize             队列最大长度
      */
     public EventQueue(String queueName, ScheduledExecutorService scheduledExecutorService, int queueMaxSize) {
-        this(queueName, scheduledExecutorService, new LinkedBlockingQueue<>(queueMaxSize));
+        this(queueName, scheduledExecutorService, new LinkedBlockingQueue<>(queueMaxSize), true);
     }
 
-    public EventQueue(String queueName, ScheduledExecutorService scheduledExecutorService, BlockingQueue<Event> queue) {
+    public EventQueue(String queueName, ScheduledExecutorService scheduledExecutorService, BlockingQueue<Event> queue, boolean isnew) {
         this.queueName = queueName;
         this.scheduledExecutorService = scheduledExecutorService;
         this.runnableBlockingQueue = queue;
-        ExecutorService.put(queueName, this);
+        if (isnew) {
+            ExecutorService.put(queueName, this);
+        }
     }
 
     Event curPoll = null;
@@ -97,7 +99,7 @@ public class EventQueue extends Event implements Executor {
     }
 
     @Override public void execute(Runnable command) {
-        if (runnableBlockingQueue.remainingCapacity() > 0) throw new RuntimeException("队列已满");
+        if (runnableBlockingQueue.remainingCapacity() < 1) throw new RuntimeException("队列已满");
         Event event = RunEvent.of(5, command);
         event.queueName = queueName;
         runnableBlockingQueue.add(event);
