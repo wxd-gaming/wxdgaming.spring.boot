@@ -5,7 +5,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import wxdgaming.spring.boot.core.threading.DefaultExecutor;
-import wxdgaming.spring.boot.core.threading.ExecutorService;
 import wxdgaming.spring.boot.net.BootstrapBuilder;
 import wxdgaming.spring.boot.net.NetScan;
 import wxdgaming.spring.boot.net.client.ClientConfig;
@@ -37,7 +36,7 @@ public class SocketClientTest {
                 .setHost("www.baidu.com")
                 .setPort(443)
                 .setUseWebSocket(false)
-                .setScanPkgs(new String[]{NetScan.class.getPackageName()})
+                .setScanHandlers(new String[]{NetScan.class.getPackageName()})
         );
 
         socketClient = socketClientBuilder.socketClient(

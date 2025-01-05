@@ -130,9 +130,16 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
 
     @AppStart
     @ReLoad
-    public void scanMessage(SpringReflect springReflect) {
-        getClientMessageDecode().getDispatcher().initMapping(springReflect.content(), new String[]{NetScan.class.getPackageName()});
-        getClientMessageDecode().getDispatcher().initMapping(springReflect.content(), config.getScanPkgs());
+    public void scanHandlers(SpringReflect springReflect) {
+        getClientMessageDecode().getDispatcher().scanHandlers(springReflect.content(), new String[]{NetScan.class.getPackageName()});
+        getClientMessageDecode().getDispatcher().scanHandlers(springReflect.content(), config.getScanHandlers());
+    }
+
+    @AppStart
+    @ReLoad
+    public void scanMessages() {
+        getClientMessageDecode().getDispatcher().scanMessages(Thread.currentThread().getContextClassLoader(), new String[]{NetScan.class.getPackageName()});
+        getClientMessageDecode().getDispatcher().scanMessages(Thread.currentThread().getContextClassLoader(), config.getScanMessages());
     }
 
     @Override public void close() {

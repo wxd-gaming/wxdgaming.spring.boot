@@ -1,5 +1,6 @@
 package wxdgaming.spring.boot.net;
 
+import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import wxdgaming.spring.boot.core.util.StringsUtil;
 import wxdgaming.spring.boot.net.message.PojoBase;
 import wxdgaming.spring.boot.net.message.SerializerUtil;
 
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
@@ -43,16 +45,16 @@ public abstract class MessageDispatcher implements InitPrint {
         dispatcherHandler = new MessageDispatcherHandler(printLogger) {};
     }
 
-    public void initMapping(SpringReflectContent springReflectContent, String[] packages) {
-        Predicate<Class<?>> filter = clazz -> {
-            if (packages == null || packages.length == 0) return true;
-            for (String p : packages) {
+    public void scanHandlers(SpringReflectContent springReflectContent, String[] scanHandlers) {
+        Predicate<Class<?>> handlerFilter = clazz -> {
+            if (scanHandlers == null || scanHandlers.length == 0) return true;
+            for (String p : scanHandlers) {
                 if (clazz.getName().startsWith(p)) return true;
             }
             return false;
         };
         springReflectContent.withMethodAnnotated(ProtoMapper.class)
-                .filter(t -> filter.test(t.getLeft().getClass()))
+                .filter(t -> handlerFilter.test(t.getLeft().getClass()))
                 .forEach(t -> {
                     Class parameterType = t.getRight().getParameterTypes()[1];
                     if (PojoBase.class.isAssignableFrom(parameterType)) {
@@ -66,27 +68,13 @@ public abstract class MessageDispatcher implements InitPrint {
                 });
     }
 
-    /**
-     * 解码消息
-     *
-     * @param msgId        消息id
-     * @param messageBytes 消息报文
-     * @param <T>          消息体类型
-     * @return 消息体
-     * @author: wxd-gaming(無心道, 15388152619)
-     * @version: 2025-01-05 11:04
-     */
-    public <T extends PojoBase> T decode(int msgId, byte[] messageBytes) {
-        Class<? extends PojoBase> aClass = messageId2Class.get(msgId);
-        return (T) SerializerUtil.decode(messageBytes, aClass);
-    }
 
-    public void registerMessage(ClassLoader classLoader, String... packages) {
+    public void scanMessages(ClassLoader classLoader, String... packages) {
         ReflectContext build = ReflectContext.Builder.of(classLoader, packages).build();
-        registerMessage(build);
+        scanMessages(build);
     }
 
-    public void registerMessage(ReflectContext reflectContext) {
+    public void scanMessages(ReflectContext reflectContext) {
         reflectContext
                 .withSuper(PojoBase.class)
                 .map(v -> (Class) v.getCls())
@@ -108,7 +96,36 @@ public abstract class MessageDispatcher implements InitPrint {
         return StringsUtil.hashcode(pojoClass.getName());
     }
 
+    /**
+     * 解码消息
+     *
+     * @param msgId        消息id
+     * @param messageBytes 消息报文
+     * @param <T>          消息体类型
+     * @return 消息体
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2025-01-05 11:04
+     */
+    public <T extends PojoBase> T decode(int msgId, byte[] messageBytes) {
+        Class<? extends PojoBase> aClass = messageId2Class.get(msgId);
+        return (T) SerializerUtil.decode(messageBytes, aClass);
+    }
+
+    public byte[] encode(PojoBase message) {
+        return SerializerUtil.encode(message);
+    }
+
+    public ByteBuf encodeBuffer(PojoBase message) {
+        return null;
+    }
+
     public void dispatch(SocketSession socketSession, int msgId, byte[] messageBytes) throws Exception {
+        if (printLogger) {
+            String orElse = Optional.ofNullable(getMessageId2Class().get(msgId))
+                    .map(Class::getName)
+                    .orElse("未知");
+            log.debug("收到消息：{}, {}({}), len={}", socketSession, msgId, orElse, messageBytes.length);
+        }
         DoMessageMapping doMessageMapping = getMappings().get(msgId);
         if (doMessageMapping != null) {
             Event event = new Event() {

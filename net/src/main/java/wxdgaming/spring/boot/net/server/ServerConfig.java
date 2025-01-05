@@ -29,7 +29,8 @@ public class ServerConfig {
     /** 是否开启 web socket */
     private boolean enableWebSocket = false;
     /** 扫描的包名 */
-    private String[] scanPkgs = new String[0];
+    private String[] scanHandlers = new String[0];
+    private String[] scanMessages = new String[0];
     private String webSocketPrefix = "/wxd-gaming";
     /** 默认的 ssl 类型 */
     private SslProtocolType sslProtocolType = SslProtocolType.TLSV12;

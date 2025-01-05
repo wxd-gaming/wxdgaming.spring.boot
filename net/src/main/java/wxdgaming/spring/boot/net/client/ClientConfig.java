@@ -28,8 +28,10 @@ public class ClientConfig {
     private boolean enableSsl = false;
     private boolean enableRpc = true;
     private boolean useWebSocket = false;
-    /** 扫描的包名 */
-    private String[] scanPkgs = new String[0];
+    /** 扫描处理器包名 */
+    private String[] scanHandlers = new String[0];
+    /** 扫描消息的包名 */
+    private String[] scanMessages = new String[0];
     private String prefix = "/wxd-gaming";
     /** 默认的 ssl 类型 */
     private SslProtocolType sslProtocolType = SslProtocolType.TLSV12;

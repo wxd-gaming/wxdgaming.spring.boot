@@ -47,8 +47,7 @@ public class SocketTest {
         bootstrapBuilder.init();
 
         messageDispatcher = new ServerMessageDispatcher(true);
-        messageDispatcher.registerMessage(InnerMessage.ReqHeart.class);
-        messageDispatcher.registerMessage(InnerMessage.ResHeart.class);
+        messageDispatcher.scanMessages(Thread.currentThread().getContextClassLoader(), InnerMessage.ReqHeart.class.getSimpleName());
 
         SocketServerBuilder socketServerBuilder = new SocketServerBuilder();
         socketServerBuilder.setConfig(new ServerConfig().setEnableWebSocket(true));

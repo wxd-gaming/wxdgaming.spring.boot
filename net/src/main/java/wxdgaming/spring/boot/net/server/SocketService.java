@@ -154,9 +154,16 @@ public class SocketService implements InitPrint, Closeable, ISession {
 
     @AppStart
     @ReLoad
-    public void scanMessage(SpringReflectContent springReflectContent) {
-        getServerMessageDecode().getDispatcher().initMapping(springReflectContent, new String[]{NetScan.class.getPackageName()});
-        getServerMessageDecode().getDispatcher().initMapping(springReflectContent, config.getScanPkgs());
+    public void scanHandlers(SpringReflectContent springReflectContent) {
+        getServerMessageDecode().getDispatcher().scanHandlers(springReflectContent, new String[]{NetScan.class.getPackageName()});
+        getServerMessageDecode().getDispatcher().scanHandlers(springReflectContent, config.getScanHandlers());
+    }
+
+    @AppStart
+    @ReLoad
+    public void scanMessages() {
+        getServerMessageDecode().getDispatcher().scanMessages(Thread.currentThread().getContextClassLoader(), new String[]{NetScan.class.getPackageName()});
+        getServerMessageDecode().getDispatcher().scanMessages(Thread.currentThread().getContextClassLoader(), config.getScanMessages());
     }
 
     /**

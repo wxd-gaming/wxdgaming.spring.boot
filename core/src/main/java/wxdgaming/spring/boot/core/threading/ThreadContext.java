@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 本地线程变量
@@ -56,6 +57,12 @@ public class ThreadContext extends JSONObject {
 
     /** 获取参数 */
     public static <T> T context(final String name) {
+        return context(name, null);
+    }
+
+
+    /** 获取参数 */
+    public static <T> Optional<T> contextOptional(final String name) {
         return context(name, null);
     }
 
