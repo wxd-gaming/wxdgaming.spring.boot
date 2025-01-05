@@ -46,34 +46,31 @@ public class SocketTest {
         bootstrapBuilder.setPrintLogger(true);
         bootstrapBuilder.init();
 
-        messageDispatcher = new ServerMessageDispatcher(true, new String[0]);
+        messageDispatcher = new ServerMessageDispatcher(true);
         messageDispatcher.registerMessage(InnerMessage.ReqHeart.class);
         messageDispatcher.registerMessage(InnerMessage.ResHeart.class);
 
         SocketServerBuilder socketServerBuilder = new SocketServerBuilder();
         socketServerBuilder.setConfig(new ServerConfig().setEnableWebSocket(true));
 
-        Consumer3<SocketSession, Integer, byte[]> webSocketFrame = new Consumer3<SocketSession, Integer, byte[]>() {
-            @Override public void accept(SocketSession socketSession, Integer integer, byte[] bytes) {
+        MessageDispatcherHandler dispatcherHandler = new MessageDispatcherHandler(true) {
+            @Override public void msgBytesNotDispatcher(SocketSession session, int msgId, byte[] messageBytes) throws Exception {
                 long startTime = System.nanoTime();
                 for (int i = 0; i < 10; i++) {
                     writeAndFlush(socketService.getSessionGroup(), "socket server writeAndFlush " + i);
                 }
                 log.info("writeAndFlush cost: {}", (System.nanoTime() - startTime) / 10000 / 100f);
             }
-        };
 
-        Consumer2<SocketSession, String> webSocketText = new Consumer2<SocketSession, String>() {
-            @Override public void accept(SocketSession socketSession, String message) {
+            @Override public void stringDispatcher(SocketSession session, String message) {
                 log.info("{}", message);
-                socketSession.write("socket server textWebSocketFrame");
+                session.write("socket server textWebSocketFrame");
             }
         };
 
         socketService = socketServerBuilder.socketService(bootstrapBuilder);
         socketService.init();
-        socketService.getServerMessageDecode().getDispatcher().setMsgBytesNotDispatcher(webSocketFrame);
-        socketService.getServerMessageDecode().getDispatcher().setStringDispatcher(webSocketText);
+        socketService.getServerMessageDecode().getDispatcher().setDispatcherHandler(dispatcherHandler);
         socketService.start();
 
         SocketClientBuilder socketClientBuilder = new SocketClientBuilder();

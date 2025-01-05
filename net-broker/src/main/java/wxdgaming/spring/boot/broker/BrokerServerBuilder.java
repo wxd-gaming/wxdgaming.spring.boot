@@ -41,16 +41,16 @@ public class BrokerServerBuilder {
         // socketService.getServerMessageDecode().getDispatcher().setStringDispatcher((socketSession, message) -> {
         //
         // });
-        socketService.getServerMessageDecode().getDispatcher().setMsgBytesNotDispatcher((socketSession, messageId, messageBytes) -> {
-            Integer sid = socketSession.attribute("sid");
-
-            ServerMapping serverMapping = dataCenter.getSessions().get(InnerMessage.Stype.GAME, sid);
-            if (serverMapping != null && serverMapping.getSession() != null) {
-                ByteBuf build = MessageEncode.build(messageId, messageBytes);
-                /*转发消息*/
-                serverMapping.getSession().writeAndFlush(build);
-            }
-        });
+        // socketService.getServerMessageDecode().getDispatcher().setMsgBytesNotDispatcher((socketSession, messageId, messageBytes) -> {
+        //     Integer sid = socketSession.attribute("sid");
+        //
+        //     ServerMapping serverMapping = dataCenter.getSessions().get(InnerMessage.Stype.GAME, sid);
+        //     if (serverMapping != null && serverMapping.getSession() != null) {
+        //         ByteBuf build = MessageEncode.build(messageId, messageBytes);
+        //         /*转发消息*/
+        //         serverMapping.getSession().writeAndFlush(build);
+        //     }
+        // });
         return socketService;
     }
 

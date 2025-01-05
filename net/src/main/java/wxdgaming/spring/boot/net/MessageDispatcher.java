@@ -1,16 +1,12 @@
 package wxdgaming.spring.boot.net;
 
-import ch.qos.logback.core.LogbackUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ReflectContext;
 import wxdgaming.spring.boot.core.SpringReflectContent;
-import wxdgaming.spring.boot.core.function.Consumer2;
-import wxdgaming.spring.boot.core.function.Consumer3;
 import wxdgaming.spring.boot.core.system.AnnUtil;
 import wxdgaming.spring.boot.core.threading.BaseScheduledExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
@@ -34,58 +30,23 @@ import java.util.function.Predicate;
 public abstract class MessageDispatcher implements InitPrint {
 
     protected final ConcurrentHashMap<Integer, DoMessageMapping> mappings = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<Integer, Class<? extends PojoBase>> messageId2Class = new ConcurrentHashMap<>();
     protected final ConcurrentHashMap<String, Integer> messageName2Id = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<String, Class<? extends PojoBase>> messageName2Class = new ConcurrentHashMap<>();
 
     private boolean printLogger = false;
-    private final String[] packages;
-    @Setter private Consumer3<SocketSession, Integer, byte[]> msgBytesNotDispatcher = (session, msgId, messageBytes) -> {
-        if (printLogger) {
-            Logger logger = LogbackUtil.logger();
-            logger.debug(
-                    "收到消息：ctx={}, id={}, len={} (未知消息)",
-                    session.toString(),
-                    msgId,
-                    messageBytes.length
-            );
-        }
-    };
 
-    @Setter private Consumer3<SocketSession, Integer, PojoBase> msgNotDispatcher = (session, msgId, message) -> {
-        if (printLogger) {
-            Logger logger = LogbackUtil.logger();
-            logger.debug(
-                    "收到消息：ctx={}, id={}, mes={}",
-                    session.toString(),
-                    msgId,
-                    message.toString()
-            );
-        }
-    };
+    @Setter MessageDispatcherHandler dispatcherHandler;
 
-    @Setter private Consumer2<SocketSession, String> stringDispatcher = (session, message) -> {
-        if (printLogger) {
-            Logger logger = LogbackUtil.logger();
-            logger.debug(
-                    "收到消息：ctx={}, mes={}",
-                    session.toString(),
-                    message
-            );
-        }
-    };
-
-    public MessageDispatcher(boolean printLogger, String[] packages) {
+    public MessageDispatcher(boolean printLogger) {
         this.printLogger = printLogger;
-        this.packages = packages;
+        dispatcherHandler = new MessageDispatcherHandler(printLogger) {};
     }
 
-    public void initMapping(SpringReflectContent springReflectContent) {
-        initMapping(springReflectContent, packages);
-    }
-
-    public void initMapping(SpringReflectContent springReflectContent, String[] params) {
+    public void initMapping(SpringReflectContent springReflectContent, String[] packages) {
         Predicate<Class<?>> filter = clazz -> {
-            if (params == null || params.length == 0) return true;
-            for (String p : params) {
+            if (packages == null || packages.length == 0) return true;
+            for (String p : packages) {
                 if (clazz.getName().startsWith(p)) return true;
             }
             return false;
@@ -103,6 +64,21 @@ public abstract class MessageDispatcher implements InitPrint {
                         log.debug("扫描消息处理接口 {}#{} {}", t.getLeft().getClass().getName(), t.getRight().getName(), parameterType.getName());
                     }
                 });
+    }
+
+    /**
+     * 解码消息
+     *
+     * @param msgId        消息id
+     * @param messageBytes 消息报文
+     * @param <T>          消息体类型
+     * @return 消息体
+     * @author: wxd-gaming(無心道, 15388152619)
+     * @version: 2025-01-05 11:04
+     */
+    public <T extends PojoBase> T decode(int msgId, byte[] messageBytes) {
+        Class<? extends PojoBase> aClass = messageId2Class.get(msgId);
+        return (T) SerializerUtil.decode(messageBytes, aClass);
     }
 
     public void registerMessage(ClassLoader classLoader, String... packages) {
@@ -123,7 +99,8 @@ public abstract class MessageDispatcher implements InitPrint {
         if (messageName2Id.put(pojoClass.getName(), msgId) == null) {
             log.debug("扫描注册消息：{} = {}", pojoClass.getName(), msgId);
         }
-
+        messageName2Class.put(pojoClass.getName(), pojoClass);
+        messageId2Class.put(msgId, pojoClass);
         return msgId;
     }
 
@@ -143,7 +120,7 @@ public abstract class MessageDispatcher implements InitPrint {
             };
             executor(socketSession, doMessageMapping.getExecutor(), doMessageMapping.queueName(), event);
         } else {
-            msgBytesNotDispatcher.accept(socketSession, msgId, messageBytes);
+            dispatcherHandler.msgBytesNotDispatcher(socketSession, msgId, messageBytes);
         }
     }
 
@@ -163,7 +140,7 @@ public abstract class MessageDispatcher implements InitPrint {
             };
             executor(socketSession, doMessageMapping.getExecutor(), doMessageMapping.queueName(), event);
         } else {
-            msgNotDispatcher.accept(socketSession, msgId, message);
+            dispatcherHandler.msgNotDispatcher(socketSession, msgId, message);
         }
     }
 

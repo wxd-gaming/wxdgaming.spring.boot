@@ -132,7 +132,7 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
     @ReLoad
     public void scanMessage(SpringReflect springReflect) {
         getClientMessageDecode().getDispatcher().initMapping(springReflect.content(), new String[]{NetScan.class.getPackageName()});
-        getClientMessageDecode().getDispatcher().initMapping(springReflect.content());
+        getClientMessageDecode().getDispatcher().initMapping(springReflect.content(), config.getScanPkgs());
     }
 
     @Override public void close() {
@@ -158,6 +158,10 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
                 .addListener((ChannelFutureListener) future -> {
                     Throwable cause = future.cause();
                     if (cause != null) {
+                        log.error("{} connect error {}", this.getClass().getSimpleName(), cause.toString());
+                        if (reconnection()) {
+                            log.info("{} reconnection", this.getClass().getSimpleName());
+                        }
                         return;
                     }
                     Channel channel = future.channel();
@@ -187,7 +191,7 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
             l = atomicLong.incrementAndGet();
         }
 
-        log.info("链接异常 {} 秒 重连", l);
+        log.info("{}链接异常 {} 秒 重连", this.hashCode(), l);
 
         executor.schedule(() -> {connect();}, l, TimeUnit.SECONDS);
         return true;

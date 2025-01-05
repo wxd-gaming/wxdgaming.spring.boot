@@ -42,7 +42,9 @@ public class ProtoBuf2Pojo {
                     imports.add(PojoBase.class.getName());
                     imports.add(Accessors.class.getName());
                     imports.add(List.class.getName());
+                    imports.add(ArrayList.class.getName());
                     imports.add(Map.class.getName());
+                    imports.add(LinkedHashMap.class.getName());
                     imports.add(MapOf.class.getName());
 
                     StringBuilder stringBuilder = new StringBuilder();
@@ -274,12 +276,21 @@ public class ProtoBuf2Pojo {
                                 .replace("string", String.class.getSimpleName())
                         ;
                     } else {
-                        field = string;
+                        if (repeated) {
+                            field = "List<" + string + ">";
+                        } else {
+                            field = string;
+                        }
                     }
                 }
             }
             fieldName = tmp.get(1);
             field += " " + tmp.get(1);
+            if (repeated) {
+                field += " = new ArrayList<>()";
+            } else if (field.contains("Map<")) {
+                field += " = new LinkedHashMap<>()";
+            }
             tag = Integer.parseInt(tmp.get(3));
         }
 

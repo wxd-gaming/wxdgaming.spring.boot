@@ -41,7 +41,7 @@ public class SocketService implements InitPrint, Closeable, ISession {
             config.setServiceClass(SocketService.class.getName());
         }
 
-        ServerMessageDispatcher messageDispatcher = new ServerMessageDispatcher(bootstrapBuilder.isPrintLogger(), config.getScanPkgs());
+        ServerMessageDispatcher messageDispatcher = new ServerMessageDispatcher(bootstrapBuilder.isPrintLogger());
         ServerMessageDecode serverMessageDecode = new ServerMessageDecode(messageDispatcher);
         ServerMessageEncode serverMessageEncode = new ServerMessageEncode(messageDispatcher);
 
@@ -156,7 +156,7 @@ public class SocketService implements InitPrint, Closeable, ISession {
     @ReLoad
     public void scanMessage(SpringReflectContent springReflectContent) {
         getServerMessageDecode().getDispatcher().initMapping(springReflectContent, new String[]{NetScan.class.getPackageName()});
-        getServerMessageDecode().getDispatcher().initMapping(springReflectContent);
+        getServerMessageDecode().getDispatcher().initMapping(springReflectContent, config.getScanPkgs());
     }
 
     /**

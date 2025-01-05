@@ -10,8 +10,8 @@ import wxdgaming.spring.boot.net.MessageDispatcher;
  **/
 public class ClientMessageDispatcher extends MessageDispatcher {
 
-    public ClientMessageDispatcher(boolean printLogger, String[] packages) {
-        super(printLogger, packages);
+    public ClientMessageDispatcher(boolean printLogger) {
+        super(printLogger);
     }
 
 }

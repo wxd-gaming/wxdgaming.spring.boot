@@ -7,6 +7,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.AttributeKey;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -22,7 +23,7 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
     public static final AttributeKey<ByteBuf> byteBufAttributeKey = AttributeKey.<ByteBuf>valueOf("__ctx_byteBuf__");
 
     protected final boolean autoRelease;
-    protected final MessageDispatcher dispatcher;
+    @Setter protected MessageDispatcher dispatcher;
 
     public MessageDecode(boolean autoRelease, MessageDispatcher dispatcher) {
         this.autoRelease = autoRelease;
@@ -83,7 +84,7 @@ public abstract class MessageDecode extends ChannelInboundHandlerAdapter {
                     if (!session.checkReceiveMessage(request.length())) {
                         return;
                     }
-                    dispatcher.getStringDispatcher().accept(session, request);
+                    dispatcher.getDispatcherHandler().stringDispatcher(session, request);
                 }
                 default -> log.warn("无法处理：{}", frame.getClass().getName());
             }
