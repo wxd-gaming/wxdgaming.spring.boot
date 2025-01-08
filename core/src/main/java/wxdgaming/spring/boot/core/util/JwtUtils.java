@@ -10,10 +10,10 @@ import java.util.concurrent.TimeUnit;
 
 public class JwtUtils {
 
-    static byte[] skey = "6b1a678d78e302fd9d264256f17fbec8t".getBytes(StandardCharsets.UTF_8);
-    static SecretKey key = Keys.hmacShaKeyFor(skey);
+    static SecretKey secretKey = Keys.hmacShaKeyFor("6b1a678d78e302fd9d264256f17fbec8t".getBytes(StandardCharsets.UTF_8));
 
-    public static void build() {
+    public static void build(String keyString) {
+        secretKey = Keys.hmacShaKeyFor(keyString.getBytes(StandardCharsets.UTF_8));
         createJwtBuilder();
         createJwtParser();
         /*调用一次实例化*/
@@ -28,7 +28,7 @@ public class JwtUtils {
     }
 
     public static JwtBuilder createJwtBuilder() {
-        return createJwtBuilder(key);
+        return createJwtBuilder(secretKey);
     }
 
     public static JwtBuilder createJwtBuilder(String private_key) {
@@ -45,7 +45,7 @@ public class JwtUtils {
     }
 
     public static JwtParser createJwtParser() {
-        return createJwtParser(key);
+        return createJwtParser(secretKey);
     }
 
     public static JwtParser createJwtParser(String private_key) {
@@ -63,7 +63,7 @@ public class JwtUtils {
     }
 
     public static Jws<Claims> parseJWT(String token) {
-        return parseJWT(createJwtParser(key), token);
+        return parseJWT(createJwtParser(secretKey), token);
     }
 
     public static Jws<Claims> parseJWT(String private_key, String token) {
