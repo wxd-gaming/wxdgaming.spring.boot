@@ -23,6 +23,8 @@ public class ClientConfig {
     private int maxFrameLength = -1;
     private int idleTimeout = 30;
     private int connectTimeout = 2000;
+    /** 默认最大连接数1 */
+    private int maxConnectNum = 1;
     /** 断线重连 */
     private boolean enableReconnection = false;
     private boolean enableSsl = false;

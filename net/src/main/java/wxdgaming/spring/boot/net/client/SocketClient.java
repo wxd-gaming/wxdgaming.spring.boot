@@ -11,8 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.SpringReflect;
-import wxdgaming.spring.boot.core.ann.ReLoad;
 import wxdgaming.spring.boot.core.ann.AppStart;
+import wxdgaming.spring.boot.core.ann.ReLoad;
 import wxdgaming.spring.boot.core.threading.BaseScheduledExecutor;
 import wxdgaming.spring.boot.core.threading.Event;
 import wxdgaming.spring.boot.core.timer.MyClock;
@@ -125,7 +125,7 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
     public synchronized void start() throws InterruptedException {
         if (started) return;
         started = true;
-        ChannelFuture channelFuture = connect();
+        connect();
     }
 
     @AppStart
@@ -148,16 +148,12 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
         log.info("shutdown tcp client：{}:{}", config.getHost(), config.getPort());
     }
 
-    public final ChannelFuture connect() {
-        return connect(socketSession -> {
-            sessionGroup.add(socketSession);
-            /*添加事件，如果链接关闭了触发*/
-            socketSession.getChannel().closeFuture().addListener(future -> {
-                sessionGroup.remove(socketSession);
-                reconnection();
-            });
-            socketClientDeviceHandler.getSessionHandler().openSession(socketSession);
-        });
+    public final void connect() {
+        if (sessionGroup.size() >= config.getMaxConnectNum()) {
+            log.error("{} 连接数已经达到最大连接数：{}", this.getClass().getSimpleName(), config.getMaxConnectNum());
+            return;
+        }
+        connect(null);
     }
 
     public ChannelFuture connect(Consumer<SocketSession> consumer) {
@@ -177,6 +173,16 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
                     socketSession.setMaxFrameLength(getConfig().getMaxFrameLength());
                     socketSession.setSsl(config.isEnableSsl());
                     log.debug("{} connect success {}", this.getClass().getSimpleName(), channel);
+
+                    sessionGroup.add(socketSession);
+                    /*添加事件，如果链接关闭了触发*/
+                    socketSession.getChannel().closeFuture().addListener(closeFuture -> {
+                        sessionGroup.remove(socketSession);
+                        reconnection();
+                    });
+
+                    socketClientDeviceHandler.getSessionHandler().openSession(socketSession);
+
                     if (consumer != null) {
                         consumer.accept(socketSession);
                     }
@@ -191,7 +197,8 @@ public abstract class SocketClient implements InitPrint, Closeable, ISession {
             || !config.isEnableReconnection()
             || executor.isShutdown()
             || executor.isTerminated()
-            || executor.isTerminating()) return false;
+            || executor.isTerminating())
+            return false;
 
         long l = atomicLong.get();
         if (l < 10) {

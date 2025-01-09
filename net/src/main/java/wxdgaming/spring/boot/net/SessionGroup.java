@@ -39,4 +39,8 @@ public class SessionGroup extends ConcurrentLoopList<SocketSession> {
         channelGroup.flush();
     }
 
+    public int size() {
+        return channelGroup.size();
+    }
+
 }
