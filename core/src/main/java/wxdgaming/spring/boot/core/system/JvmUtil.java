@@ -1,8 +1,6 @@
 package wxdgaming.spring.boot.core.system;
 
 
-import wxdgaming.spring.boot.core.util.StringsUtil;
-
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.Map;
@@ -136,7 +134,7 @@ public class JvmUtil {
      * 采用 GMT时区设置
      */
     public static TimeZone setTimeZone(String zoneId) {
-        if (StringsUtil.emptyOrNull(zoneId)) {
+        if (zoneId == null || zoneId.isBlank()) {
             throw new RuntimeException("zoneId = " + zoneId);
         }
         TimeZone timeZone = TimeZone.getTimeZone(zoneId);
