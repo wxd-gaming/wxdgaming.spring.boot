@@ -1,6 +1,7 @@
 package code.size;
 
 import org.junit.Test;
+import wxdgaming.spring.boot.core.format.data.Data2Size;
 
 public class MemoryTest {
 
@@ -40,5 +41,28 @@ public class MemoryTest {
             System.out.println(i1 == i2);
         }
     }
+
+    @Test
+    public void tsize() {
+        boolean bool = false;
+        byte byte1 = 0;
+        int i1 = 0;
+        long l1 = 0;
+        System.out.println(Data2Size.totalSize0(byte1));
+        System.out.println(Data2Size.totalSize0(bool));
+        System.out.println(Data2Size.totalSize0(i1));
+        System.out.println(Data2Size.totalSize0(l1));
+        A obj = new A();
+        System.out.println(Data2Size.totalSize0(obj));
+        System.out.println(Data2Size.totalSize0(obj.bool));
+    }
+
+    public static class A {
+        boolean bool = false;
+        byte byte1 = 0;
+        int i1 = 0;
+        long l1 = 0;
+    }
+
 
 }
