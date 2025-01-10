@@ -23,15 +23,15 @@ import java.util.Map;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties("spring.db2")
-@ConditionalOnProperty("spring.db2.config.url")
-public class Jdbc2Helper implements InitPrint {
+@ConfigurationProperties("spring.jdbc4")
+@ConditionalOnProperty("spring.jdbc4.config.url")
+public class JdbcHelper4 implements InitPrint {
 
     DruidSourceConfig config;
     DruidDataSource dataSource;
     EntityManager entityManager;
 
-    @Bean("jdbcContext2")
+    @Bean("jdbcContext4")
     public JdbcContext jdbcContext() {
         config.createDatabase();
         dataSource = config.toDataSource();

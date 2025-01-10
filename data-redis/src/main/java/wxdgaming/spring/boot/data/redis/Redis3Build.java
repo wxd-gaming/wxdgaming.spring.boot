@@ -28,14 +28,14 @@ public class Redis3Build extends RedisBuildBase {
 
     private RedisProperties config;
 
-    @Bean("redis3ConnectionFactory")
+    @Bean("redisConnectionFactory3")
     public RedisConnectionFactory redisConnectionFactory() {
         return redisConnectionFactory(config);
     }
 
-    @Bean("redis3Template")
+    @Bean("redisTemplate3")
     public RedisTemplate<String, Object> redisTemplate(
-            @Qualifier("redis3ConnectionFactory") RedisConnectionFactory redisConnectionFactory) {
+            @Qualifier("redisConnectionFactory3") RedisConnectionFactory redisConnectionFactory) {
         return buildRedisTemplate(redisConnectionFactory);
     }
 

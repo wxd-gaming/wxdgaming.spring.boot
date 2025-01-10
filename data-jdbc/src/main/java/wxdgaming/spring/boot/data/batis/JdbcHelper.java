@@ -22,8 +22,8 @@ import wxdgaming.spring.boot.core.InitPrint;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties("spring.db")
-@ConditionalOnProperty("spring.db.config.url")
+@ConfigurationProperties("spring.jdbc")
+@ConditionalOnProperty("spring.jdbc.config.url")
 public class JdbcHelper implements InitPrint {
 
     DruidSourceConfig config;

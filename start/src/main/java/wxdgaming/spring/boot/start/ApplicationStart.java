@@ -70,15 +70,15 @@ public class ApplicationStart {
 
         RedisTemplate<String, Object> redisTemplate = runBean.getBean(RedisTemplate.class);
         redisTemplate.opsForValue().setIfAbsent("1", "1");
-        RedisTemplate<String, Object> redis2Template = runBean.getBean("redis2Template");
-        redis2Template.opsForValue().set("2", "2");
+        RedisTemplate<String, Object> redisTemplate2 = runBean.getBean("redisTemplate2");
+        redisTemplate2.opsForValue().set("2", "2");
         long l = System.nanoTime();
         HashMap<String, String> putAll = new HashMap<>();
         for (int i = 0; i < 10000; i++) {
-            // redis2Template.opsForValue().set(String.valueOf(i), String.valueOf(i));
+            // redisTemplate2.opsForValue().set(String.valueOf(i), String.valueOf(i));
             putAll.put(String.valueOf(i), String.valueOf(i));
         }
-        redis2Template.opsForHash().putAll("redis2Template", putAll);
+        redisTemplate2.opsForHash().putAll("redisTemplate2", putAll);
         log.info("redis 耗时：{} ms", (System.nanoTime() - l) / 10000 / 100f);
         RpcService rpcService = runBean.getBean(RpcService.class);
         RpcDispatcher rpcDispatcher = rpcService.getRpcDispatcher();

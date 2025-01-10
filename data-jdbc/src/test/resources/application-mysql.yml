@@ -7,7 +7,7 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
 
-  db:
+  jdbc:
     config:
       url: jdbc:mysql://localhost:3306/db1?serverTimezone=UTC&autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&rewriteBatchedStatements=true
       username: root
@@ -18,7 +18,7 @@ spring:
       packageNames: code.db1
 
 
-  db2:
+  jdbc2:
     config:
       url: jdbc:mysql://localhost:3306/db2?serverTimezone=UTC&autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&rewriteBatchedStatements=true
       username: root
