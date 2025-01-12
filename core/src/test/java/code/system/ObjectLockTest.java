@@ -52,13 +52,11 @@ public class ObjectLockTest {
         }
         for (int i = 0; i < 10; i++) {
             String loginName = new String("loginName");
-            logicExecutor.execute(
-                    () -> {
-                        synchronized (loginName.intern()) {
-                            lock(loginName);
-                        }
-                    }
-            );
+            logicExecutor.execute(() -> {
+                synchronized (loginName.intern()) {
+                    lock(loginName);
+                }
+            });
         }
         Thread.sleep(15000);
     }
