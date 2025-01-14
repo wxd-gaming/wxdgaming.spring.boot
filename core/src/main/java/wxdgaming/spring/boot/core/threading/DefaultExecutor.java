@@ -13,7 +13,7 @@ import wxdgaming.spring.boot.core.InitPrint;
 @Component
 public class DefaultExecutor extends BaseScheduledExecutor implements InitPrint {
 
-    public DefaultExecutor(@Value("${defaultCoreSize:2}") int coreSize) {
+    public DefaultExecutor(@Value("${server.executor.defaultCoreSize:2}") int coreSize) {
         super("default", coreSize);
     }
 

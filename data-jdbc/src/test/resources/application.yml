@@ -15,7 +15,7 @@ server:
   executor:
     defaultCoreSize: 2 #默认线程池
     logicCoreSize: 10 #逻辑线程池
-    virtual-core-size: 200 # 启用虚拟线程 控制并发线程数量
+    virtualCoreSize: 200 # 启用虚拟线程 控制并发线程数量
 
 spring:
   main:
