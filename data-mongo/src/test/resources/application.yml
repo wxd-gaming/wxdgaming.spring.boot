@@ -1,0 +1,7 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost/test
+      auto-index-creation: true
+    mongodb2:
+      uri: mongodb://localhost/test2

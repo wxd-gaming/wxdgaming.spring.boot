@@ -1,7 +1,7 @@
 spring:
   db:
     config:
-      url: jdbc:mysql://localhost:3306/db1?serverTimezone=UTC&autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&rewriteBatchedStatements=true
+      url: jdbc:mysql://192.168.137.10:3306/db1?serverTimezone=UTC&autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&rewriteBatchedStatements=true
       username: root
       password: test
       driver-class-name: com.mysql.cj.jdbc.Driver
@@ -12,7 +12,7 @@ spring:
 
   db2:
     config:
-      url: jdbc:mysql://localhost:3306/db2?serverTimezone=UTC&autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&rewriteBatchedStatements=true
+      url: jdbc:mysql://192.168.137.10:3306/db2?serverTimezone=UTC&autoReconnect=true&useUnicode=true&characterEncoding=utf8&useSSL=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&rewriteBatchedStatements=true
       username: root
       password: test
       driver-class-name: com.mysql.cj.jdbc.Driver

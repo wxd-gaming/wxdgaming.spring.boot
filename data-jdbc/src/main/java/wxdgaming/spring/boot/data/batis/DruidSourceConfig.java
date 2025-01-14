@@ -20,6 +20,7 @@ import wxdgaming.spring.boot.core.util.StringsUtil;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -180,37 +181,54 @@ public class DruidSourceConfig extends ObjectBase {
     /** 创建数据库 , 吃方法创建数据库后会自动使用 use 语句 */
     public void createDatabase() {
         if (url.contains("jdbc:h2")) return;
-        String dbName = getDbName();
-        try (Connection connection = getConnection()) {
-            Consumer<String> stringConsumer = (character) -> {
-                String databaseString = createDatabaseString(dbName, character);
-                try (Statement statement = connection.createStatement()) {
-                    int update = statement.executeUpdate(databaseString);
-                    log.info("数据库 {} 创建 {}", dbName, update);
-                } catch (Exception e) {
-                    throw Throw.of(e);
+        if (url.contains("jdbc:mysql")) {
+            String dbName = getDbName();
+            try (Connection connection = getConnection("INFORMATION_SCHEMA")) {
+                Consumer<String> stringConsumer = (character) -> {
+                    String databaseString = createDatabaseString(dbName, character);
+                    try (Statement statement = connection.createStatement()) {
+                        int update = statement.executeUpdate(databaseString);
+                        log.info("数据库 {} 创建 {}", dbName, update);
+                    } catch (Exception e) {
+                        throw Throw.of(e);
+                    }
+                };
+                try {
+                    stringConsumer.accept("utf8mb4");
+                } catch (Throwable t) {
+                    if (t.getMessage().contains("utf8mb4")) {
+                        log.warn("数据库 {} 不支持 utf8mb4 格式 重新用 utf8 字符集创建数据库", dbName, new RuntimeException());
+                        stringConsumer.accept("utf8");
+                    } else {
+                        log.error("创建数据库 {}", dbName, t);
+                    }
                 }
-            };
-            try {
-                stringConsumer.accept("utf8mb4");
-            } catch (Throwable t) {
-                if (t.getMessage().contains("utf8mb4")) {
-                    log.warn("数据库 {} 不支持 utf8mb4 格式 重新用 utf8 字符集创建数据库", dbName, new RuntimeException());
-                    stringConsumer.accept("utf8");
-                } else {
-                    log.error("创建数据库 {}", dbName, t);
-                }
+            } catch (Exception e) {
+                log.error("创建数据库 {}", dbName, e);
             }
-        } catch (Exception e) {
-            log.error("创建数据库 {}", dbName, e);
+        } else if (url.contains("jdbc:postgresql:")) {
+            String dbName = getDbName();
+            try (Connection connection = getConnection("postgres"); Statement statement = connection.createStatement()) {
+                String formatted = "SELECT 1 as t FROM pg_database WHERE datname = '%s'".formatted(dbName);
+                log.debug("数据库 {}", formatted);
+                ResultSet resultSet = statement.executeQuery(formatted);
+                if (resultSet.next()) {
+                    log.debug("数据库 {} 已经存在", dbName);
+                    return;
+                }
+                boolean execute = statement.execute("CREATE DATABASE %s".formatted(dbName));
+                log.debug("数据库 {} 创建 {}", dbName, execute);
+            } catch (Exception e) {
+                log.error("创建数据库 {}", dbName, e);
+            }
         }
     }
 
-    private Connection getConnection() {
+    private Connection getConnection(String databaseName) {
         try {
             Class.forName(getDriverClassName());
             return DriverManager.getConnection(
-                    url.replace(getDbName(), "INFORMATION_SCHEMA"),
+                    url.replace(getDbName(), databaseName),
                     username,
                     password
             );

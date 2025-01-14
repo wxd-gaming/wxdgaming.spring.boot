@@ -1,0 +1,17 @@
+spring:
+  jpa:
+    database: h2
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+
+  jdbc:
+    config:
+      url: jdbc:h2:file:./target/database/test
+      username: root
+      password: test
+      driver-class-name: org.h2.Driver
+      show-sql: false
+      ddl-auto: "update"

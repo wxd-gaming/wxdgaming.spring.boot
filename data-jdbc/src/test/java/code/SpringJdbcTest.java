@@ -17,8 +17,13 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import wxdgaming.spring.boot.core.CoreScan;
+import wxdgaming.spring.boot.core.format.HexId;
 import wxdgaming.spring.boot.data.batis.DataJdbcScan;
 import wxdgaming.spring.boot.data.batis.JdbcContext;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * 通过spring注入测试jdbc
@@ -35,21 +40,31 @@ import wxdgaming.spring.boot.data.batis.JdbcContext;
 @SpringBootTest(classes = {CoreScan.class, DataJdbcScan.class})
 public class SpringJdbcTest {
 
+    HexId hexId = new HexId(1);
     @Autowired JdbcContext jdbcContext;
-    @Qualifier("jdbcContext2")
-    @Autowired JdbcContext jdbcContext2;
     @Autowired Log1Jpa log1Repository;
+    @Qualifier("jdbcContext2")
+    @Autowired(required = false) JdbcContext jdbcContext2;
     @Autowired(required = false) Log2Jpa log2Repository;
 
     @Test
     public void insert() {
-        log1Repository.save(new Log1().setUid(System.nanoTime()));
-        jdbcContext.save(new Log1().setUid(System.nanoTime()));
+        IntStream.range(1, 10000).parallel()
+                .forEach(k -> {
+                    long nanoTime = System.nanoTime();
+                    List<Log1> logs = new ArrayList<>();
+                    for (int i = 0; i < 2000; i++) {
+                        logs.add(new Log1().setUid(hexId.newId()).setName(String.valueOf(i)));
+                    }
+                    jdbcContext.batchInsert(logs);
+                    System.out.println((System.nanoTime() - nanoTime) / 10000 / 100f + " ms");
+                });
     }
 
     @Test
     public void insert2() {
-        jdbcContext2.save(new Log2().setUid(System.nanoTime()));
+        jdbcContext2.save(new Log2().setUid(hexId.newId()));
+        log.info("end");
     }
 
 
