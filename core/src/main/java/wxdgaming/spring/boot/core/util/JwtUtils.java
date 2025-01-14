@@ -28,20 +28,29 @@ public class JwtUtils {
     }
 
     public static JwtBuilder createJwtBuilder() {
-        return createJwtBuilder(secretKey);
+        return createJwtBuilder(TimeUnit.DAYS.toMillis(6));
+    }
+
+    public static JwtBuilder createJwtBuilder(long duration) {
+        return createJwtBuilder(secretKey, duration);
     }
 
     public static JwtBuilder createJwtBuilder(String private_key) {
-        return createJwtBuilder(Keys.hmacShaKeyFor(private_key.getBytes(StandardCharsets.UTF_8)));
+        return createJwtBuilder(private_key, TimeUnit.DAYS.toMillis(6));
     }
 
-    public static JwtBuilder createJwtBuilder(SecretKey key) {
+    public static JwtBuilder createJwtBuilder(String private_key, long duration) {
+        return createJwtBuilder(Keys.hmacShaKeyFor(private_key.getBytes(StandardCharsets.UTF_8)), duration);
+    }
+
+    public static JwtBuilder createJwtBuilder(SecretKey key, long duration) {
         // 生成 HMAC 密钥，根据提供的字节数组长度选择适当的 HMAC 算法，并返回相应的 SecretKey 对象。
         // 设置jwt的body
         return Jwts.builder()
                 // 设置签名使用的签名算法和签名使用的秘钥
                 // 如果有私有声明，一定要先设置这个自己创建的私有的声明，这个是给builder的claim赋值，一旦写在标准的声明赋值之后，就是覆盖了那些标准的声明的
-                .signWith(key);
+                .signWith(key)
+                .expiration(new Date(System.currentTimeMillis() + duration));
     }
 
     public static JwtParser createJwtParser() {
