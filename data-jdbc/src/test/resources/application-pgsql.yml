@@ -9,9 +9,9 @@ spring:
 
   jdbc:
     config:
+      driver-class-name: org.postgresql.Driver
       url: jdbc:postgresql://192.168.137.10:5432/test
       username: postgres
       password: test
-      driver-class-name: org.postgresql.Driver
       show-sql: false
       ddl-auto: "update"

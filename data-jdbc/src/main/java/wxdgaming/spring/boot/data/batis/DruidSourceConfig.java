@@ -210,14 +210,13 @@ public class DruidSourceConfig extends ObjectBase {
             String dbName = getDbName();
             try (Connection connection = getConnection("postgres"); Statement statement = connection.createStatement()) {
                 String formatted = "SELECT 1 as t FROM pg_database WHERE datname = '%s'".formatted(dbName);
-                log.debug("数据库 {}", formatted);
                 ResultSet resultSet = statement.executeQuery(formatted);
                 if (resultSet.next()) {
                     log.debug("数据库 {} 已经存在", dbName);
                     return;
                 }
                 boolean execute = statement.execute("CREATE DATABASE %s".formatted(dbName));
-                log.debug("数据库 {} 创建 {}", dbName, execute);
+                log.info("数据库 {} 创建 {}", dbName, execute);
             } catch (Exception e) {
                 log.error("创建数据库 {}", dbName, e);
             }
