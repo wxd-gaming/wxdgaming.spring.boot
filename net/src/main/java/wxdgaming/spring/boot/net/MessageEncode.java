@@ -52,7 +52,7 @@ public abstract class MessageEncode extends ChannelOutboundHandlerAdapter {
                     super.write(ctx, byteBuf, promise);
                 }
                 if (messageDispatcher.isPrintLogger()) {
-                    log.info("{} 发送消息：{}, {}", session, msgId, pojoBase.getClass().getName());
+                    log.debug("{} 发送消息：{}, {}", session, msgId, pojoBase.getClass().getName());
                 }
             }
             case byte[] bytes -> {
