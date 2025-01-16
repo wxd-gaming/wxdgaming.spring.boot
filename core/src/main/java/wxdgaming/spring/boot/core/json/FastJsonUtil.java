@@ -42,6 +42,16 @@ public class FastJsonUtil {
      * 这个是会给所有的值对象加入引号，不管是否是字符串；
      * <p>json 标准key值必须是字符串
      */
+    public static final SerializerFeature[] Writer_Features_Type_Key_String;
+    /**
+     * 这个是会给所有的值对象加入引号，不管是否是字符串；
+     * <p>json 标准key值必须是字符串, js long精度问题需要转string
+     */
+    public static final SerializerFeature[] Writer_Features_Type_K_V_String;
+    /**
+     * 这个是会给所有的值对象加入引号，不管是否是字符串；
+     * <p>json 标准key值必须是字符串
+     */
     public static final SerializerFeature[] Writer_Features_Fmt_Key_String;
     /**
      * 这个是会给所有的值对象加入引号，不管是否是字符串；
@@ -82,6 +92,9 @@ public class FastJsonUtil {
         Writer_Features_Key_String = MergeUtil.merge(Writer_Features, SerializerFeature.WriteNonStringKeyAsString);/*所有的 key 都用引号*/
         Writer_Features_K_V_String = MergeUtil.merge(Writer_Features_Key_String, SerializerFeature.WriteNonStringValueAsString);/*所有的 value 都用引号*/
 
+        Writer_Features_Type_Key_String = MergeUtil.merge(Writer_Features, SerializerFeature.WriteClassName, SerializerFeature.WriteNonStringKeyAsString);/*所有的 key 都用引号*/
+        Writer_Features_Type_K_V_String = MergeUtil.merge(Writer_Features_Key_String, SerializerFeature.WriteClassName, SerializerFeature.WriteNonStringValueAsString);/*所有的 value 都用引号*/
+
         Writer_Features_Fmt_Key_String = MergeUtil.merge(Writer_Features_Key_String, SerializerFeature.PrettyFormat);/*所有的 key 都用引号*/
         Writer_Features_Fmt_K_V_String = MergeUtil.merge(Writer_Features_K_V_String, SerializerFeature.PrettyFormat);/*所有的 value 都用引号*/
 
@@ -102,6 +115,16 @@ public class FastJsonUtil {
     /** 一般是js用的，所有 key - value 值都是字符串 格式化 */
     public static String toJsonAllAsString(Object object) {
         return JSON.toJSONString(object, Writer_Features_K_V_String);
+    }
+
+    /** 一般是js用的，所有 key 值都是字符串 格式化 */
+    public static String toJsonTypeKeyAsString(Object object) {
+        return JSON.toJSONString(object, Writer_Features_Type_Key_String);
+    }
+
+    /** 一般是js用的，所有 key - value 值都是字符串 格式化 */
+    public static String toJsonTypeAllAsString(Object object) {
+        return JSON.toJSONString(object, Writer_Features_Type_K_V_String);
     }
 
     /** 一般是js用的，所有 key 值都是字符串 格式化 */

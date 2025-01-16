@@ -25,13 +25,13 @@ public class InnerHeartController {
     @ProtoMapper
     public void reqHeartAction(SocketSession session, InnerMessage.ReqHeart reqHeart) throws Exception {
         if (printLogger)
-            log.debug("心跳包{} {}", session, reqHeart.getMilli());
+            log.debug("内部心跳包{} {}", session, reqHeart.getMilli());
     }
 
     @ProtoMapper
     public void resHeartAction(SocketSession session, InnerMessage.ResHeart resHeart) throws Exception {
         if (printLogger)
-            log.debug("心跳包{} {}", session, resHeart.getMilli());
+            log.debug("内部心跳包{} {}", session, resHeart.getMilli());
     }
 
 }

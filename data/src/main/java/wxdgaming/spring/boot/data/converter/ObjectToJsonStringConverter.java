@@ -13,11 +13,15 @@ import wxdgaming.spring.boot.core.json.FastJsonUtil;
  */
 @Converter
 public class ObjectToJsonStringConverter implements AttributeConverter<Object, String> {
+
     @Override public String convertToDatabaseColumn(Object attribute) {
-        return FastJsonUtil.toJsonWriteType(attribute);
+        String jsonWriteType = FastJsonUtil.toJsonWriteType(attribute);
+        // System.out.println(jsonWriteType);
+        return jsonWriteType;
     }
 
     @Override public Object convertToEntityAttribute(String dbData) {
         return FastJsonUtil.parse(dbData, new TypeReference<>() {});
     }
+
 }
