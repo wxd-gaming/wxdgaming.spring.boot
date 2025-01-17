@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import wxdgaming.spring.boot.core.ann.AppStart;
+import wxdgaming.spring.boot.core.ann.LogicStart;
 import wxdgaming.spring.boot.core.ann.ReLoad;
 import wxdgaming.spring.boot.core.lang.Tuple2;
 import wxdgaming.spring.boot.core.system.AnnUtil;
@@ -80,11 +80,17 @@ public class SpringReflectContent {
         executorMethod(AppStart.class);
     }
 
+    /** 执行{@link LogicStart}注解方法 */
+    public void executorLogicStartMethod() {
+        executorMethod(LogicStart.class);
+    }
+
     /** 执行{@link ReLoad}注解方法 */
     public void executorReloadMethod() {
         executorMethod(ReLoad.class);
     }
 
+    /** 调用执行含有指定注解的方法 */
     public void executorMethod(Class<? extends Annotation> annotationType) {
         withMethodAnnotated(annotationType)
                 .sorted(METHOD_COMPARATOR)
@@ -151,7 +157,8 @@ public class SpringReflectContent {
         @SuppressWarnings("unchecked")
         Stream<U> tmp = stream()
                 .map(v -> v.instance)
-                .filter(e -> cls.isAssignableFrom(e.getClass())).map(c -> (U) c);
+                .filter(e -> cls.isAssignableFrom(e.getClass()))
+                .map(c -> (U) c);
         if (predicate != null) tmp = tmp.filter(predicate);
         return tmp;
     }
