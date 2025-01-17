@@ -1,6 +1,7 @@
 package code;
 
 import code.pgsql.PgsqlLogTest;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.jupiter.api.RepeatedTest;
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import wxdgaming.spring.boot.core.CoreScan;
@@ -33,6 +35,7 @@ import java.util.stream.Stream;
 @Slf4j
 @RunWith(SpringRunner.class)
 @ExtendWith(SpringExtension.class)
+@ActiveProfiles("pgsql")
 @SpringBootApplication
 @EntityScan(basePackages = {"code.pgsql"})
 @EnableJpaRepositories("code.pgsql")
@@ -44,7 +47,7 @@ public class SpringPgsqlTest {
 
     @Test
     public void insert() {
-        IntStream.range(0, 10000)
+        IntStream.range(0, 100)
                 .parallel()
                 .forEach(k -> {
                     long nanoTime = System.nanoTime();
@@ -58,6 +61,7 @@ public class SpringPgsqlTest {
                         logTest.getSensors().put("b", RandomUtils.random(1, 10000));
                         logTest.getSensors().put("c", RandomUtils.random(1, 10000));
                         logTest.getSensors().put("d", RandomUtils.random(1, 10000));
+                        logTest.getSensors().put("e", new JSONObject().fluentPut("aa", String.valueOf(RandomUtils.random(1, 10000))));
                         logTests.add(logTest);
                     }
                     jdbcContext.batchInsert(logTests);
@@ -70,13 +74,14 @@ public class SpringPgsqlTest {
     public void select() {
         long nanoTime = System.nanoTime();
         String string = String.valueOf(RandomUtils.random(1, 10000));
-        Stream<PgsqlLogTest> all2Stream = jdbcContext.findAll2Stream(
-                "from " + PgsqlLogTest.class.getSimpleName() + " where jsonb_extract_path_text(sensors,'a') = ?1",
+        List<PgsqlLogTest> all2Stream = jdbcContext.findAll(
+                "from " + PgsqlLogTest.class.getSimpleName() + " where jsonb_extract_path_text(sensors,'e','aa') = ?1",
                 PgsqlLogTest.class,
                 string
         );
         System.out.println((System.nanoTime() - nanoTime) / 10000 / 100f + " ms");
-        System.out.println("select $a=" + string + " - count = " + all2Stream.count());
+        System.out.println("select $a=" + string + " - count = " + all2Stream.size());
+        all2Stream.forEach(item -> System.out.println(item));
     }
 
     @Test

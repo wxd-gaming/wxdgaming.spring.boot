@@ -1,6 +1,7 @@
 package code;
 
 import code.mysql.MysqlLogTest;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.jupiter.api.RepeatedTest;
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import wxdgaming.spring.boot.core.CoreScan;
@@ -33,6 +35,7 @@ import java.util.stream.Stream;
 @Slf4j
 @RunWith(SpringRunner.class)
 @ExtendWith(SpringExtension.class)
+@ActiveProfiles("mysql")
 @SpringBootApplication
 @EntityScan(basePackages = {"code.mysql"})
 @EnableJpaRepositories("code.mysql")
@@ -44,7 +47,7 @@ public class SpringMysqlTest {
 
     @Test
     public void insert() {
-        IntStream.range(0, 10000)
+        IntStream.range(0, 100)
                 .parallel()
                 .forEach(k -> {
                     long nanoTime = System.nanoTime();
@@ -58,6 +61,7 @@ public class SpringMysqlTest {
                         logTest.getSensors().put("b", String.valueOf(RandomUtils.random(1, 10000)));
                         logTest.getSensors().put("c", String.valueOf(RandomUtils.random(1, 10000)));
                         logTest.getSensors().put("d", String.valueOf(RandomUtils.random(1, 10000)));
+                        logTest.getSensors().put("e", new JSONObject().fluentPut("aa", String.valueOf(RandomUtils.random(1, 10000))));
                         logTests.add(logTest);
                     }
                     jdbcContext.batchInsert(logTests);
@@ -70,13 +74,13 @@ public class SpringMysqlTest {
     public void select() {
         long nanoTime = System.nanoTime();
         String string = String.valueOf(RandomUtils.random(1, 10000));
-        Stream<MysqlLogTest> all2Stream = jdbcContext.findAll2Stream(
-                "from " + MysqlLogTest.class.getSimpleName() + " where json_extract(sensors,'$.a') = ?1",
+        List<MysqlLogTest> all2Stream = jdbcContext.findAll(
+                "from " + MysqlLogTest.class.getSimpleName() + " where json_extract(sensors,'$.e.aa') = ?1",
                 MysqlLogTest.class,
                 string
         );
         System.out.println((System.nanoTime() - nanoTime) / 10000 / 100f + " ms");
-        System.out.println("select $a=" + string + " - count = " + all2Stream.count());
+        System.out.println("select $a=" + string + " - count = " + all2Stream.size());
     }
 
     @Test

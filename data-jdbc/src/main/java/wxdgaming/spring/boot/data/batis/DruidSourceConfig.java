@@ -188,7 +188,7 @@ public class DruidSourceConfig extends ObjectBase {
                     String databaseString = createDatabaseString(dbName, character);
                     try (Statement statement = connection.createStatement()) {
                         int update = statement.executeUpdate(databaseString);
-                        log.info("数据库 {} 创建 {}", dbName, update);
+                        log.info("mysql 数据库 {} 创建 {}", dbName, update);
                     } catch (Exception e) {
                         throw Throw.of(e);
                     }
@@ -197,14 +197,14 @@ public class DruidSourceConfig extends ObjectBase {
                     stringConsumer.accept("utf8mb4");
                 } catch (Throwable t) {
                     if (t.getMessage().contains("utf8mb4")) {
-                        log.warn("数据库 {} 不支持 utf8mb4 格式 重新用 utf8 字符集创建数据库", dbName, new RuntimeException());
+                        log.warn("mysql 数据库 {} 不支持 utf8mb4 格式 重新用 utf8 字符集创建数据库", dbName, new RuntimeException());
                         stringConsumer.accept("utf8");
                     } else {
-                        log.error("创建数据库 {}", dbName, t);
+                        log.error("mysql 创建数据库 {}", dbName, t);
                     }
                 }
             } catch (Exception e) {
-                log.error("创建数据库 {}", dbName, e);
+                log.error("mysql 创建数据库 {}", dbName, e);
             }
         } else if (url.contains("jdbc:postgresql:")) {
             String dbName = getDbName();
@@ -212,13 +212,13 @@ public class DruidSourceConfig extends ObjectBase {
                 String formatted = "SELECT 1 as t FROM pg_database WHERE datname = '%s'".formatted(dbName);
                 ResultSet resultSet = statement.executeQuery(formatted);
                 if (resultSet.next()) {
-                    log.debug("数据库 {} 已经存在", dbName);
+                    log.debug("pgsql 数据库 {} 已经存在", dbName);
                     return;
                 }
                 boolean execute = statement.execute("CREATE DATABASE %s".formatted(dbName));
-                log.info("数据库 {} 创建 {}", dbName, execute);
+                log.info("pgsql 数据库 {} 创建 {}", dbName, execute);
             } catch (Exception e) {
-                log.error("创建数据库 {}", dbName, e);
+                log.error("pgsql 创建数据库 {}", dbName, e);
             }
         }
     }

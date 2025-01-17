@@ -5,8 +5,6 @@ server:
     virtualCoreSize: 200 # 启用虚拟线程 控制并发线程数量
 
 spring:
-  profiles:
-    active: mysql
   main:
     allow-bean-definition-overriding: true
     web-application-type: none

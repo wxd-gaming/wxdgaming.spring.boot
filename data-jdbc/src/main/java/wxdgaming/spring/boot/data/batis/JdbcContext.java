@@ -158,6 +158,14 @@ public class JdbcContext {
         }
     }
 
+    public <T extends EntityUID> List<T> findAll(String qlString, Class<T> clazz, Object... params) {
+        TypedQuery<T> query = context().createQuery(qlString, clazz);
+        for (int i = 0; i < params.length; i++) {
+            query.setParameter(i + 1, params[i]);
+        }
+        return query.getResultList();
+    }
+
     public <T extends EntityUID> Stream<T> findAll2Stream(Class<T> clazz) {
         EntityManager entityManager = context();
         try {
