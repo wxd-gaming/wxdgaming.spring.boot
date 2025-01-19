@@ -23,13 +23,9 @@ import wxdgaming.spring.boot.data.converter.ObjectToJsonStringConverter;
 @Table(indexes = {
         @Index(columnList = "name"),
         @Index(columnList = "name2"),
-        @Index(columnList = "name3"),
 })
 public class PgsqlLogTest extends EntityBase<Long> {
 
-    private boolean online;
-    private short lv;
-    private int exp;
     private String name;
     private String name2;
     private String name3;

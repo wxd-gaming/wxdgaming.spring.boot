@@ -47,22 +47,13 @@ public class SpringMysqlTest {
     @Autowired JdbcContext jdbcContext;
 
     @Test
-    @RepeatedTest(5)
-    public void selectCount() {
-        long nanoTime = System.nanoTime();
-        long count = jdbcContext.count(MysqlLogTest.class);
-        System.out.println((System.nanoTime() - nanoTime) / 10000 / 100f + " ms");
-        System.out.println("select count=" + count);
-    }
-
-    @Test
-    public void insert_100w() {
-        insert(1000);
-    }
-
-    @Test
     public void insert_10w() {
         insert(100);
+    }
+
+    @Test
+    public void insert_1w() {
+        insert(10);
     }
 
     public void insert(int count) {
@@ -74,13 +65,13 @@ public class SpringMysqlTest {
                     for (int i = 0; i < 1000; i++) {
                         MysqlLogTest logTest = new MysqlLogTest().setUid(hexId.newId())
                                 .setName(String.valueOf(i));
-                        // logTest.setName2(String.valueOf(i));
-                        // logTest.setName3(String.valueOf(i));
+                        logTest.setName2(String.valueOf(i));
+                        logTest.setName3(String.valueOf(i));
                         logTest.getSensors().put("a", String.valueOf(RandomUtils.random(1, 10000)));
                         logTest.getSensors().put("b", String.valueOf(RandomUtils.random(1, 10000)));
-                        // logTest.getSensors().put("c", String.valueOf(RandomUtils.random(1, 10000)));
-                        // logTest.getSensors().put("d", String.valueOf(RandomUtils.random(1, 10000)));
-                        // logTest.getSensors().put("e", new JSONObject().fluentPut("aa", String.valueOf(RandomUtils.random(1, 10000))));
+                        logTest.getSensors().put("c", String.valueOf(RandomUtils.random(1, 10000)));
+                        logTest.getSensors().put("d", String.valueOf(RandomUtils.random(1, 10000)));
+                        logTest.getSensors().put("e", new JSONObject().fluentPut("aa", String.valueOf(RandomUtils.random(1, 10000))));
                         logTests.add(logTest);
                     }
                     jdbcContext.batchInsert(logTests);
@@ -90,8 +81,23 @@ public class SpringMysqlTest {
 
     @Test
     @RepeatedTest(5)
-    public void selectA() {
+    public void selectCount() {
+        long nanoTime = System.nanoTime();
+        long count = jdbcContext.count(MysqlLogTest.class);
+        System.out.println((System.nanoTime() - nanoTime) / 10000 / 100f + " ms");
+        System.out.println("select count=" + count);
+    }
+
+    @Test
+    @RepeatedTest(5)
+    public void selectJsonA() {
         selectJson("a");
+    }
+
+    @Test
+    @RepeatedTest(5)
+    public void selectJsonEA() {
+        selectJson("e.aa");
     }
 
     public void selectJson(String json_path) {
@@ -100,11 +106,12 @@ public class SpringMysqlTest {
         List<MysqlLogTest> all2Stream = jdbcContext.findAll(
                 "from " + MysqlLogTest.class.getSimpleName() + " where json_extract(sensors,?1) = ?2",
                 MysqlLogTest.class,
-                "$sensors." + json_path,
+                "$." + json_path,
                 string
         );
         System.out.println((System.nanoTime() - nanoTime) / 10000 / 100f + " ms");
         System.out.println("select $sensors." + json_path + "=" + string + " - count = " + all2Stream.size());
+        all2Stream.forEach(System.out::println);
     }
 
 

@@ -46,22 +46,32 @@ public class SpringPgsqlTest {
     @Autowired JdbcContext jdbcContext;
 
     @Test
-    public void insert() {
-        IntStream.range(0, 100)
+    public void insert_10w() {
+        insert(100);
+    }
+
+    @Test
+    public void insert_1w() {
+        insert(10);
+    }
+
+    public void insert(int count) {
+        IntStream.range(0, count)
                 .parallel()
                 .forEach(k -> {
                     long nanoTime = System.nanoTime();
                     List<PgsqlLogTest> logTests = new ArrayList<>();
                     for (int i = 0; i < 1000; i++) {
-                        PgsqlLogTest logTest = new PgsqlLogTest().setUid(hexId.newId())
+                        PgsqlLogTest logTest = new PgsqlLogTest()
+                                .setUid(hexId.newId())
                                 .setName(String.valueOf(i));
-                        // logTest.setName2(String.valueOf(i));
-                        // logTest.setName3(String.valueOf(i));
+                        logTest.setName2(String.valueOf(i));
+                        logTest.setName3(String.valueOf(i));
                         logTest.getSensors().put("a", RandomUtils.random(1, 10000));
                         logTest.getSensors().put("b", RandomUtils.random(1, 10000));
-                        // logTest.getSensors().put("c", RandomUtils.random(1, 10000));
-                        // logTest.getSensors().put("d", RandomUtils.random(1, 10000));
-                        // logTest.getSensors().put("e", new JSONObject().fluentPut("aa", String.valueOf(RandomUtils.random(1, 10000))));
+                        logTest.getSensors().put("c", RandomUtils.random(1, 10000));
+                        logTest.getSensors().put("d", RandomUtils.random(1, 10000));
+                        logTest.getSensors().put("e", new JSONObject().fluentPut("aa", String.valueOf(RandomUtils.random(1, 10000))));
                         logTests.add(logTest);
                     }
                     jdbcContext.batchInsert(logTests);
@@ -78,24 +88,29 @@ public class SpringPgsqlTest {
         System.out.println("select count=" + count);
     }
 
-
     @Test
     @RepeatedTest(5)
-    public void selectc() {
+    public void selectJsonA() {
+        selectJson("a");
+    }
+
+    public void selectJson(String field) {
         long nanoTime = System.nanoTime();
         String string = String.valueOf(RandomUtils.random(1, 10000));
-        Stream<PgsqlLogTest> all2Stream = jdbcContext.findAll2Stream(
-                "from " + PgsqlLogTest.class.getSimpleName() + " where jsonb_extract_path_text(sensors,'c') = ?1",
+        List<PgsqlLogTest> all2Stream = jdbcContext.findAll(
+                "from " + PgsqlLogTest.class.getSimpleName() + " where jsonb_extract_path_text(sensors, ?1) = ?2",
                 PgsqlLogTest.class,
+                field,
                 string
         );
         System.out.println((System.nanoTime() - nanoTime) / 10000 / 100f + " ms");
-        System.out.println("select $c=" + string + " - count = " + all2Stream.count());
+        System.out.println("select $" + field + "=" + string + " - count = " + all2Stream.size());
+        all2Stream.forEach(System.out::println);
     }
 
     @Test
     @RepeatedTest(5)
-    public void select() {
+    public void selectJson2() {
         long nanoTime = System.nanoTime();
         String string = String.valueOf(RandomUtils.random(1, 10000));
         List<PgsqlLogTest> all2Stream = jdbcContext.findAll(
@@ -104,8 +119,8 @@ public class SpringPgsqlTest {
                 string
         );
         System.out.println((System.nanoTime() - nanoTime) / 10000 / 100f + " ms");
-        System.out.println("select $a=" + string + " - count = " + all2Stream.size());
-        all2Stream.forEach(item -> System.out.println(item));
+        System.out.println("select $.e.aa=" + string + " - count = " + all2Stream.size());
+        all2Stream.forEach(System.out::println);
     }
 
 
