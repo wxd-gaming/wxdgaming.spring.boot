@@ -1,7 +1,7 @@
 spring:
   jpa:
     database: postgresql
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: update
       naming:
@@ -14,5 +14,5 @@ spring:
       url: jdbc:postgresql://192.168.137.10:5432/test
       username: postgres
       password: test
-      show-sql: false
+      show-sql: true
       ddl-auto: "update"

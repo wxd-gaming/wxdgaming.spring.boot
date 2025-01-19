@@ -27,6 +27,9 @@ import wxdgaming.spring.boot.data.converter.ObjectToJsonStringConverter;
 })
 public class PgsqlLogTest extends EntityBase<Long> {
 
+    private boolean online;
+    private short lv;
+    private int exp;
     private String name;
     private String name2;
     private String name3;

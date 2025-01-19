@@ -82,7 +82,11 @@ public class JdbcContext {
     }
 
     public long count(String qlString, Object... params) {
-        TypedQuery<Long> query = context().createQuery(qlString, Long.class);
+        return singleResult(qlString, Long.class, params);
+    }
+
+    public <T> T singleResult(String qlString, Class<T> cls, Object... params) {
+        TypedQuery<T> query = context().createQuery(qlString, cls);
         for (int i = 0; i < params.length; i++) {
             query.setParameter(i + 1, params[i]);
         }

@@ -23,12 +23,15 @@ import wxdgaming.spring.boot.data.converter.ObjectToJsonStringConverter;
 @Table(indexes = {
         @Index(columnList = "name"),
         @Index(columnList = "name2"),
-        @Index(columnList = "name3"),
+        // @Index(columnList = "name3"),
         // @Index(columnList = "((CAST(sensors->>'$.a' AS CHAR(100))))"),
         // @Index(columnList = "((CAST(sensors->>'$.b' AS CHAR(100))))"),
 })
 public class MysqlLogTest extends EntityBase<Long> {
 
+    private boolean online;
+    private short lv;
+    private int exp;
     private String name;
     private String name2;
     private String name3;
