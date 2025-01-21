@@ -21,14 +21,12 @@ import wxdgaming.spring.boot.data.converter.ObjectToJsonStringConverter;
 @Accessors(chain = true)
 @Entity
 @Table(indexes = {
-        @Index(columnList = "name"),
-        @Index(columnList = "name2"),
+        @Index(columnList = "logType"),
 })
 public class MysqlLogTest extends EntityBase<Long> {
 
+    private String logType;
     private String name;
-    private String name2;
-    private String name3;
     @Convert(converter = ObjectToJsonStringConverter.class)
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")

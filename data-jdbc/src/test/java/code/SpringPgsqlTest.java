@@ -24,7 +24,6 @@ import wxdgaming.spring.boot.data.batis.JdbcContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * 通过spring注入测试jdbc
@@ -56,6 +55,7 @@ public class SpringPgsqlTest {
     }
 
     public void insert(int count) {
+        List<String> strings = List.of("item-log", "login-log", "pay-log");
         IntStream.range(0, count)
                 .parallel()
                 .forEach(k -> {
@@ -64,9 +64,8 @@ public class SpringPgsqlTest {
                     for (int i = 0; i < 1000; i++) {
                         PgsqlLogTest logTest = new PgsqlLogTest()
                                 .setUid(hexId.newId())
+                                .setLogType(RandomUtils.randomItem(strings))
                                 .setName(String.valueOf(i));
-                        logTest.setName2(String.valueOf(i));
-                        logTest.setName3(String.valueOf(i));
                         logTest.getSensors().put("a", RandomUtils.random(1, 10000));
                         logTest.getSensors().put("b", RandomUtils.random(1, 10000));
                         logTest.getSensors().put("c", RandomUtils.random(1, 10000));

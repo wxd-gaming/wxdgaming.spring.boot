@@ -1,7 +1,6 @@
 package code;
 
 import code.mysql.MysqlLogTest;
-import code.pgsql.PgsqlLogTest;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -25,7 +24,6 @@ import wxdgaming.spring.boot.data.batis.JdbcContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * 通过spring注入测试jdbc
@@ -57,16 +55,17 @@ public class SpringMysqlTest {
     }
 
     public void insert(int count) {
+        List<String> strings = List.of("item-log", "login-log", "pay-log");
         IntStream.range(0, count)
                 .parallel()
                 .forEach(k -> {
                     long nanoTime = System.nanoTime();
                     List<MysqlLogTest> logTests = new ArrayList<>();
                     for (int i = 0; i < 1000; i++) {
-                        MysqlLogTest logTest = new MysqlLogTest().setUid(hexId.newId())
+                        MysqlLogTest logTest = new MysqlLogTest()
+                                .setUid(hexId.newId())
+                                .setLogType(RandomUtils.randomItem(strings))
                                 .setName(String.valueOf(i));
-                        logTest.setName2(String.valueOf(i));
-                        logTest.setName3(String.valueOf(i));
                         logTest.getSensors().put("a", String.valueOf(RandomUtils.random(1, 10000)));
                         logTest.getSensors().put("b", String.valueOf(RandomUtils.random(1, 10000)));
                         logTest.getSensors().put("c", String.valueOf(RandomUtils.random(1, 10000)));
