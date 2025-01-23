@@ -3,7 +3,7 @@ package wxdgaming.spring.boot.rpc;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import wxdgaming.spring.boot.net.ProtoMapper;
+import wxdgaming.spring.boot.net.ProtoMapping;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.rpc.pojo.RpcMessage;
 
@@ -28,7 +28,7 @@ public class ResponseRpcMessageController {
         this.rpcService = rpcService;
     }
 
-    @ProtoMapper
+    @ProtoMapping
     public void rpcResSocketAction(SocketSession session, RpcMessage.ResRPC resRPC) throws Exception {
         long rpcId = resRPC.getRpcId();
         long targetId = resRPC.getTargetId();

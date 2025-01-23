@@ -13,6 +13,7 @@ import wxdgaming.spring.boot.core.io.FileUtil;
 import wxdgaming.spring.boot.core.io.FileWriteUtil;
 import wxdgaming.spring.boot.core.lang.ObjectBase;
 import wxdgaming.spring.boot.core.util.StringsUtil;
+import wxdgaming.spring.boot.net.ProtoMapping;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -431,7 +432,7 @@ public class ProtoBuf2Pojo {
             return;
         }
         TreeSet<String> imports = new TreeSet<>();
-        imports.add(wxdgaming.spring.boot.net.ProtoMapper.class.getName());
+        imports.add(ProtoMapping.class.getName());
         imports.add(Slf4j.class.getName());
         imports.add(Component.class.getName());
         imports.add(wxdgaming.spring.boot.net.SocketSession.class.getName());
@@ -454,7 +455,7 @@ public class ProtoBuf2Pojo {
                 @Component
                 public class %s {
                 
-                    @ProtoMapper
+                    @ProtoMapping
                     public void %s(SocketSession socketSession, %s req) {
                 
                     }

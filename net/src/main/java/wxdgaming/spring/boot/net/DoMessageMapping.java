@@ -13,7 +13,7 @@ import java.util.concurrent.Executor;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2024-08-19 19:51
  **/
-public record DoMessageMapping(ProtoMapper mapper, ExecutorWith executorWith, Object bean, Method method,
+public record DoMessageMapping(ProtoMapping mapper, ExecutorWith executorWith, Object bean, Method method,
         Class<?> messageType) {
     public Executor getExecutor() {
         String executorName = null;

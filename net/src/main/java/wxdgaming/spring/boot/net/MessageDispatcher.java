@@ -53,14 +53,14 @@ public abstract class MessageDispatcher implements InitPrint {
             }
             return false;
         };
-        springReflectContent.withMethodAnnotated(ProtoMapper.class)
+        springReflectContent.withMethodAnnotated(ProtoMapping.class)
                 .filter(t -> handlerFilter.test(t.getLeft().getClass()))
                 .forEach(t -> {
                     Class parameterType = t.getRight().getParameterTypes()[1];
                     if (PojoBase.class.isAssignableFrom(parameterType)) {
-                        ProtoMapper protoMapper = AnnUtil.ann(t.getRight(), ProtoMapper.class);
+                        ProtoMapping protoMapping = AnnUtil.ann(t.getRight(), ProtoMapping.class);
                         ExecutorWith executorWith = AnnUtil.ann(t.getRight(), ExecutorWith.class);
-                        DoMessageMapping messageMapping = new DoMessageMapping(protoMapper, executorWith, t.getLeft(), t.getRight(), parameterType);
+                        DoMessageMapping messageMapping = new DoMessageMapping(protoMapping, executorWith, t.getLeft(), t.getRight(), parameterType);
                         int msgId = registerMessage(parameterType);
                         mappings.put(msgId, messageMapping);
                         log.debug("扫描消息处理接口 {}#{} {}", t.getLeft().getClass().getName(), t.getRight().getName(), parameterType.getName());

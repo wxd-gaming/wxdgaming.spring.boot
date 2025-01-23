@@ -5,7 +5,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import wxdgaming.spring.boot.net.ProtoMapper;
+import wxdgaming.spring.boot.net.ProtoMapping;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.rpc.pojo.RpcMessage;
 
@@ -29,7 +29,7 @@ public class RequestRpcMessageController {
         this.rpcService = rpcService;
     }
 
-    @ProtoMapper
+    @ProtoMapping
     public void rpcReqSocketAction(SocketSession session, RpcMessage.ReqRPC reqRemote) throws Exception {
         long rpcId = reqRemote.getRpcId();
         long targetId = reqRemote.getTargetId();

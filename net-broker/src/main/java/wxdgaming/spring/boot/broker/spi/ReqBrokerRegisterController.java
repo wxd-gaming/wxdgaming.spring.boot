@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller;
 import wxdgaming.spring.boot.broker.DataCenter;
 import wxdgaming.spring.boot.broker.ServerMapping;
 import wxdgaming.spring.boot.broker.pojo.inner.InnerMessage;
-import wxdgaming.spring.boot.net.ProtoMapper;
+import wxdgaming.spring.boot.net.ProtoMapping;
 import wxdgaming.spring.boot.net.SocketSession;
 
 import java.util.Set;
@@ -27,7 +27,7 @@ public class ReqBrokerRegisterController {
     }
 
 
-    @ProtoMapper
+    @ProtoMapping
     public void reqRegisterAction(SocketSession session, InnerMessage.ReqBrokerRegister reqRegister) throws Exception {
         InnerMessage.Stype stype = reqRegister.getStype();
         int sid = reqRegister.getSid();
