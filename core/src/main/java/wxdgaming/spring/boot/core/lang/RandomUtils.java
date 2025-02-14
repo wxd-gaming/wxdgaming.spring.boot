@@ -1,5 +1,7 @@
 package wxdgaming.spring.boot.core.lang;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
