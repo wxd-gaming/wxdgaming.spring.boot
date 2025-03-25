@@ -1,7 +1,0 @@
-spring:
-  data:
-    mongodb:
-      uri: mongodb://192.168.137.10/test
-      auto-index-creation: true
-    mongodb2:
-      uri: mongodb://192.168.137.10/test2

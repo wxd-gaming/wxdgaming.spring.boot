@@ -17,22 +17,7 @@
     <description>wxdgaming.spring.boot</description>
 
     <modules>
-        <module>assist</module>
-        <module>core</module>
-        <module>data</module>
-        <module>data-excel</module>
-        <module>data-jdbc</module>
-        <module>data-mongo</module>
-        <module>data-redis</module>
-        <module>net</module>
-        <module>net-broker</module>
-        <module>net-rpc</module>
-        <module>script-lua</module>
-        <module>start</module>
-        <module>web</module>
-        <module>web-client</module>
-        <module>web-lua</module>
-        <module>loader</module>
+        <module>wxdgaming.spring.boot.core</module>
     </modules>
 
     <properties>
