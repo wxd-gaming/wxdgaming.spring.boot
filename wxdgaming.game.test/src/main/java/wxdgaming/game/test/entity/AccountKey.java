@@ -1,5 +1,6 @@
 package wxdgaming.game.test.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * 账号主键id
@@ -24,23 +26,24 @@ public class AccountKey implements Serializable {
 
     @Serial private static final long serialVersionUID = 1l;
 
-    private long id;
     private int sid;
+    @Column(length = 64)
+    private String account;
 
     @Override public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
 
         AccountKey that = (AccountKey) o;
-        return getId() == that.getId() && getSid() == that.getSid();
+        return getSid() == that.getSid() && Objects.equals(getAccount(), that.getAccount());
     }
 
     @Override public int hashCode() {
-        int result = Long.hashCode(getId());
-        result = 31 * result + getSid();
+        int result = getSid();
+        result = 31 * result + Objects.hashCode(getAccount());
         return result;
     }
 
     @Override public String toString() {
-        return "AccountKey{id=%d, sid=%d}".formatted(id, sid);
+        return "AccountKey{sid=%d, account='%s'}".formatted(sid, account);
     }
 }

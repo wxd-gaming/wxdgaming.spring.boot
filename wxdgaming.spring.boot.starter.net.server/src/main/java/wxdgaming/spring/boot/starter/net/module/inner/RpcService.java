@@ -81,6 +81,7 @@ public class RpcService implements Closeable {
         CompletableFuture<JSONObject> completableFuture = new CompletableFuture<>();
         ReqRemote reqRemote = new ReqRemote();
         reqRemote
+                .setUid(hexId.newId())
                 .setCmd(cmd)
                 .setParams(params);
 

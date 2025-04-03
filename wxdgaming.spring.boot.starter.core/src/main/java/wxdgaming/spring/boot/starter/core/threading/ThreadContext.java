@@ -128,7 +128,8 @@ public class ThreadContext extends JSONObject {
     }
 
     public ThreadContext(Map m) {
-        super(m);
+        super();
+        putAll(m);
     }
 
     /** 获取当前任务所在队列 */

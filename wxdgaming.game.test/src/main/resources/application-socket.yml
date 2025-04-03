@@ -7,7 +7,7 @@ socket:
     scheduledFlushMs: 10                                    #定时调用flush的频率单位是ms
     enabledWebSocket: true                                  #是否启用websocket
     webSocketPrefix: "/ws"                                   #websocket前缀
-    maxAggregatorLength: 64                                  #聚合器最大长度
+    maxAggregatorLength: 64                                  #聚合器最大长度 单位MB
     maxFrameBytes: -1                                        #单个消息最大长度
     maxFrameLength: -1                                       #一秒钟接收消息最大数量
     sslProtocolType: TLS                                     #ssll类型
@@ -29,7 +29,7 @@ socket:
     webSocketPrefix: "/ws"                                    #websocket前缀
     enabledReconnection: true                                  #是否启用重连
     enabledSSL: true
-    maxAggregatorLength: 64                                    #聚合器最大长度
+    maxAggregatorLength: 64                                    #聚合器最大长度 单位MB
     maxConnectionCount: 1
     maxFrameBytes: -1                                          #单个消息最大长度
     maxFrameLength: -1                                         #一秒钟接收消息最大数量

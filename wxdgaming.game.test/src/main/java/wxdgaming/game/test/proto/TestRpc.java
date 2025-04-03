@@ -33,7 +33,7 @@ public class TestRpc implements RpcFilter {
     @ExecutorWith(queueName = "guild")
     public void index(@ThreadParam(path = "queueName") String queueName, @Value("${sid:0}") int sid, @RequestParam("name") String name) {
         ExecutorQueue queue = ThreadContext.context().queue();
-        log.info("test/index - " + sid + " - " + ThreadContext.context().queueName() + " - " + queueName);
+        log.info("rpc out test/index - " + sid + " - " + ThreadContext.context().queueName() + " - " + queueName);
     }
 
     @Override public boolean doFilter(RpcListenerTrigger rpcListenerTrigger, String cmd, SocketSession socketSession, JSONObject paramObject) {

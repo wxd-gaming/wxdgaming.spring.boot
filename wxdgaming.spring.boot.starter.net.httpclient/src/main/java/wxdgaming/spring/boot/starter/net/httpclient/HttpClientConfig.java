@@ -3,6 +3,7 @@ package wxdgaming.spring.boot.starter.net.httpclient;
 import com.alibaba.fastjson.annotation.JSONCreator;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Getter;
+import lombok.Setter;
 import wxdgaming.spring.boot.starter.core.lang.ObjectBase;
 
 /**
@@ -12,37 +13,41 @@ import wxdgaming.spring.boot.starter.core.lang.ObjectBase;
  * @version: 2025-02-18 10:26
  **/
 @Getter
+@Setter
 public class HttpClientConfig extends ObjectBase {
 
     @JSONField(ordinal = 1)
-    private final int core;
+    private int core;
     @JSONField(ordinal = 2)
-    private final int max;
+    private int max;
     @JSONField(ordinal = 3)
-    private final int resetTimeM;
+    private int resetTimeM;
     @JSONField(ordinal = 4)
-    private final int connectionRequestTimeout;
+    private int connectionRequestTimeout;
     @JSONField(ordinal = 5)
-    private final int connectTimeOut;
+    private int connectTimeOut;
     @JSONField(ordinal = 6)
-    private final int readTimeout;
+    private int readTimeout;
     @JSONField(ordinal = 7)
-    private final int keepAliveTimeout;
+    private int keepAliveTimeout;
     @JSONField(ordinal = 8)
-    private final String sslProtocol;
+    private String sslProtocol;
     @JSONField(ordinal = 9)
-    private final boolean autoUseGzip;
+    private boolean autoUseGzip;
+
+    public HttpClientConfig() {
+    }
 
     @JSONCreator
-    public HttpClientConfig(@JSONField(name = "core") int core,
-                            @JSONField(name = "max") int max,
-                            @JSONField(name = "resetTimeM") int resetTimeM,
-                            @JSONField(name = "connectionRequestTimeout") int connectionRequestTimeout,
-                            @JSONField(name = "connectTimeOut") int connectTimeOut,
-                            @JSONField(name = "readTimeout") int readTimeout,
-                            @JSONField(name = "keepAliveTimeout") int keepAliveTimeout,
-                            @JSONField(name = "sslProtocol", defaultValue = "TLS") String sslProtocol,
-                            @JSONField(name = "autoUseGzip", defaultValue = "false") boolean autoUseGzip) {
+    public HttpClientConfig(int core,
+                            int max,
+                            int resetTimeM,
+                            int connectionRequestTimeout,
+                            int connectTimeOut,
+                            int readTimeout,
+                            int keepAliveTimeout,
+                            String sslProtocol,
+                            boolean autoUseGzip) {
         this.core = core;
         this.max = max;
         this.resetTimeM = resetTimeM;

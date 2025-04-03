@@ -8,6 +8,7 @@ import org.apache.hc.core5.http.ContentType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
+import wxdgaming.spring.boot.starter.core.ann.AppStart;
 import wxdgaming.spring.boot.starter.core.cache2.CASCache;
 import wxdgaming.spring.boot.starter.core.cache2.Cache;
 import wxdgaming.spring.boot.starter.core.function.Function1;
@@ -29,7 +30,7 @@ public class HttpClientBuilder {
     protected HttpClientConfig client;
     protected Cache<String, HttpClientPool> HTTP_CLIENT_CACHE;
 
-    @PostConstruct
+    @AppStart
     public void init() {
         if (client == null) {
             client = HttpClientPoolScan.DEFAULT;

@@ -18,7 +18,7 @@ import wxdgaming.spring.boot.starter.batis.LongUidEntity;
 @Table(indexes = {@Index(columnList = "account", unique = true)})
 public class Account extends LongUidEntity {
 
-    @Column
+    @Column(length = 64)
     private String account;
 
 }

@@ -22,7 +22,7 @@ public class ScriptRpcController implements InitPrint {
     @RpcRequest
     public void index() {
         ExecutorQueue queue = ThreadContext.context().queue();
-        log.info("script/index - " + ThreadContext.context().queueName());
+        log.info("rpc out script/index - " + ThreadContext.context().queueName());
     }
 
 }

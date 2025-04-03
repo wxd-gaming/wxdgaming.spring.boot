@@ -15,6 +15,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -27,7 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class ExecutorUtil implements Serializable, Closeable {
 
     /** 忽略异常 */
-    public static void executorIgnoredException(ConsumerE0 ce) {
+    static void executorIgnoredException(ConsumerE0 ce) {
         try {
             ce.accept();
         } catch (Throwable ignored) {}
@@ -42,15 +43,17 @@ public final class ExecutorUtil implements Serializable, Closeable {
     /** 当前正在执行的任务 */
     final ConcurrentHashMap<Thread, ExecutorServiceJob> Run_THREAD_LOCAL = new ConcurrentHashMap<>();
     /** 全部初始化的 */
-    public final ConcurrentHashMap<String, IExecutorServices> All_THREAD_LOCAL = new ConcurrentHashMap<>();
+    final ConcurrentHashMap<String, IExecutorServices> All_THREAD_LOCAL = new ConcurrentHashMap<>();
     /** 属于后台线程池, 默认线程池， 一旦收到停服新号，线程立马关闭了 */
-    private IExecutorServices basicExecutor = null;
+    IExecutorServices basicExecutor = null;
     /** 属于后台线程池, 逻辑线程池，一旦收到停服新号，线程立马关闭了 */
-    private IExecutorServices logicExecutor = null;
+    IExecutorServices logicExecutor = null;
     /** 属于后台线程池, 虚拟线程池，一旦收到停服新号，线程立马关闭了 */
-    private IExecutorServices virtualExecutor = null;
+    IExecutorServices virtualExecutor = null;
 
-    ExecutorUtil(ExecutorConfig basicConfig, ExecutorConfig logicConfig, ExecutorConfig virtualConfig) {
+    ExecutorUtil() {}
+
+    void init(ExecutorConfig basicConfig, ExecutorConfig logicConfig, ExecutorConfig virtualConfig) {
         Logger logger = LogbackUtil.logger();
         if (logger.isDebugEnabled()) {
             logger.debug("ExecutorUtil init basic config: {}", basicConfig.toJSONString());
@@ -74,15 +77,17 @@ public final class ExecutorUtil implements Serializable, Closeable {
     }
 
     @Override public void close() throws IOException {
+        Logger logger = LogbackUtil.logger();
+        logger.info("shutdown executor services");
         executorIgnoredException(TIMER_THREAD::clear);
-        executorIgnoredException(TIMER_THREAD::interrupt);
+        TIMER_THREAD.closing.set(true);
         executorIgnoredException(TIMER_THREAD::join);
-        executorIgnoredException(GUARD_THREAD::interrupt);
-        executorIgnoredException(GUARD_THREAD::join);
+        GUARD_THREAD.closing.set(true);
+        logger.info("shutdown executor services");
         All_THREAD_LOCAL.values().forEach(executorServices -> {
-            System.out.println("shutdown executorServices start: " + executorServices.getName());
+            logger.info("shutdown executorServices start: {}", executorServices.getName());
             executorIgnoredException(executorServices::terminate);
-            System.out.println("shutdown executorServices end: " + executorServices.getName());
+            logger.info("shutdown executorServices end: {}", executorServices.getName());
         });
         All_THREAD_LOCAL.clear();
     }
@@ -168,6 +173,8 @@ public final class ExecutorUtil implements Serializable, Closeable {
     /** 守护线程 */
     protected class GuardThread extends Thread implements Serializable {
 
+        final AtomicBoolean closing = new AtomicBoolean();
+
         protected GuardThread() {
             super("guard-thread");
             setPriority(Thread.MIN_PRIORITY);
@@ -176,7 +183,7 @@ public final class ExecutorUtil implements Serializable, Closeable {
         @Override public void run() {
             Tick tick = new Tick(50, 10, TimeUnit.SECONDS);
             Logger logger = LoggerFactory.getLogger(this.getClass());
-            while (!Thread.currentThread().isInterrupted()) {
+            while (!closing.get()) {
                 try {
                     try {
                         tick.waitNext();
@@ -188,8 +195,9 @@ public final class ExecutorUtil implements Serializable, Closeable {
                             LoggerFactory.getLogger(this.getClass()).info(stringBuilder.toString());
                         }
                     } catch (Throwable throwable) {
-                        if (!(throwable instanceof InterruptedException))
-                            GlobalUtil.exception("guard-thread", throwable);
+                        if (throwable instanceof InterruptedException)
+                            break;
+                        GlobalUtil.exception("guard-thread", throwable);
                     }
                 } catch (Throwable throwable) {/*不能加东西，log也有可能异常*/}
             }
@@ -199,6 +207,7 @@ public final class ExecutorUtil implements Serializable, Closeable {
 
     protected class TimerThread extends Thread {
 
+        final AtomicBoolean closing = new AtomicBoolean();
         final ReentrantLock relock = new ReentrantLock();
         private LinkedList<TimerJob> timerJobs = new LinkedList<>();
 
@@ -229,7 +238,7 @@ public final class ExecutorUtil implements Serializable, Closeable {
         @Override public void run() {
             Tick tick = new Tick(1, 2, TimeUnit.MILLISECONDS);
             Logger logger = LoggerFactory.getLogger(this.getClass());
-            while (!Thread.currentThread().isInterrupted()) {
+            while (!closing.get()) {
                 try {
                     tick.waitNext();
                     relock.lock();

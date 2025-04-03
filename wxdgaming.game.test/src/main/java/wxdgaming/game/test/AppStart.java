@@ -10,13 +10,16 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import wxdgaming.game.test.entity.Account2;
+import wxdgaming.game.test.entity.AccountKey;
 import wxdgaming.spring.boot.starter.batis.sql.DataJdbcScan;
+import wxdgaming.spring.boot.starter.batis.sql.JdbcContext;
 import wxdgaming.spring.boot.starter.core.CoreScan;
 import wxdgaming.spring.boot.starter.core.SpringReflect;
 import wxdgaming.spring.boot.starter.core.SpringUtil;
 import wxdgaming.spring.boot.starter.core.collection.MapOf;
 import wxdgaming.spring.boot.starter.core.loader.ClassDirLoader;
-import wxdgaming.spring.boot.starter.core.threading.ExecutorUtil;
+import wxdgaming.spring.boot.starter.core.loader.JavaCoderCompile;
 import wxdgaming.spring.boot.starter.core.threading.ExecutorUtilImpl;
 import wxdgaming.spring.boot.starter.net.NetScan;
 import wxdgaming.spring.boot.starter.net.SocketSession;
@@ -55,16 +58,20 @@ public class AppStart {
 
     public static void main(String[] args) throws Exception {
         ConfigurableApplicationContext run = SpringApplication.run(AppStart.class, args);
-        AppSpringReflect springReflect = run.getBean(AppSpringReflect.class);
-        springReflect.getSpringReflectContent().executorInitMethod();
-        springReflect.getSpringReflectContent().executorAppStartMethod();
+        AppSpringReflect appSpringReflect = run.getBean(AppSpringReflect.class);
+        appSpringReflect.getSpringReflectContent().executorInitMethod();
+        appSpringReflect.getSpringReflectContent().executorAppStartMethod();
 
         ClassDirLoader scriptClassLoader;
         Path path = Path.of("script.jar");
         if (Files.exists(path)) {
             scriptClassLoader = new ClassDirLoader(path.toUri().toURL());
         } else {
-            scriptClassLoader = new ClassDirLoader("wxdgaming.game.test-script/target/classes");
+            new JavaCoderCompile()
+                    .parentClassLoader(AppStart.class.getClassLoader())
+                    .compilerJava("wxdgaming.game.test-script/src/main/java")
+                    .outPutFile("target/scripts", true);
+            scriptClassLoader = new ClassDirLoader("target/scripts");
         }
 
         ConfigurableApplicationContext configurableApplicationContext = SpringUtil.newChild(run, ScriptScan.class, scriptClassLoader);
@@ -74,14 +81,33 @@ public class AppStart {
 
         ExecutorUtilImpl.getInstance().getLogicExecutor().scheduleAtFixedDelay(
                 () -> {
-                    SocketClient bean = springReflect.getBean(SocketClient.class);
+                    SocketClient bean = scriptSpringReflect.getBean(SocketClient.class);
                     SocketSession idle = bean.idle();
-                    RpcService rpcService = springReflect.getBean(RpcService.class);
+                    RpcService rpcService = scriptSpringReflect.getBean(RpcService.class);
                     rpcService.request(idle, "test/index", MapOf.newJSONObject().fluentPut("name", 1).toJSONString());
-
+                    rpcService.request(idle, "test/index", MapOf.newJSONObject().fluentPut("name", 2).toJSONString());
                     rpcService.request(idle, "script/index", MapOf.newJSONObject().fluentPut("name", 1).toJSONString());
+                    rpcService.request(idle, "script/index", MapOf.newJSONObject().fluentPut("name", 2).toJSONString());
                 },
                 3,
+                3,
+                TimeUnit.SECONDS
+        );
+
+        ExecutorUtilImpl.getInstance().getLogicExecutor().schedule(
+                () -> {
+                    JdbcContext jdbcContext = scriptSpringReflect.getBean(JdbcContext.class);
+                    {
+                        Account2 account2 = new Account2();
+                        account2.setUid(new AccountKey(1, "test"));
+                        jdbcContext.save(account2);
+                    }
+                    {
+                        Account2 account2 = new Account2();
+                        account2.setUid(new AccountKey(2, "test"));
+                        jdbcContext.save(account2);
+                    }
+                },
                 3,
                 TimeUnit.SECONDS
         );

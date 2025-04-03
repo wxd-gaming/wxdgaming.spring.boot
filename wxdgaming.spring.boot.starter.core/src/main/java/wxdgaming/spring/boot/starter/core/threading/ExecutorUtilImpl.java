@@ -33,7 +33,9 @@ public class ExecutorUtilImpl {
 
     @Bean
     public ExecutorUtil init() {
-        return instance = new ExecutorUtil(basic, logic, virtual);
+        instance = new ExecutorUtil();
+        instance.init(basic, logic, virtual);
+        return instance;
     }
 
     public static void action(AtomicBoolean vt,

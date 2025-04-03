@@ -45,6 +45,7 @@ public class RpcListenerTrigger extends Event {
                               SocketSession socketSession,
                               long rpcId,
                               JSONObject paramObject) {
+        super();
         this.rpcMapping = rpcMapping;
         this.rpcService = rpcService;
         this.springReflectContent = springReflectContent;
@@ -88,19 +89,6 @@ public class RpcListenerTrigger extends Event {
             Parameter parameter = parameters[i];
             Class<?> parameterType = parameter.getType();
             Type parameterizedType = parameter.getParameterizedType();
-            if (SpringReflectContent.class.isAssignableFrom(parameterType)) {
-                params[i] = parameterType.cast(springReflectContent);
-                continue;
-            } else if (ApplicationContext.class.isAssignableFrom(parameterType)) {
-                params[i] = parameterType.cast(springReflectContent.getApplicationContext());
-                continue;
-            } else if (SocketSession.class.isAssignableFrom(parameterType)) {
-                params[i] = parameterType.cast(socketSession);
-                continue;
-            } else if (JSONObject.class.isAssignableFrom(parameterType)) {
-                params[i] = parameterType.cast(paramObject);
-                continue;
-            }
             /*实现注入*/
             {
                 Value value = parameter.getAnnotation(Value.class);
@@ -158,7 +146,19 @@ public class RpcListenerTrigger extends Event {
                     continue;
                 }
             }
-
+            if (SpringReflectContent.class.isAssignableFrom(parameterType)) {
+                params[i] = parameterType.cast(springReflectContent);
+                continue;
+            } else if (ApplicationContext.class.isAssignableFrom(parameterType)) {
+                params[i] = parameterType.cast(springReflectContent.getApplicationContext());
+                continue;
+            } else if (SocketSession.class.isAssignableFrom(parameterType)) {
+                params[i] = parameterType.cast(socketSession);
+                continue;
+            } else if (JSONObject.class.isAssignableFrom(parameterType)) {
+                params[i] = parameterType.cast(paramObject);
+                continue;
+            }
             try {
                 params[i] = springReflectContent.getApplicationContext().getBean(parameterType);
             } catch (Exception e) {
