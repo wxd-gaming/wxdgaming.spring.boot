@@ -1,4 +1,4 @@
-package wxdgaming.game.test.entity;
+package entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * 账号主键id
+ * 账号主键id，复合主键
  *
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2025-04-02 13:39

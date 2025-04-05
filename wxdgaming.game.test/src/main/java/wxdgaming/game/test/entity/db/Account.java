@@ -1,4 +1,4 @@
-package wxdgaming.game.test.entity;
+package wxdgaming.game.test.entity.db;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

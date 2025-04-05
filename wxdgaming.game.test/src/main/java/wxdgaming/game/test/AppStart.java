@@ -3,15 +3,12 @@ package wxdgaming.game.test;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import wxdgaming.game.test.entity.Account2;
-import wxdgaming.game.test.entity.AccountKey;
+import wxdgaming.game.test.entity.db.Account;
 import wxdgaming.spring.boot.starter.batis.sql.DataJdbcScan;
 import wxdgaming.spring.boot.starter.batis.sql.JdbcContext;
 import wxdgaming.spring.boot.starter.core.CoreScan;
@@ -39,8 +36,6 @@ import java.util.concurrent.TimeUnit;
  **/
 @Slf4j
 @EnableScheduling
-@EnableJpaRepositories
-@EntityScan("wxdgaming.game.test.entity")
 @SpringBootApplication(
         scanBasePackageClasses = {
                 CoreScan.class,
@@ -98,13 +93,8 @@ public class AppStart {
                 () -> {
                     JdbcContext jdbcContext = scriptSpringReflect.getBean(JdbcContext.class);
                     {
-                        Account2 account2 = new Account2();
-                        account2.setUid(new AccountKey(1, "test"));
-                        jdbcContext.save(account2);
-                    }
-                    {
-                        Account2 account2 = new Account2();
-                        account2.setUid(new AccountKey(2, "test"));
+                        Account account2 = new Account();
+                        account2.setUid(1L);
                         jdbcContext.save(account2);
                     }
                 },

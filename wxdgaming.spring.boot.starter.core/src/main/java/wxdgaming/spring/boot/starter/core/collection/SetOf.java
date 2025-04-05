@@ -1,6 +1,7 @@
 package wxdgaming.spring.boot.starter.core.collection;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -47,9 +48,7 @@ public class SetOf implements Serializable {
     }
 
     public static <T> Set<T> asSet(Set<T> list, T... args) {
-        for (T t : args) {
-            list.add(t);
-        }
+        list.addAll(Arrays.asList(args));
         return list;
     }
 

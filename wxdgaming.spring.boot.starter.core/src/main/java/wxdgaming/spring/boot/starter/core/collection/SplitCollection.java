@@ -3,13 +3,14 @@ package wxdgaming.spring.boot.starter.core.collection;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.starter.core.format.data.Data2Json;
-import wxdgaming.spring.boot.starter.core.lang.LockBase;
+import wxdgaming.spring.boot.starter.core.lang.ObjectBase;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 块集合
@@ -20,8 +21,9 @@ import java.util.List;
  **/
 @Slf4j
 @Getter
-public class SplitCollection<E> extends LockBase implements Serializable, Data2Json {
+public class SplitCollection<E> extends ObjectBase implements Serializable, Data2Json {
 
+    private final ReentrantLock lock = new ReentrantLock();
     /** 切割块大小 */
     private final int splitOrg;
     private final boolean linked;
@@ -32,9 +34,17 @@ public class SplitCollection<E> extends LockBase implements Serializable, Data2J
         this(1000);
     }
 
+    /** 块大小 */
     public SplitCollection(int splitOrg) {
-        this(splitOrg, true);
+        this(splitOrg, false);
     }
+
+    /** 块大小 */
+    public SplitCollection(int splitOrg, Collection<E> es) {
+        this(splitOrg, false);
+        addAll(es);
+    }
+
 
     public SplitCollection(int splitOrg, boolean linked) {
         this.splitOrg = splitOrg;

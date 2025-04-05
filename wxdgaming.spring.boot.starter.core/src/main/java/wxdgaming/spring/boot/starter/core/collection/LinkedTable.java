@@ -20,33 +20,33 @@ import java.util.function.Predicate;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class Table<K1, K2, V> implements Serializable, Data2Json {
+public class LinkedTable<K1, K2, V> implements Serializable, Data2Json {
 
     private static final Map EMPTY_MAP = Map.of();
 
-    private final HashMap<K1, HashMap<K2, V>> nodes;
+    private final LinkedHashMap<K1, LinkedHashMap<K2, V>> nodes;
 
-    public Table() {
+    public LinkedTable() {
         this(16);
     }
 
-    public Table(int initialCapacity) {
-        nodes = new HashMap<>(initialCapacity);
+    public LinkedTable(int initialCapacity) {
+        nodes = new LinkedHashMap<>(initialCapacity);
     }
 
-    public Table(Map<K1, Map<K2, V>> m) {
+    public LinkedTable(Map<K1, Map<K2, V>> m) {
         this(m.size() + 10);
         for (Map.Entry<K1, Map<K2, V>> entry : m.entrySet()) {
             putAll(entry.getKey(), entry.getValue());
         }
     }
 
-    public Table<K1, K2, V> putAll(K1 k1, Map<K2, V> m) {
+    public LinkedTable<K1, K2, V> putAll(K1 k1, Map<K2, V> m) {
         row(k1).putAll(m);
         return this;
     }
 
-    public Table<K1, K2, V> append(K1 k1, K2 k2, V v) {
+    public LinkedTable<K1, K2, V> append(K1 k1, K2 k2, V v) {
         row(k1).put(k2, v);
         return this;
     }
@@ -57,7 +57,7 @@ public class Table<K1, K2, V> implements Serializable, Data2Json {
 
     /** 行 */
     public Map<K2, V> row(K1 k1) {
-        return nodes.computeIfAbsent(k1, k -> new HashMap<>());
+        return nodes.computeIfAbsent(k1, k -> new LinkedHashMap<>());
     }
 
     public V computeIfAbsent(K1 k1, K2 k2, Function<? super K2, ? extends V> mappingFunction) {
@@ -73,7 +73,7 @@ public class Table<K1, K2, V> implements Serializable, Data2Json {
         return collection;
     }
 
-    public Set<Map.Entry<K1, HashMap<K2, V>>> entrySet() {
+    public Set<Map.Entry<K1, LinkedHashMap<K2, V>>> entrySet() {
         return this.nodes.entrySet();
     }
 
@@ -81,7 +81,7 @@ public class Table<K1, K2, V> implements Serializable, Data2Json {
         return this.nodes.keySet();
     }
 
-    public Collection<HashMap<K2, V>> values() {
+    public Collection<LinkedHashMap<K2, V>> values() {
         return this.nodes.values();
     }
 
