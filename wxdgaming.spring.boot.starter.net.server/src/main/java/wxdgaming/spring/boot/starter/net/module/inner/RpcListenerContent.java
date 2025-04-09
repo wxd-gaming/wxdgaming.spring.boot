@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import wxdgaming.spring.boot.starter.core.SpringReflect;
+import wxdgaming.spring.boot.starter.core.assist.JavassistProxy;
 import wxdgaming.spring.boot.starter.core.io.Objects;
 import wxdgaming.spring.boot.starter.core.system.AnnUtil;
 import wxdgaming.spring.boot.starter.core.util.StringUtils;
@@ -69,14 +70,15 @@ public class RpcListenerContent {
                     }
 
                     String lowerCase = path.toLowerCase();
-                    RpcMapping rpcMapping = new RpcMapping(methodRequestMapping, lowerCase, ins, method);
+                    JavassistProxy javassistProxy = JavassistProxy.of(ins, method);
+                    RpcMapping rpcMapping = new RpcMapping(methodRequestMapping, lowerCase, javassistProxy);
 
                     RpcMapping old = rpcMappingMap.put(lowerCase, rpcMapping);
-                    if (old != null && !Objects.equals(old.ins().getClass().getName(), ins.getClass().getName())) {
+                    if (old != null && !Objects.equals(old.proxy().getInstance().getClass().getName(), ins.getClass().getName())) {
                         String formatted = "重复路由监听 %s old = %s - new = %s"
                                 .formatted(
                                         lowerCase,
-                                        old.ins().getClass().getName(),
+                                        old.proxy().getInstance().getClass().getName(),
                                         ins.getClass().getName()
                                 );
                         throw new RuntimeException(formatted);

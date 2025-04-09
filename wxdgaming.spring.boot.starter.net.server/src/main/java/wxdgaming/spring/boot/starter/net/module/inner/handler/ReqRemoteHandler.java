@@ -77,7 +77,7 @@ public class ReqRemoteHandler {
             );
 
             boolean allMatch = rpcFilterList.stream()
-                    .allMatch(filter -> filter.doFilter(rpcListenerTrigger, lowerCase, socketSession, paramObject));
+                    .allMatch(filter -> filter.doFilter(rpcListenerTrigger, lowerCase));
             if (!allMatch) {
                 return;
             }

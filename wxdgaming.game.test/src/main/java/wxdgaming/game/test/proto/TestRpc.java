@@ -36,8 +36,8 @@ public class TestRpc implements RpcFilter {
         log.info("rpc out test/index - " + sid + " - " + ThreadContext.context().queueName() + " - " + queueName);
     }
 
-    @Override public boolean doFilter(RpcListenerTrigger rpcListenerTrigger, String cmd, SocketSession socketSession, JSONObject paramObject) {
-        Method method = rpcListenerTrigger.getRpcMapping().method();
+    @Override public boolean doFilter(RpcListenerTrigger rpcListenerTrigger, String cmd) {
+        Method method = rpcListenerTrigger.getRpcMapping().proxy().getMethod();
         AnnUtil.annOpt(method, ExecutorWith.class)
                 .ifPresent(executorWith -> {
                     if ("guild".equals(executorWith.queueName())) {

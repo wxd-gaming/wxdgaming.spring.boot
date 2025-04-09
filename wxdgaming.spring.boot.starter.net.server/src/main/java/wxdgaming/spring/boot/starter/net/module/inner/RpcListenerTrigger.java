@@ -55,13 +55,13 @@ public class RpcListenerTrigger extends Event {
     }
 
     @Override public String getTaskInfoString() {
-        return "RpcListenerTrigger: " + rpcMapping.path() + "; " + rpcMapping.ins().getClass().getName() + "." + rpcMapping.method().getName() + "()";
+        return "RpcListenerTrigger: " + rpcMapping.path() + "; " + rpcMapping.proxy().getInstance().getClass().getName() + "." + rpcMapping.proxy().getMethod().getName() + "()";
     }
 
     @Override public void onEvent() {
         try {
-            Object invoke = rpcMapping.method().invoke(rpcMapping.ins(), injectorParameters(springReflectContent, socketSession, paramObject));
-            if (rpcMapping.method().getReturnType() == void.class) {
+            Object invoke = rpcMapping.proxy().proxyInvoke(injectorParameters());
+            if (rpcMapping.proxy().getMethod().getReturnType() == void.class) {
                 invoke = null;
             }
             if (rpcId > 0) {
@@ -82,8 +82,8 @@ public class RpcListenerTrigger extends Event {
         }
     }
 
-    public Object[] injectorParameters(SpringReflectContent springReflectContent, SocketSession socketSession, JSONObject paramObject) {
-        Parameter[] parameters = rpcMapping.method().getParameters();
+    public Object[] injectorParameters() {
+        Parameter[] parameters = rpcMapping.proxy().getMethod().getParameters();
         Object[] params = new Object[parameters.length];
         for (int i = 0; i < params.length; i++) {
             Parameter parameter = parameters[i];
