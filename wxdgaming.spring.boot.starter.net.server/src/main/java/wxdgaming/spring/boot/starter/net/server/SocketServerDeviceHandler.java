@@ -53,6 +53,7 @@ public class SocketServerDeviceHandler extends SocketDeviceHandler {
             socketSession.setMaxFrameBytes(BytesUnit.Kb.toBytes(socketServerConfig.getMaxFrameBytes()));
         }
         socketSession.setMaxFrameLength(socketServerConfig.getMaxFrameLength());
+        socketServer.getSessionGroup().add(socketSession);
         list.forEach(socketServerEvent -> socketServerEvent.onOpen(socketServer, socketSession));
     }
 
@@ -60,6 +61,7 @@ public class SocketServerDeviceHandler extends SocketDeviceHandler {
         super.channelUnregistered(ctx);
         SocketSession socketSession = ChannelUtil.session(ctx.channel());
         if (socketSession != null) {
+            socketServer.getSessionGroup().add(socketSession);
             list.forEach(socketServerEvent -> socketServerEvent.onClose(socketServer, socketSession));
         }
     }

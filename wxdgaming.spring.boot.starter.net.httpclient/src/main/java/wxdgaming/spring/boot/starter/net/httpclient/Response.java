@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.cookie.Cookie;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.NameValuePair;
+import wxdgaming.spring.boot.starter.core.json.FastJsonUtil;
 import wxdgaming.spring.boot.starter.core.lang.RunResult;
 import wxdgaming.spring.boot.starter.core.util.StringUtils;
 import wxdgaming.spring.boot.starter.core.zip.GzipUtil;
@@ -73,20 +74,17 @@ public final class Response<H extends HttpBase> {
         return RunResult.parse(string);
     }
 
+    public <T> T bodyObject(Class<T> clazz) {
+        String string = bodyString(StandardCharsets.UTF_8);
+        return FastJsonUtil.parse(string, clazz);
+    }
+
     public String bodyString() {
         return bodyString(StandardCharsets.UTF_8);
     }
 
     public String bodyString(Charset charset) {
         return new String(body(), charset);
-    }
-
-    public RunResult bodySyncJson() {
-        return bodySyncJson(StandardCharsets.UTF_8);
-    }
-
-    public RunResult bodySyncJson(Charset charset) {
-        return RunResult.parse(bodyString(charset));
     }
 
     public String bodyUnicodeDecodeString() {

@@ -1,19 +1,16 @@
 package wxdgaming.spring.boot.starter.net.httpclient;
 
 
-import jakarta.annotation.PostConstruct;
-import lombok.Getter;
 import lombok.Setter;
 import org.apache.hc.core5.http.ContentType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.starter.core.ann.AppStart;
 import wxdgaming.spring.boot.starter.core.cache2.CASCache;
 import wxdgaming.spring.boot.starter.core.cache2.Cache;
 import wxdgaming.spring.boot.starter.core.function.Function1;
-import wxdgaming.spring.boot.starter.core.threading.ExecutorUtil;
 import wxdgaming.spring.boot.starter.core.threading.ExecutorUtilImpl;
+import wxdgaming.spring.boot.starter.core.threading.Qos;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -102,5 +99,21 @@ public class HttpClientBuilder {
     public PostText postJson(HttpClientPool httpClientPool, String uriPath) {
         return new PostText(httpClientPool, uriPath).setContentType(ContentType.APPLICATION_JSON);
     }
+
+    public IPInfo getCity4Ip(String ip) {
+        final String format = "http://ip-api.com/json/%s?lang=zh-CN";
+        return Qos.retrySupply(3, () -> {
+            Get get = get(String.format(format, ip));
+            IPInfo ipInfo = get
+                    .readTimeout(15000)
+                    .connectionRequestTimeout(5000)
+                    .request()
+                    .bodyObject(IPInfo.class);
+            if (!"success".equals(ipInfo.getStatus()))
+                throw new RuntimeException("ip地址解析失败");
+            return ipInfo;
+        });
+    }
+
 
 }

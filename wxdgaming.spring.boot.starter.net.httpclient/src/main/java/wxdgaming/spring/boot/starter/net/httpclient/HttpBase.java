@@ -100,13 +100,13 @@ public abstract class HttpBase<H extends HttpBase> {
     }
 
     public CompletableFuture<RunResult> asyncSyncJson() {
-        return sendAsync(3).thenApply(Response::bodySyncJson);
+        return sendAsync(3).thenApply(Response::bodyRunResult);
     }
 
     public void asyncSyncJson(Consumer<RunResult> consumer) {
         sendAsync(3)
                 .thenApply(httpResponse -> {
-                    consumer.accept(httpResponse.bodySyncJson());
+                    consumer.accept(httpResponse.bodyRunResult());
                     return null;
                 })
                 .exceptionally(throwable -> {
