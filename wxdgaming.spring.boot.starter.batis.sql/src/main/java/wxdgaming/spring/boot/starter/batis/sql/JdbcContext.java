@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -159,6 +160,10 @@ public class JdbcContext {
         } finally {
             releaseVirtual(entityManager);
         }
+    }
+
+    public <T extends BaseEntity> Optional<T> findNullable(Class<T> clazz, Object uid) {
+        return Optional.ofNullable(find(clazz, uid));
     }
 
     public <T extends BaseEntity> List<T> findAll(Class<T> clazz) {
