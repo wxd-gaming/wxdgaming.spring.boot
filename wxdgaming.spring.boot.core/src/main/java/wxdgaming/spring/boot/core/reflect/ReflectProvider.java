@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.Throw;
+import wxdgaming.spring.boot.core.io.FileReadUtil;
 
 import java.io.File;
 import java.io.InputStream;

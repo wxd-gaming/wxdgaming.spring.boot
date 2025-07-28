@@ -1,7 +1,5 @@
 package wxdgaming.spring.boot.core.executor;
 
-import wxdgaming.spring.boot.core.BootConfig;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -35,10 +33,9 @@ public class ExecutorFactory {
         EXECUTOR_MAP = new ConcurrentHashMap<>();
         EXECUTOR_MONITOR = new ExecutorMonitor();
         scheduledExecutorService = newSingleThreadScheduledExecutor("scheduled");
-        BootConfig bootConfig = BootConfig.getIns();
-        EXECUTOR_SERVICE_BASIC = create("basic", bootConfig.basicConfig());
-        EXECUTOR_SERVICE_LOGIC = create("logic", bootConfig.logicConfig());
-        EXECUTOR_SERVICE_VIRTUAL = createVirtual("virtual", bootConfig.virtualConfig());
+        EXECUTOR_SERVICE_BASIC = create("basic", ExecutorConfig.BASIC_INSTANCE.get());
+        EXECUTOR_SERVICE_LOGIC = create("logic", ExecutorConfig.LOGIC_INSTANCE.get());
+        EXECUTOR_SERVICE_VIRTUAL = createVirtual("virtual", ExecutorConfig.VIRTUAL_INSTANCE.get());
     }
 
     public static ExecutorService getExecutor(String name) {

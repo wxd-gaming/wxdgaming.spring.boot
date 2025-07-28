@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.core.assist;
 
 import javassist.*;
 import lombok.Getter;
+import wxdgaming.spring.boot.core.Throw;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
