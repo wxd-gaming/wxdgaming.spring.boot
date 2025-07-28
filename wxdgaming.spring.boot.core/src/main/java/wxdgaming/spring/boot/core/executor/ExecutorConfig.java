@@ -3,6 +3,8 @@ package wxdgaming.spring.boot.core.executor;
 import com.alibaba.fastjson.annotation.JSONCreator;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import wxdgaming.spring.boot.core.lang.ObjectBase;
 
 import java.util.function.Supplier;
@@ -14,25 +16,19 @@ import java.util.function.Supplier;
  * @version: 2025-02-13 15:05
  **/
 @Getter
+@Setter
+@Accessors(chain = true)
 public class ExecutorConfig extends ObjectBase {
 
-    public static Supplier<Object> BASIC_INSTANCE = () -> new ExecutorConfig(2, 5000, QueuePolicyConst.AbortPolicy);
-    public static Supplier<Object> LOGIC_INSTANCE = () -> new ExecutorConfig(8, 5000, QueuePolicyConst.AbortPolicy);
-    public static Supplier<Object> VIRTUAL_INSTANCE = () -> new ExecutorConfig(100, 5000, QueuePolicyConst.AbortPolicy);
+    public static Supplier<ExecutorConfig> BASIC_INSTANCE = () -> new ExecutorConfig().setCoreSize(2).setMaxQueueSize(5000).setQueuePolicy(QueuePolicyConst.AbortPolicy);
+    public static Supplier<ExecutorConfig> LOGIC_INSTANCE = () -> new ExecutorConfig().setCoreSize(8).setMaxQueueSize(10000).setQueuePolicy(QueuePolicyConst.AbortPolicy);
+    public static Supplier<ExecutorConfig> VIRTUAL_INSTANCE = () -> new ExecutorConfig().setCoreSize(100).setMaxQueueSize(20000).setQueuePolicy(QueuePolicyConst.AbortPolicy);
 
     @JSONField(ordinal = 1)
-    private final int coreSize;
+    private int coreSize;
+    @JSONField(ordinal = 2)
+    private int maxQueueSize;
     @JSONField(ordinal = 3)
-    private final int maxQueueSize;
-    private final QueuePolicyConst queuePolicy;
+    private QueuePolicyConst queuePolicy;
 
-    @JSONCreator
-    public ExecutorConfig(
-            @JSONField(name = "coreSize") Integer coreSize,
-            @JSONField(name = "maxQueueSize") Integer maxQueueSize,
-            @JSONField(name = "queuePolicy") QueuePolicyConst queuePolicy) {
-        this.coreSize = coreSize == null ? 2 : coreSize;
-        this.maxQueueSize = maxQueueSize == null ? 5000 : maxQueueSize;
-        this.queuePolicy = queuePolicy == null ? QueuePolicyConst.AbortPolicy : queuePolicy;
-    }
 }

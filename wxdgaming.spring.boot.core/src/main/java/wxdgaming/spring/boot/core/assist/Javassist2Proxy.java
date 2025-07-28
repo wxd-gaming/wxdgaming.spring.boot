@@ -3,6 +3,7 @@ package wxdgaming.spring.boot.core.assist;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import wxdgaming.spring.boot.core.loader.JavaCoderCompile;
+import wxdgaming.spring.boot.core.reflect.ReflectProvider;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicLong;

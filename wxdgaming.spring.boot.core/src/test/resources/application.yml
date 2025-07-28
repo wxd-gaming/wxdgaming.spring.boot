@@ -1,0 +1,5 @@
+core:
+  basic:
+    coreSize: 2
+    maxQueueSize: 5
+    queuePolicy: AbortPolicy

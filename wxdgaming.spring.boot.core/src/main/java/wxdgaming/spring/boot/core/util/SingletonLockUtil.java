@@ -1,8 +1,8 @@
 package wxdgaming.spring.boot.core.util;
 
 
-import io.undertow.server.handlers.cache.LRUCache;
 import wxdgaming.spring.boot.core.cache2.CacheLock;
+import wxdgaming.spring.boot.core.cache2.LRUCache;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;

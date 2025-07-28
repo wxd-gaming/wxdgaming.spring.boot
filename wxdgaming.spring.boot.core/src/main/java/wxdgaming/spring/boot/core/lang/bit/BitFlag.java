@@ -2,6 +2,7 @@ package wxdgaming.spring.boot.core.lang.bit;
 
 import lombok.Getter;
 import wxdgaming.spring.boot.core.chatset.StringUtils;
+import wxdgaming.spring.boot.core.util.AssertUtil;
 
 import java.io.Serializable;
 import java.util.Arrays;

@@ -1,11 +1,11 @@
 package wxdgaming.spring.boot.core.executor;
 
-import wxdgaming.spring.boot.core.BootConfig;
+import lombok.Getter;
+import wxdgaming.spring.boot.core.CoreConfig;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 线程执行器工厂
@@ -15,30 +15,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
  **/
 public class ExecutorFactory {
 
-    private static final AtomicBoolean InitEnd = new AtomicBoolean();
     private static ExecutorMonitor EXECUTOR_MONITOR;
-    private static ScheduledExecutorService scheduledExecutorService;
-    private static ConcurrentHashMap<String, ExecutorService> EXECUTOR_MAP;
+    @Getter private static ScheduledExecutorService scheduledExecutorService;
+    @Getter private static ConcurrentHashMap<String, ExecutorService> EXECUTOR_MAP;
 
-    private static ExecutorService EXECUTOR_SERVICE_BASIC;
-    private static ExecutorService EXECUTOR_SERVICE_LOGIC;
-    private static ExecutorService EXECUTOR_SERVICE_VIRTUAL;
+    @Getter private static ExecutorService EXECUTOR_SERVICE_BASIC;
+    @Getter private static ExecutorService EXECUTOR_SERVICE_LOGIC;
+    @Getter private static ExecutorService EXECUTOR_SERVICE_VIRTUAL;
 
-    static void check() {
-        if (!InitEnd.get() && InitEnd.compareAndSet(false, true)) {
-            init();
-            InitEnd.set(true);
-        }
-    }
-
-    static void init() {
+    public static void init(CoreConfig bootConfig) {
         EXECUTOR_MAP = new ConcurrentHashMap<>();
         EXECUTOR_MONITOR = new ExecutorMonitor();
         scheduledExecutorService = newSingleThreadScheduledExecutor("scheduled");
-        BootConfig bootConfig = BootConfig.getIns();
-        EXECUTOR_SERVICE_BASIC = create("basic", bootConfig.basicConfig());
-        EXECUTOR_SERVICE_LOGIC = create("logic", bootConfig.logicConfig());
-        EXECUTOR_SERVICE_VIRTUAL = createVirtual("virtual", bootConfig.virtualConfig());
+        EXECUTOR_SERVICE_BASIC = create("basic", bootConfig.getBasic());
+        EXECUTOR_SERVICE_LOGIC = create("logic", bootConfig.getLogic());
+        EXECUTOR_SERVICE_VIRTUAL = createVirtual("virtual", bootConfig.getVirtual());
     }
 
     public static ExecutorService getExecutor(String name) {
@@ -89,28 +80,19 @@ public class ExecutorFactory {
         return executorServiceVirtual;
     }
 
-    public static ScheduledExecutorService getScheduledExecutorService() {
-        check();
-        return scheduledExecutorService;
-    }
-
     public static ConcurrentHashMap<String, ExecutorService> getExecutorMap() {
-        check();
         return EXECUTOR_MAP;
     }
 
     public static ExecutorService getExecutorServiceBasic() {
-        check();
         return EXECUTOR_SERVICE_BASIC;
     }
 
     public static ExecutorService getExecutorServiceLogic() {
-        check();
         return EXECUTOR_SERVICE_LOGIC;
     }
 
     public static ExecutorService getExecutorServiceVirtual() {
-        check();
         return EXECUTOR_SERVICE_VIRTUAL;
     }
 }
