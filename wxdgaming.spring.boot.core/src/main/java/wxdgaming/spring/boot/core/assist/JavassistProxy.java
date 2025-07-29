@@ -2,7 +2,7 @@ package wxdgaming.spring.boot.core.assist;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import wxdgaming.spring.boot.core.CoreConfig;
+import wxdgaming.spring.boot.core.CoreConfiguration;
 
 import java.lang.reflect.Method;
 
@@ -56,7 +56,7 @@ public class JavassistProxy {
         stringBuilder.append("    ").append("return result;").append("\n");
         stringBuilder.append("}");
         String methodBody = stringBuilder.toString();
-        boolean nestedValue = CoreConfig.getInstance().isEnableAsmDebug();
+        boolean nestedValue = CoreConfiguration.getInstance().isEnableAsmDebug();
         if (nestedValue) {
             log.info("\n{}", methodBody);
         }

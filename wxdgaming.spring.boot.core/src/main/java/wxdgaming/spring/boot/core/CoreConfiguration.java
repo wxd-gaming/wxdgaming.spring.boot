@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import wxdgaming.spring.boot.core.executor.ExecutorConfig;
 import wxdgaming.spring.boot.core.executor.ExecutorFactory;
@@ -17,16 +18,16 @@ import wxdgaming.spring.boot.core.executor.ExecutorFactory;
  **/
 @Getter
 @Setter
-@Accessors(chain = true)
 @Configuration
+@EnableConfigurationProperties({CoreConfiguration.class})
 @ConfigurationProperties(prefix = "core")
-public class CoreConfig implements InitPrint {
+public class CoreConfiguration implements InitPrint {
 
     private static class Lazy {
-        private static CoreConfig instance = new CoreConfig();
+        private static CoreConfiguration instance = new CoreConfiguration();
     }
 
-    public static CoreConfig getInstance() {
+    public static CoreConfiguration getInstance() {
         return Lazy.instance;
     }
 

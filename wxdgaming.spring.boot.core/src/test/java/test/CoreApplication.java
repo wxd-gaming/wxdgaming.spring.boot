@@ -3,7 +3,7 @@ package test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import wxdgaming.spring.boot.core.CoreConfig;
+import wxdgaming.spring.boot.core.CoreConfiguration;
 import wxdgaming.spring.boot.core.executor.ExecutorConfig;
 
 /**
@@ -14,7 +14,7 @@ import wxdgaming.spring.boot.core.executor.ExecutorConfig;
  **/
 @SpringBootApplication(
         scanBasePackageClasses = {
-                CoreConfig.class,
+                CoreConfiguration.class,
                 ExecutorConfig.class
         }
 )

@@ -11,5 +11,12 @@
 
     <artifactId>wxdgaming.spring.boot.batis</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>wxdgaming.spring.boot.core</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+    </dependencies>
 
 </project>
