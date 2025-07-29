@@ -22,7 +22,7 @@ import wxdgaming.spring.boot.core.executor.ExecutorFactory;
 @Configuration
 @Order(Ordered.HIGHEST_PRECEDENCE)  // 确保优先初始化
 @EnableConfigurationProperties({CoreConfiguration.class})
-@ConfigurationProperties(prefix = "core")
+@ConfigurationProperties(prefix = "core.executor")
 public class CoreConfiguration implements InitPrint {
 
     private static class Lazy {
