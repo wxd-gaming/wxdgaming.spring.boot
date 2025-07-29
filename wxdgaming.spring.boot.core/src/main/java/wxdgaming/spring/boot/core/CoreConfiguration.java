@@ -3,10 +3,11 @@ package wxdgaming.spring.boot.core;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import wxdgaming.spring.boot.core.executor.ExecutorConfig;
 import wxdgaming.spring.boot.core.executor.ExecutorFactory;
 
@@ -19,6 +20,7 @@ import wxdgaming.spring.boot.core.executor.ExecutorFactory;
 @Getter
 @Setter
 @Configuration
+@Order(Ordered.HIGHEST_PRECEDENCE)  // 确保优先初始化
 @EnableConfigurationProperties({CoreConfiguration.class})
 @ConfigurationProperties(prefix = "core")
 public class CoreConfiguration implements InitPrint {

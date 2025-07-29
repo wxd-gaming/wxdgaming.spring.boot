@@ -3,6 +3,8 @@ package wxdgaming.spring.boot.batis.sql.pgsql;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +27,10 @@ import wxdgaming.spring.boot.core.InitPrint;
 public class PgsqlConfiguration implements InitPrint {
 
     private SqlConfig pgsql;
+    private SqlConfig pgsqlSecond;
+
+    @Autowired
+    public PgsqlConfiguration(CoreConfiguration coreConfiguration) {}
 
     @PostConstruct
     public void init() {
@@ -32,8 +38,15 @@ public class PgsqlConfiguration implements InitPrint {
     }
 
     @Bean
+    @ConditionalOnProperty(name = "db.sql.pgsql.url")
     public PgsqlDataHelper pgsqlDataHelper() {
         return new PgsqlDataHelper(pgsql);
+    }
+
+    @Bean("pgsqlSecond")
+    @ConditionalOnProperty(name = "db.sql.pgsql-second.url")
+    public PgsqlDataHelper pgsqlSecond() {
+        return new PgsqlDataHelper(pgsqlSecond);
     }
 
 }

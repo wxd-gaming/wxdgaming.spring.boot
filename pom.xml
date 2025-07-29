@@ -22,6 +22,9 @@
         <module>wxdgaming.spring.boot.batis.sql</module>
         <module>wxdgaming.spring.boot.batis.sql.mysql</module>
         <module>wxdgaming.spring.boot.batis.sql.pgsql</module>
+        <module>wxdgaming.spring.boot.batis.mapdb</module>
+        <module>wxdgaming.spring.boot.net</module>
+        <module>wxdgaming.spring.boot.net.httpclient</module>
     </modules>
 
     <properties>

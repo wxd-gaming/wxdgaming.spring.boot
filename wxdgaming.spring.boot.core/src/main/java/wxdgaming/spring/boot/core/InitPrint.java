@@ -2,6 +2,8 @@ package wxdgaming.spring.boot.core;
 
 import ch.qos.logback.core.LogbackUtil;
 import jakarta.annotation.PostConstruct;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 /**
  * 添加初始化打印
@@ -11,8 +13,9 @@ import jakarta.annotation.PostConstruct;
  */
 public interface InitPrint {
 
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     @PostConstruct
-    default void initPrint() {
+    default void __initPrint() {
         LogbackUtil.logger().debug("init print {}", this.getClass().getName());
     }
 

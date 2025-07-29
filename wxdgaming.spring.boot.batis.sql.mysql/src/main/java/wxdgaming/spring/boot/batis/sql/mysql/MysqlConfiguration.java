@@ -3,6 +3,8 @@ package wxdgaming.spring.boot.batis.sql.mysql;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +28,10 @@ import wxdgaming.spring.boot.core.InitPrint;
 public class MysqlConfiguration implements InitPrint {
 
     private SqlConfig mysql;
+    private SqlConfig mysqlSecond;
+
+    @Autowired
+    public MysqlConfiguration(CoreConfiguration coreConfiguration) {}
 
     @PostConstruct
     public void init() {
@@ -33,7 +39,14 @@ public class MysqlConfiguration implements InitPrint {
     }
 
     @Bean
-    public MysqlDataHelper pgsqlDataHelper() {
+    @ConditionalOnProperty(name = "db.sql.mysql.url")
+    public MysqlDataHelper mysqlDataHelper() {
+        return new MysqlDataHelper(mysql);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "db.sql.mysql-second.url")
+    public MysqlDataHelper mysqlSecond() {
         return new MysqlDataHelper(mysql);
     }
 
