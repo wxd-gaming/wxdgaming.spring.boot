@@ -51,6 +51,7 @@ public class ApplicationContextProvider implements InitPrint, ApplicationContext
 
     @Override public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+        SpringUtil.applicationContext = this;
     }
 
     public List<Content<Object>> getBeans() {

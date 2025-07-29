@@ -9,6 +9,7 @@ import wxdgaming.spring.boot.net.httpclient.HttpResponse;
 
 @SpringBootApplication(
         scanBasePackageClasses = {
+//                CoreConfiguration.class,
                 HttpClientConfiguration.class,
         }
 )

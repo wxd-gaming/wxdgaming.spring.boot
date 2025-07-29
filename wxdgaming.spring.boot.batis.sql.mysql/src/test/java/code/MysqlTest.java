@@ -9,9 +9,7 @@ import wxdgaming.spring.boot.core.CoreConfiguration;
 
 @SpringBootTest(
         classes = {
-                CoreConfiguration.class,
                 MysqlConfiguration.class,
-                MysqlTest.class
         }
 )
 class MysqlTest {

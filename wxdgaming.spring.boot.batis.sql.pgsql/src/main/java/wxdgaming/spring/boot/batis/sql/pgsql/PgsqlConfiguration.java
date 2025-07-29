@@ -1,6 +1,5 @@
 package wxdgaming.spring.boot.batis.sql.pgsql;
 
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import wxdgaming.spring.boot.batis.sql.SqlConfig;
 import wxdgaming.spring.boot.core.CoreConfiguration;
@@ -21,9 +21,10 @@ import wxdgaming.spring.boot.core.InitPrint;
  **/
 @Getter
 @Setter
+@ComponentScan(basePackageClasses = {CoreConfiguration.class})
 @Configuration
-@EnableConfigurationProperties({CoreConfiguration.class, PgsqlConfiguration.class})
 @ConfigurationProperties(prefix = "db.sql")
+@EnableConfigurationProperties
 public class PgsqlConfiguration implements InitPrint {
 
     private SqlConfig pgsql;
@@ -31,11 +32,6 @@ public class PgsqlConfiguration implements InitPrint {
 
     @Autowired
     public PgsqlConfiguration(CoreConfiguration coreConfiguration) {}
-
-    @PostConstruct
-    public void init() {
-        System.out.println(1);
-    }
 
     @Bean
     @ConditionalOnProperty(name = "db.sql.pgsql.url")

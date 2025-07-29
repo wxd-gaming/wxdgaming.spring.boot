@@ -16,7 +16,7 @@ public interface InitPrint {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @PostConstruct
     default void __initPrint() {
-        LogbackUtil.logger().debug("init print {}", this.getClass().getName());
+        LogbackUtil.logger().debug("init print {} {}", this.getClass().getName(), this.hashCode());
     }
 
 }

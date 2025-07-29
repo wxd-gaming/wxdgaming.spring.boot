@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import wxdgaming.spring.boot.batis.sql.SqlConfig;
 import wxdgaming.spring.boot.core.CoreConfiguration;
@@ -22,9 +23,10 @@ import wxdgaming.spring.boot.core.InitPrint;
 
 @Getter
 @Setter
+@ComponentScan(basePackageClasses = {CoreConfiguration.class})
 @Configuration
-@EnableConfigurationProperties({CoreConfiguration.class, MysqlConfiguration.class})
 @ConfigurationProperties(prefix = "db.sql")
+@EnableConfigurationProperties
 public class MysqlConfiguration implements InitPrint {
 
     private SqlConfig mysql;

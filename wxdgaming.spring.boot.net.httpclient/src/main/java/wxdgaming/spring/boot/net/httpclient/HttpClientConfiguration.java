@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Getter
 @Setter
+@ComponentScan(basePackageClasses = {CoreConfiguration.class})
 @Configuration
 @ConfigurationProperties(prefix = "http-client")
 @EnableConfigurationProperties({HttpClientConfiguration.class})

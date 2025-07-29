@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import wxdgaming.spring.boot.batis.sql.pgsql.PgsqlConfiguration;
 import wxdgaming.spring.boot.core.ApplicationContextProvider;
-import wxdgaming.spring.boot.core.CoreConfiguration;
 import wxdgaming.spring.boot.core.ann.Start;
 
 /**
@@ -16,7 +15,6 @@ import wxdgaming.spring.boot.core.ann.Start;
  **/
 @SpringBootApplication(
         scanBasePackageClasses = {
-                CoreConfiguration.class,
                 PgsqlConfiguration.class
         }
 )
