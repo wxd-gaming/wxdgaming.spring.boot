@@ -3,10 +3,11 @@ package wxdgaming.spring.boot.core;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import wxdgaming.spring.boot.core.executor.ExecutorConfig;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 import wxdgaming.spring.boot.core.executor.ExecutorFactory;
 
 /**
@@ -16,40 +17,22 @@ import wxdgaming.spring.boot.core.executor.ExecutorFactory;
  * @version: 2025-07-28 20:11
  **/
 @Getter
-@Setter
-@Configuration
-@ConfigurationProperties(prefix = "core.executor")
-@EnableConfigurationProperties
+@Order(Ordered.HIGHEST_PRECEDENCE)
+@Component
+@EnableConfigurationProperties(CoreProperties.class)
 public class CoreConfiguration implements InitPrint {
 
-    private boolean enableAsmDebug = false;
-    private ExecutorConfig basic;
-    private ExecutorConfig logic;
-    private ExecutorConfig virtual;
+    private final CoreProperties coreProperties;
+
+    @Autowired
+    public CoreConfiguration(CoreProperties coreProperties) {
+        this.coreProperties = coreProperties;
+    }
 
     @PostConstruct
     public void init() {
-        ExecutorFactory.init(this);
+        ExecutorFactory.init(this.getCoreProperties());
     }
 
-    public ExecutorConfig getBasic() {
-        if (basic == null) {
-            basic = ExecutorConfig.BASIC_INSTANCE.get();
-        }
-        return basic;
-    }
 
-    public ExecutorConfig getLogic() {
-        if (logic == null) {
-            logic = ExecutorConfig.LOGIC_INSTANCE.get();
-        }
-        return logic;
-    }
-
-    public ExecutorConfig getVirtual() {
-        if (virtual == null) {
-            virtual = ExecutorConfig.VIRTUAL_INSTANCE.get();
-        }
-        return virtual;
-    }
 }

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 import wxdgaming.spring.boot.core.chatset.StringUtils;
 import wxdgaming.spring.boot.core.chatset.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.reflect.AnnUtil;
@@ -32,7 +31,6 @@ import java.util.stream.Stream;
  **/
 @Slf4j
 @Getter
-@Component
 public class ApplicationContextProvider implements InitPrint, ApplicationContextAware {
 
     public static final Comparator<Object> OBJECT_COMPARATOR = (o1, o2) -> {
@@ -45,13 +43,13 @@ public class ApplicationContextProvider implements InitPrint, ApplicationContext
     };
 
     /** 上下文对象实例 */
-    private ApplicationContext applicationContext;
+    protected ApplicationContext applicationContext;
 
-    private volatile List<Content<Object>> beans;
+    protected volatile List<Content<Object>> beans;
 
-    @Override public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-        SpringUtil.applicationContext = this;
     }
 
     public List<Content<Object>> getBeans() {
@@ -149,6 +147,22 @@ public class ApplicationContextProvider implements InitPrint, ApplicationContext
         return methodStream;
     }
 
+    public void executorWithMethodAnnotated(Class<? extends Annotation> annotation, Object... args) {
+        Stream<MethodContent> methodContentStream = withMethodAnnotated(annotation);
+        methodContentStream.forEach(methodContent -> methodContent.invoke(args));
+    }
+
+    public void executorWithMethodAnnotatedIgnoreException(Class<? extends Annotation> annotation, Object... args) {
+        Stream<MethodContent> methodContentStream = withMethodAnnotated(annotation);
+        methodContentStream.forEach(methodContent -> {
+            try {
+                methodContent.invoke(args);
+            } catch (Exception e) {
+                log.error("执行方法异常", e);
+            }
+        });
+    }
+
     @Getter
     public class Content<T> {
 
@@ -197,7 +211,8 @@ public class ApplicationContextProvider implements InitPrint, ApplicationContext
             return fieldStream().filter(f -> AnnUtil.ann(f, annotation) != null);
         }
 
-        @Override public String toString() {
+        @Override
+        public String toString() {
             return instance.getClass().getName();
         }
     }
@@ -205,33 +220,39 @@ public class ApplicationContextProvider implements InitPrint, ApplicationContext
     @Getter
     public class MethodContent implements Comparable<MethodContent> {
 
-        private final Object ins;
+        private final Object bean;
         private final Method method;
 
-        public MethodContent(Object ins, Method method) {
-            this.ins = ins;
+        public MethodContent(Object bean, Method method) {
+            this.bean = bean;
             this.method = method;
         }
 
-        public Object invoke() {
+        @Override
+        public String toString() {
+            return "MethodContent{bean=%s, method=%s}".formatted(bean.getClass().getName(), method.getName());
+        }
+
+        public Object invoke(Object... args) {
             try {
-                log.debug("{}.{}", ins.getClass().getSimpleName(), this.method.getName());
-                Object[] objects = ApplicationContextProvider.this.springParameters(ins, method);
-                return method.invoke(ins, objects);
+                log.debug("{}.{}", bean.getClass().getSimpleName(), this.method.getName());
+                Object[] objects = ApplicationContextProvider.this.springParameters(bean, method, args);
+                return method.invoke(bean, objects);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw Throw.of(toString(), e);
             }
         }
 
-        @Override public int compareTo(MethodContent o) {
+        @Override
+        public int compareTo(MethodContent o) {
 
             int o1Sort = AnnUtil.annOpt(method, Order.class)
-                    .or(() -> AnnUtil.annOpt(ins.getClass(), Order.class))
+                    .or(() -> AnnUtil.annOpt(bean.getClass(), Order.class))
                     .map(Order::value)
                     .orElse(999999);
 
             int o2Sort = AnnUtil.annOpt(o.method, Order.class)
-                    .or(() -> AnnUtil.annOpt(o.ins.getClass(), Order.class))
+                    .or(() -> AnnUtil.annOpt(o.bean.getClass(), Order.class))
                     .map(Order::value)
                     .orElse(999999);
 
@@ -243,9 +264,27 @@ public class ApplicationContextProvider implements InitPrint, ApplicationContext
         }
     }
 
-    public Object[] springParameters(Object bean, Method method) {
+    /** 传递参数提取 */
+    static class HolderArgument {
+
+        private final Object[] arguments;
+        private int argumentIndex = 0;
+
+        public HolderArgument(Object[] arguments) {
+            this.arguments = arguments;
+        }
+
+        @SuppressWarnings("unchecked")
+        public <R> R next() {
+            return (R) arguments[argumentIndex++];
+        }
+
+    }
+
+    public Object[] springParameters(Object bean, Method method, Object... args) {
         Parameter[] parameters = method.getParameters();
         Object[] params = new Object[parameters.length];
+        HolderArgument holderArgument = new HolderArgument(args);
         for (int i = 0; i < params.length; i++) {
             Parameter parameter = parameters[i];
             Class<?> parameterType = parameter.getType();
@@ -261,13 +300,10 @@ public class ApplicationContextProvider implements InitPrint, ApplicationContext
             Qualifier qualifier = parameter.getAnnotation(Qualifier.class);
             if (qualifier != null) {
                 String name = qualifier.value();
-                if (StringUtils.isBlank(name)) {
-                    throw new RuntimeException(
-                            "%s#%s, 无法识别 %d 参数 RequestParam 指定 name %s"
-                                    .formatted(bean.getClass().getName(), method.getName(), i + 1, parameterType)
-                    );
-                }
-                params[i] = applicationContext.getBean(name);
+                if (StringUtils.isBlank(name))
+                    params[i] = applicationContext.getBean(parameterType);
+                else
+                    params[i] = applicationContext.getBean(name);
                 continue;
             }
             Value value = parameter.getAnnotation(Value.class);
@@ -275,7 +311,7 @@ public class ApplicationContextProvider implements InitPrint, ApplicationContext
                 params[i] = configValue(value, parameterizedType);
                 continue;
             }
-            params[i] = applicationContext.getBean(parameterType);
+            params[i] = holderArgument.next();
         }
         return params;
     }

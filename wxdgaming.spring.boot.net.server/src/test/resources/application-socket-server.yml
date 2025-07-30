@@ -1,0 +1,3 @@
+socket:
+  server:
+    port: 8080

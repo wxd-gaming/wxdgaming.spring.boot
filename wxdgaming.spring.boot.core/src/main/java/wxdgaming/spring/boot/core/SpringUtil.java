@@ -40,9 +40,10 @@ import java.util.Collection;
  */
 @Slf4j
 public class SpringUtil implements InitPrint {
-
-    public static ApplicationContextProvider applicationContext;
-    public static ApplicationContextProvider scriptApplicationContext;
+    
+    /** sd */
+    public static MainApplicationContextProvider mainApplicationContextProvider;
+    public static ScriptApplicationContextProvider scriptApplicationContext;
 
     /**
      * 判断一个类是否有 Spring 核心注解
@@ -82,6 +83,109 @@ public class SpringUtil implements InitPrint {
         }
         return false;
     }
+
+    public static String getCurrentUrl(HttpServletRequest request) {
+        String scheme = request.getScheme();              // http
+        String serverName = request.getServerName();     // hostname.com
+        int serverPort = request.getServerPort();        // 80
+        String contextPath = request.getContextPath();   // /mywebapp
+        String servletPath = request.getServletPath();   // /servlet/MyServlet
+
+        // Reconstruct original requesting URL
+        StringBuilder url = new StringBuilder();
+        url.append(scheme).append("://").append(serverName);
+
+        // Include server port if it's not standard http/https port
+        if (!((scheme.equals("http") && serverPort == 80) || (scheme.equals("https") && serverPort == 443))) {
+            url.append(":").append(serverPort);
+        }
+
+        url.append(contextPath).append(servletPath);
+
+        return url.toString();
+    }
+
+    public static String getClientIp() {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes == null) {
+            return null;
+        }
+        if (!(requestAttributes instanceof ServletRequestAttributes servletRequestAttributes)) {
+            return null;
+        }
+        HttpServletRequest request = servletRequestAttributes.getRequest();
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_CLIENT_IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
+    }
+
+    public static ConfigurableApplicationContext newChild4Jar(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String... jarPaths) {
+        ClassDirLoader classLoader = ClassDirLoader.bootLib(parentClassLoad, jarPaths);
+        return newChild(parent, scan, classLoader);
+    }
+
+    public static ConfigurableApplicationContext newChild4JavaCode(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String javaCodePath, String... resourceUrls) throws Exception {
+        ClassDirLoader classLoader = new JavaCoderCompile()
+                .parentClassLoader(parentClassLoad)
+                .compilerJava(javaCodePath)
+                .classLoader("target/scripts");
+
+        classLoader.addURL(resourceUrls);
+        return newChild(parent, scan, classLoader);
+    }
+
+    public static ConfigurableApplicationContext newChild4Classes(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String... urls) throws Exception {
+        ClassDirLoader classLoader = new ClassDirLoader(parentClassLoad, urls);
+        return newChild(parent, scan, classLoader);
+    }
+
+    public static ConfigurableApplicationContext newChild(ConfigurableApplicationContext parent, Class<?> scan, ClassDirLoader classLoader) {
+        Collection<Class<?>> values = classLoader.getLoadClassMap().values();
+        // 创建子容器
+        AnnotationConfigServletWebApplicationContext childContext = new AnnotationConfigServletWebApplicationContext();
+        childContext.setParent(parent);
+        childContext.setEnvironment(parent.getEnvironment());
+        childContext.setApplicationStartup(parent.getApplicationStartup());
+        childContext.setServletContext(parent.getBean(ServletContext.class));
+        childContext.setClassLoader(classLoader);
+        // 设置扫描类
+        childContext.register(scan);
+        // 刷新子容器以完成初始化
+        childContext.refresh();
+
+        ScriptApplicationContextProvider scriptApplicationContextProvider = new ScriptApplicationContextProvider();
+        scriptApplicationContextProvider.setApplicationContext(childContext);
+        SpringUtil.registerInstance(childContext, scriptApplicationContextProvider.getClass().getSimpleName(), scriptApplicationContextProvider, true);
+
+        String[] beanDefinitionNames = childContext.getBeanDefinitionNames();
+        for (String beanDefinitionName : beanDefinitionNames) {
+            Object bean1 = childContext.getBean(beanDefinitionName);
+            if (!values.contains(bean1.getClass())) {
+                continue;
+            }
+            /*把请求注入到主容器*/
+            if (bean1.getClass().isAnnotationPresent(Controller.class) || bean1.getClass().isAnnotationPresent(RestController.class)) {
+                SpringUtil.registerInstance(parent, beanDefinitionName, bean1, true);
+                SpringUtil.registerController(parent, beanDefinitionName);
+            }
+        }
+        return childContext;
+    }
+
 
     /**
      * 注册一个bean
@@ -241,100 +345,5 @@ public class SpringUtil implements InitPrint {
         );
     }
 
-    public static String getCurrentUrl(HttpServletRequest request) {
-        String scheme = request.getScheme();              // http
-        String serverName = request.getServerName();     // hostname.com
-        int serverPort = request.getServerPort();        // 80
-        String contextPath = request.getContextPath();   // /mywebapp
-        String servletPath = request.getServletPath();   // /servlet/MyServlet
 
-        // Reconstruct original requesting URL
-        StringBuilder url = new StringBuilder();
-        url.append(scheme).append("://").append(serverName);
-
-        // Include server port if it's not standard http/https port
-        if (!((scheme.equals("http") && serverPort == 80) || (scheme.equals("https") && serverPort == 443))) {
-            url.append(":").append(serverPort);
-        }
-
-        url.append(contextPath).append(servletPath);
-
-        return url.toString();
-    }
-
-    public static String getClientIp() {
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        if (requestAttributes == null) {
-            return null;
-        }
-        if (!(requestAttributes instanceof ServletRequestAttributes servletRequestAttributes)) {
-            return null;
-        }
-        HttpServletRequest request = servletRequestAttributes.getRequest();
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        return ip;
-    }
-
-    public static ConfigurableApplicationContext newChild4Jar(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String... jarPaths) {
-        ClassDirLoader classLoader = ClassDirLoader.bootLib(parentClassLoad, jarPaths);
-        return newChild(parent, scan, classLoader);
-    }
-
-    public static ConfigurableApplicationContext newChild4JavaCode(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String javaCodePath, String... resourceUrls) throws Exception {
-        ClassDirLoader classLoader = new JavaCoderCompile()
-                .parentClassLoader(parentClassLoad)
-                .compilerJava(javaCodePath)
-                .classLoader("target/scripts");
-
-        classLoader.addURL(resourceUrls);
-        return newChild(parent, scan, classLoader);
-    }
-
-    public static ConfigurableApplicationContext newChild4Classes(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String... urls) throws Exception {
-        ClassDirLoader classLoader = new ClassDirLoader(parentClassLoad, urls);
-        return newChild(parent, scan, classLoader);
-    }
-
-    public static ConfigurableApplicationContext newChild(ConfigurableApplicationContext parent, Class<?> scan, ClassDirLoader classLoader) {
-        Collection<Class<?>> values = classLoader.getLoadClassMap().values();
-        // 创建子容器
-        AnnotationConfigServletWebApplicationContext childContext = new AnnotationConfigServletWebApplicationContext();
-        childContext.setParent(parent);
-        childContext.setEnvironment(parent.getEnvironment());
-        childContext.setApplicationStartup(parent.getApplicationStartup());
-        childContext.setServletContext(parent.getBean(ServletContext.class));
-        childContext.setClassLoader(classLoader);
-        // 设置扫描类
-        childContext.register(scan);
-        // 刷新子容器以完成初始化
-        childContext.refresh();
-        String[] beanDefinitionNames = childContext.getBeanDefinitionNames();
-        for (String beanDefinitionName : beanDefinitionNames) {
-            Object bean1 = childContext.getBean(beanDefinitionName);
-            if (!values.contains(bean1.getClass())) {
-                continue;
-            }
-            /*把请求注入到主容器*/
-            if (bean1.getClass().isAnnotationPresent(Controller.class) || bean1.getClass().isAnnotationPresent(RestController.class)) {
-                SpringUtil.registerInstance(parent, beanDefinitionName, bean1, true);
-                SpringUtil.registerController(parent, beanDefinitionName);
-            }
-        }
-        return childContext;
-    }
 }

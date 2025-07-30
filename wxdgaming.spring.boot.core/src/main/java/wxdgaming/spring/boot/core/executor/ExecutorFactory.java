@@ -1,7 +1,7 @@
 package wxdgaming.spring.boot.core.executor;
 
 import lombok.Getter;
-import wxdgaming.spring.boot.core.CoreConfiguration;
+import wxdgaming.spring.boot.core.CoreProperties;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -23,13 +23,13 @@ public class ExecutorFactory {
     @Getter private static ExecutorService EXECUTOR_SERVICE_LOGIC;
     @Getter private static ExecutorService EXECUTOR_SERVICE_VIRTUAL;
 
-    public static void init(CoreConfiguration bootConfig) {
+    public static void init(CoreProperties coreProperties) {
         EXECUTOR_MAP = new ConcurrentHashMap<>();
         EXECUTOR_MONITOR = new ExecutorMonitor();
         scheduledExecutorService = newSingleThreadScheduledExecutor("scheduled");
-        EXECUTOR_SERVICE_BASIC = create("basic", bootConfig.getBasic());
-        EXECUTOR_SERVICE_LOGIC = create("logic", bootConfig.getLogic());
-        EXECUTOR_SERVICE_VIRTUAL = createVirtual("virtual", bootConfig.getVirtual());
+        EXECUTOR_SERVICE_BASIC = create("basic", coreProperties.getBasic());
+        EXECUTOR_SERVICE_LOGIC = create("logic", coreProperties.getLogic());
+        EXECUTOR_SERVICE_VIRTUAL = createVirtual("virtual", coreProperties.getVirtual());
     }
 
     public static ExecutorService getExecutor(String name) {
