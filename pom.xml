@@ -27,6 +27,7 @@
         <module>wxdgaming.spring.boot.net.httpclient</module>
         <module>wxdgaming.spring.boot.net.server</module>
         <module>wxdgaming.spring.boot.scheduled</module>
+        <module>wxdgaming.spring.test</module>
     </modules>
 
     <properties>
