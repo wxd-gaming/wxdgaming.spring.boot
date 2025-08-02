@@ -1,0 +1,14 @@
+core:
+  executor:
+    basic:
+      coreSize: 2
+      maxQueueSize: 5
+      queuePolicy: AbortPolicy
+    scheduled:
+      coreSize: 1
+      maxQueueSize: 500
+      queuePolicy: AbortPolicy
+
+
+server:
+  port: 8888

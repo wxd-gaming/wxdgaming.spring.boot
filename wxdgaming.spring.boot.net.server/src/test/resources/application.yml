@@ -1,0 +1,17 @@
+core:
+  executor:
+    basic:
+      coreSize: 2
+      maxQueueSize: 5
+      queuePolicy: AbortPolicy
+
+sid: 1
+rpc:
+  token: aaa
+
+server:
+  port: 8888
+
+spring:
+  profiles:
+    active: socket-server,socket-client

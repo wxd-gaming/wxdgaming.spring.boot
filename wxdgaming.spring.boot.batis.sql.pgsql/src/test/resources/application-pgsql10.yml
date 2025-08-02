@@ -1,0 +1,12 @@
+db:
+  sql:
+    pgsql:
+      driverClassName: org.postgresql.Driver
+      url: jdbc:postgresql://10.28.0.26:5432/postgres
+      username: postgres
+      password: test
+    pgsql-second:
+      driverClassName: org.postgresql.Driver
+      url: jdbc:postgresql://10.28.0.26:5432/postgres2
+      username: postgres
+      password: test

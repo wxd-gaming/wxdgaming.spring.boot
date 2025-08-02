@@ -1,0 +1,7 @@
+db:
+  sql:
+    mysql:
+      driverClassName: com.mysql.jdbc.Driver
+      url: jdbc:mysql://10.28.0.26:3306/test3
+      username: root
+      password: test
