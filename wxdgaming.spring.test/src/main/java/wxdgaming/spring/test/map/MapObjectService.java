@@ -68,6 +68,25 @@ public class MapObjectService implements InitPrint {
         }
     }
 
+    public List<MapObject> filterTargets(MapObject self, List<MapObject> targets, TargetGroup targetType, int targetCount) {
+        return switch (targetType) {
+            case All -> List.copyOf(getMapObjectMap().values());
+            case Friend -> targets.stream()
+                    .filter(target -> target.getMapObjectType() == self.getMapObjectType())
+                    .limit(targetCount)
+                    .toList();
+            case Enemy -> targets.stream()
+                    .filter(target -> target.getMapObjectType() != self.getMapObjectType())
+                    .limit(targetCount)
+                    .toList();
+            case Team -> targets.stream()
+                    .filter(target -> target.getMapObjectType() == self.getMapObjectType())
+                    .limit(targetCount)
+                    .toList();
+            default -> List.of();
+        };
+    }
+
     public List<MapObject> findTargets(MapObject self, TargetGroup targetType, int targetCount) {
         return switch (targetType) {
             case All -> List.copyOf(getMapObjectMap().values());
