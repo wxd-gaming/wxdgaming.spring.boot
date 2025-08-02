@@ -5,23 +5,20 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * 技能配置
+ * 游戏对象
  *
  * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-08-01 15:09
+ * @version: 2025-08-02 21:36
  **/
 @Getter
 @Setter
 @Accessors(chain = true)
-public class SkillCfg {
+public class GameObject {
 
-    private int id;
-    private int lv;
+    private long uid;
     private String name;
-    private long cd;
 
     @Override public String toString() {
-        return "SkillCfg{id=%d, lv=%d, name='%s'}".formatted(id, lv, name);
+        return "GameObject{name='%s', uid=%d}".formatted(name, uid);
     }
-
 }
