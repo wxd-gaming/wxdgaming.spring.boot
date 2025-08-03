@@ -6,11 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
+import wxdgaming.spring.boot.core.util.RandomUtils;
 import wxdgaming.spring.test.TargetGroup;
 import wxdgaming.spring.test.skill.SkillService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * 管理器
@@ -35,75 +38,79 @@ public class MapObjectService implements InitPrint {
     @PostConstruct()
     public void init() {
         {
-            MapObject player1 = new MapObject().setMapObjectType(MapObjectType.Player).setUid(1).setName("萨满").setHp(1000).setMp(500).setLevel(1);
+            MapObject player1 = new MapObject().setObjectType(MapObjectType.Player).setUid(1).setName("萨满").setHp(1000).setMp(500).setLevel(1);
             player1.addSkill(skillService.createSkill(1));
             player1.addSkill(skillService.createSkill(2));
             mapObjectMap.put(player1.getUid(), player1);
         }
 
         {
-            MapObject player2 = new MapObject().setMapObjectType(MapObjectType.Player).setUid(2).setName("MT").setHp(1000).setMp(500).setLevel(1);
+            MapObject player2 = new MapObject().setObjectType(MapObjectType.Player).setUid(2).setName("MT").setHp(1000).setMp(500).setLevel(1);
             player2.addSkill(skillService.createSkill(3));
             player2.addSkill(skillService.createSkill(4));
             mapObjectMap.put(player2.getUid(), player2);
         }
 
         {
-            MapObject enemy1 = new MapObject().setMapObjectType(MapObjectType.Monster).setUid(21).setName("哥布林").setHp(1000).setMp(500).setLevel(1);
+            MapObject enemy1 = new MapObject().setObjectType(MapObjectType.Monster).setUid(21).setName("哥布林").setHp(1000).setMp(500).setLevel(1);
             enemy1.addSkill(skillService.createSkill(3));
             enemy1.addSkill(skillService.createSkill(4));
             mapObjectMap.put(enemy1.getUid(), enemy1);
         }
         {
-            MapObject enemy2 = new MapObject().setMapObjectType(MapObjectType.Monster).setUid(22).setName("小软").setHp(1000).setMp(500).setLevel(1);
+            MapObject enemy2 = new MapObject().setObjectType(MapObjectType.Monster).setUid(22).setName("小软").setHp(1000).setMp(500).setLevel(1);
             enemy2.addSkill(skillService.createSkill(3));
             enemy2.addSkill(skillService.createSkill(4));
             mapObjectMap.put(enemy2.getUid(), enemy2);
         }
         {
-            MapObject enemy2 = new MapObject().setMapObjectType(MapObjectType.Monster).setUid(22).setName("巫师").setHp(1000).setMp(500).setLevel(1);
+            MapObject enemy2 = new MapObject().setObjectType(MapObjectType.Monster).setUid(22).setName("巫师").setHp(1000).setMp(500).setLevel(1);
             enemy2.addSkill(skillService.createSkill(1));
             enemy2.addSkill(skillService.createSkill(2));
             mapObjectMap.put(enemy2.getUid(), enemy2);
         }
     }
 
-    public List<MapObject> filterTargets(MapObject self, List<MapObject> targets, TargetGroup targetType, int targetCount) {
+    public List<MapObject> filterTargets(MapObject self, List<MapObject> targets, TargetGroup targetType) {
         return switch (targetType) {
+            case Self -> List.of(self);
+            case Target -> targets;
             case All -> List.copyOf(getMapObjectMap().values());
             case Friend -> targets.stream()
-                    .filter(target -> target.getMapObjectType() == self.getMapObjectType())
-                    .limit(targetCount)
+                    .filter(target -> target.getObjectType() == self.getObjectType())
                     .toList();
             case Enemy -> targets.stream()
-                    .filter(target -> target.getMapObjectType() != self.getMapObjectType())
-                    .limit(targetCount)
+                    .filter(target -> target.getObjectType() != self.getObjectType())
                     .toList();
             case Team -> targets.stream()
-                    .filter(target -> target.getMapObjectType() == self.getMapObjectType())
-                    .limit(targetCount)
+                    .filter(target -> target.getObjectType() == self.getObjectType())
                     .toList();
             default -> List.of();
         };
     }
 
     public List<MapObject> findTargets(MapObject self, TargetGroup targetType, int targetCount) {
-        return switch (targetType) {
-            case All -> List.copyOf(getMapObjectMap().values());
+        List<MapObject> targets = switch (targetType) {
+            case Self -> List.of(self);
+            case All -> new ArrayList<>(getMapObjectMap().values());
             case Friend -> mapObjectMap.values().stream()
-                    .filter(target -> target.getMapObjectType() == self.getMapObjectType())
-                    .limit(targetCount)
-                    .toList();
+                    .filter(target -> target.getObjectType() == self.getObjectType())
+                    .collect(Collectors.toList());
             case Enemy -> mapObjectMap.values().stream()
-                    .filter(target -> target.getMapObjectType() != self.getMapObjectType())
-                    .limit(targetCount)
-                    .toList();
+                    .filter(target -> target.getObjectType() != self.getObjectType())
+                    .collect(Collectors.toList());
             case Team -> mapObjectMap.values().stream()
-                    .filter(target -> target.getMapObjectType() == self.getMapObjectType())
-                    .limit(targetCount)
-                    .toList();
+                    .filter(target -> target.getObjectType() == self.getObjectType())
+                    .collect(Collectors.toList());
             default -> List.of();
         };
+
+        if (targets.size() > targetCount) {
+            for (int i = 0; i < targetCount; i++) {
+                RandomUtils.randomRemove(targets);
+            }
+        }
+        return targets;
     }
 
 }

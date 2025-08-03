@@ -22,20 +22,20 @@ import java.util.List;
 @Accessors(chain = true)
 public class MapObject extends GameObject {
 
-    private MapObjectType mapObjectType;
+    private MapObjectType objectType;
     private int hp;
     private int mp;
     private int level;
     private List<Skill> skills = new ArrayList<>();
     private SkillExecutor useSkill;
 
-    @Override public MapObject setName(String name) {
-        super.setName(name);
+    @Override public MapObject setUid(long uid) {
+        super.setUid(uid);
         return this;
     }
 
-    @Override public MapObject setUid(long uid) {
-        super.setUid(uid);
+    @Override public MapObject setName(String name) {
+        super.setName(name);
         return this;
     }
 

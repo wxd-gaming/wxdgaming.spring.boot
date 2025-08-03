@@ -5,7 +5,11 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
+import wxdgaming.spring.boot.core.format.HexId;
+import wxdgaming.spring.boot.core.timer.MyClock;
+import wxdgaming.spring.boot.core.util.RandomUtils;
 import wxdgaming.spring.test.TargetGroup;
+import wxdgaming.spring.test.map.MapObject;
 import wxdgaming.spring.test.skill.impl.SkillCostHpEffect;
 import wxdgaming.spring.test.skill.impl.SkillHealHpEffect;
 import wxdgaming.spring.test.skill.impl.SkillHealMpEffect;
@@ -24,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class SkillService implements InitPrint {
 
+
+    private final HexId hexId = new HexId(1);
     private final Map<Integer, Skill> skillTemplates = new ConcurrentHashMap<>();
 
     @PostConstruct
@@ -88,6 +94,43 @@ public class SkillService implements InitPrint {
             return template;
         }
         return null;
+    }
+
+    public void execute(MapObject  attack) {
+        if (attack.getUseSkill() == null) {
+            boolean b = RandomUtils.randomBoolean(20);
+            if (b) {
+                Skill skill = attack.randomSkill();
+                if (skill != null) {
+                    SkillExecutor skillExecutor = SkillExecutor.builder()
+                            .uid(hexId.newId())
+                            .self(attack)
+                            .skill(skill)
+                            .build();
+                    attack.setUseSkill(skillExecutor);
+                    log.debug("{} 释放技能 {}", attack, skill);
+                }
+            }
+        }
+        if (attack.getUseSkill() != null) {
+            onExecute(attack);
+            if (!attack.getUseSkill().hasNext()) {
+                log.debug("{} 技能 {} 释放完毕", attack, attack.getUseSkill());
+                attack.setUseSkill(null);
+            }
+        }
+    }
+
+    public void onExecute(MapObject attack) {
+        SkillExecutor useSkill = attack.getUseSkill();
+        while (useSkill.hasNext()) {
+            AbstractSkillEffect effect = useSkill.get();
+            long diff = MyClock.millis() - useSkill.getStartTime();
+            if (effect.getExecutorDiffTime() > diff) break;
+            List<MapObject> targets = mapObjectService.findTargets(attack, effect.getTargetGroup(), effect.getTargetCount());
+            effect.execute(attack, targets);
+            useSkill.moveNext();
+        }
     }
 
 }
