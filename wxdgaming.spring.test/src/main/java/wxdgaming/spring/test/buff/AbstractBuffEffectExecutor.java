@@ -1,6 +1,9 @@
 package wxdgaming.spring.test.buff;
 
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import wxdgaming.spring.test.map.MapObject;
+import wxdgaming.spring.test.map.MapObjectService;
 
 import java.util.List;
 
@@ -10,7 +13,10 @@ import java.util.List;
  * @author: wxd-gaming(無心道, 15388152619)
  * @version: 2025-08-03 09:52
  **/
+@Getter
 public abstract class AbstractBuffEffectExecutor {
+
+    @Autowired MapObjectService mapObjectService;
 
     public abstract BuffEffectType buffEffectType();
 

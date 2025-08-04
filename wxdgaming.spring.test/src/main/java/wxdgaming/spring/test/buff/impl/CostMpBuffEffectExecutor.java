@@ -2,6 +2,7 @@ package wxdgaming.spring.test.buff.impl;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import wxdgaming.spring.boot.core.util.RandomUtils;
 import wxdgaming.spring.test.buff.AbstractBuffEffectExecutor;
 import wxdgaming.spring.test.buff.Buff;
@@ -17,6 +18,7 @@ import wxdgaming.spring.test.map.MapObject;
  **/
 @Slf4j
 @Getter
+@Component
 public class CostMpBuffEffectExecutor extends AbstractBuffEffectExecutor {
 
     @Override public BuffEffectType buffEffectType() {
@@ -25,8 +27,7 @@ public class CostMpBuffEffectExecutor extends AbstractBuffEffectExecutor {
 
     @Override protected void onExecute(MapObject self, Buff buff, BuffEffect buffEffect, MapObject target) {
         int random = RandomUtils.random(10, 300);
-        int old = target.getMp();
-        target.setMp(old - random);
+        getMapObjectService().costMp(target, random);
         log.debug(
                 "{}触发buff{}({})，消耗{} {}点魔法值, 当前魔法值：{}",
                 self.getName(), buff.getBuffCfg(), buffEffect.getName(), target.getName(), random, target.getMp()

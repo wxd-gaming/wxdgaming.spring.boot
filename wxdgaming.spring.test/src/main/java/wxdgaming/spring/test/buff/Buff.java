@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Getter;
 import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.test.map.MapObject;
-import wxdgaming.spring.test.map.MapObjectService;
 
 import java.util.List;
 
@@ -22,6 +21,7 @@ public class Buff {
     private long createdTime;
     /** 效果消耗 */
     private List<BuffEffect> effectList;
+    /** 是谁释放的 */
     private MapObject spellcaster;
 
     public boolean checkOver() {
@@ -31,14 +31,7 @@ public class Buff {
         return MyClock.millis() - createdTime > buffCfg.getDuration();
     }
 
-    public void execute(MapObjectService mapObjectService, MapObject self) {
-
-        for (BuffEffect effect : effectList) {
-
-            List<MapObject> targets = mapObjectService.findTargets(self, effect.getTargetGroup(), effect.getTargetCount());
-            effect.execute(self, targets);
-        }
-
+    @Override public String toString() {
+        return buffCfg.toString();
     }
-
 }

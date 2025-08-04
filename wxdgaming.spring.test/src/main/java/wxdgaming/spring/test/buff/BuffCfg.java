@@ -2,7 +2,6 @@ package wxdgaming.spring.test.buff;
 
 import lombok.Builder;
 import lombok.Getter;
-import wxdgaming.spring.test.TargetGroup;
 
 /**
  * buff配置
@@ -20,4 +19,8 @@ public class BuffCfg {
     private boolean clientShow;
     /** 持续时间 */
     private long duration;
+
+    @Override public String toString() {
+        return "BuffCfg{id=%d, name='%s'}".formatted(id, name);
+    }
 }

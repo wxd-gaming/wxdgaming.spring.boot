@@ -36,7 +36,7 @@ public class SkillExecutor {
         return index < skill.getEffectList().size();
     }
 
-    public AbstractSkillEffect get() {
+    public SkillEffect get() {
         return skill.getEffectList().get(index);
     }
 

@@ -21,7 +21,7 @@ public class Skill implements Cloneable {
 
     protected SkillCfg skillCfg;
     /** 效果消耗 */
-    protected List<AbstractSkillEffect> effectList;
+    protected List<SkillEffect> effectList;
     /** 效果消耗 */
     protected List<SkillCost> costs;
 

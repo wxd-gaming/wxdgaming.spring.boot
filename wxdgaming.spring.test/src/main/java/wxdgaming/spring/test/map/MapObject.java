@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import wxdgaming.spring.boot.core.util.RandomUtils;
 import wxdgaming.spring.test.GameObject;
+import wxdgaming.spring.test.buff.Buff;
 import wxdgaming.spring.test.skill.Skill;
 import wxdgaming.spring.test.skill.SkillExecutor;
 
@@ -23,10 +24,11 @@ import java.util.List;
 public class MapObject extends GameObject {
 
     private MapObjectType objectType;
-    private int hp;
-    private int mp;
+    private long hp;
+    private long mp;
     private int level;
     private List<Skill> skills = new ArrayList<>();
+    private List<Buff> buffs = new ArrayList<>();
     private SkillExecutor useSkill;
 
     @Override public MapObject setUid(long uid) {
@@ -37,6 +39,14 @@ public class MapObject extends GameObject {
     @Override public MapObject setName(String name) {
         super.setName(name);
         return this;
+    }
+
+    public long maxHp() {
+        return 10000;
+    }
+
+    public long maxMp() {
+        return 5000;
     }
 
     public void addSkill(Skill skill) {

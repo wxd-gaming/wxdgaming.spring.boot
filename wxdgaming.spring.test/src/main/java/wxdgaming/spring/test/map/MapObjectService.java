@@ -10,7 +10,6 @@ import wxdgaming.spring.boot.core.util.RandomUtils;
 import wxdgaming.spring.test.TargetGroup;
 import wxdgaming.spring.test.skill.SkillService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -75,14 +74,19 @@ public class MapObjectService implements InitPrint {
         return switch (targetType) {
             case Self -> List.of(self);
             case Target -> targets;
-            case All -> List.copyOf(getMapObjectMap().values());
+            case All -> mapObjectMap.values().stream()
+                    .filter(target -> !isDead(target))
+                    .collect(Collectors.toList());
             case Friend -> targets.stream()
+                    .filter(target -> !isDead(target))
                     .filter(target -> target.getObjectType() == self.getObjectType())
                     .toList();
             case Enemy -> targets.stream()
+                    .filter(target -> !isDead(target))
                     .filter(target -> target.getObjectType() != self.getObjectType())
                     .toList();
             case Team -> targets.stream()
+                    .filter(target -> !isDead(target))
                     .filter(target -> target.getObjectType() == self.getObjectType())
                     .toList();
             default -> List.of();
@@ -92,14 +96,19 @@ public class MapObjectService implements InitPrint {
     public List<MapObject> findTargets(MapObject self, TargetGroup targetType, int targetCount) {
         List<MapObject> targets = switch (targetType) {
             case Self -> List.of(self);
-            case All -> new ArrayList<>(getMapObjectMap().values());
+            case All -> mapObjectMap.values().stream()
+                    .filter(target -> !isDead(target))
+                    .collect(Collectors.toList());
             case Friend -> mapObjectMap.values().stream()
+                    .filter(target -> !isDead(target))
                     .filter(target -> target.getObjectType() == self.getObjectType())
                     .collect(Collectors.toList());
             case Enemy -> mapObjectMap.values().stream()
+                    .filter(target -> !isDead(target))
                     .filter(target -> target.getObjectType() != self.getObjectType())
                     .collect(Collectors.toList());
             case Team -> mapObjectMap.values().stream()
+                    .filter(target -> !isDead(target))
                     .filter(target -> target.getObjectType() == self.getObjectType())
                     .collect(Collectors.toList());
             default -> List.of();
@@ -111,6 +120,42 @@ public class MapObjectService implements InitPrint {
             }
         }
         return targets;
+    }
+
+    public void costHp(MapObject self, long change) {
+        self.setHp(self.getHp() - change);
+        if (self.getHp() < 0) {
+            self.setHp(0);
+        }
+        if (isDead(self)) {
+            log.debug("{}死亡", self, new RuntimeException(","));
+        }
+    }
+
+    public void costMp(MapObject self, long change) {
+        self.setMp(self.getMp() - change);
+        if (self.getMp() < 0) {
+            self.setMp(0);
+        }
+    }
+
+    public void healHp(MapObject self, long change) {
+        self.setHp(self.getHp() + change);
+        if (self.getHp() > self.maxHp()) {
+            self.setHp(self.maxHp());
+        }
+    }
+
+    public void healMp(MapObject self, long change) {
+        self.setMp(self.getMp() + change);
+        if (self.getMp() > self.maxMp()) {
+            self.setMp(self.maxMp());
+        }
+    }
+
+
+    public boolean isDead(MapObject self) {
+        return self.getHp() <= 0;
     }
 
 }

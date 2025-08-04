@@ -4,9 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import wxdgaming.spring.test.TargetGroup;
-import wxdgaming.spring.test.map.MapObject;
-
-import java.util.List;
 
 /**
  * 技能效果
@@ -17,31 +14,25 @@ import java.util.List;
 @Getter
 @Setter
 @Accessors(chain = true)
-public abstract class AbstractSkillEffect {
+public class SkillEffect {
 
     private final SkillCfg skillCfg;
     /** 效果名称 */
     protected final String name;
+    /** 技能效果类型 */
+    protected final SkillEffectType skillEffectType;
     /** 效果作用目标 */
     protected final TargetGroup targetGroup;
     protected final int targetCount;
     /** 执行间隔时间差 */
     protected long executorDiffTime;
 
-    public AbstractSkillEffect(SkillCfg skillCfg, String name, TargetGroup targetGroup, int targetCount) {
+    public SkillEffect(SkillCfg skillCfg, String name, SkillEffectType skillEffectType, TargetGroup targetGroup, int targetCount) {
         this.skillCfg = skillCfg;
         this.name = name;
+        this.skillEffectType = skillEffectType;
         this.targetGroup = targetGroup;
         this.targetCount = targetCount;
     }
-
-
-    public final void execute(MapObject self, List<MapObject> targets) {
-        for (MapObject target : targets) {
-            onExecute(self, target);
-        }
-    }
-
-    protected abstract void onExecute(MapObject self, MapObject target);
 
 }
