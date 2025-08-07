@@ -89,20 +89,40 @@ public abstract class SqlQueryBuilder {
         return this;
     }
 
+    /** 追加左边括号 */
+    public SqlQueryBuilder pushWhereLeftBracket() {
+        this.where += "(";
+        return this;
+    }
+
+    /** 追加右边括号 */
+    public SqlQueryBuilder pushWhereRightBracket() {
+        this.where += ")";
+        return this;
+    }
+
     /**
      * 添加 where 条件
      *
      * @param where 例如： a=?
      * @param param 1
-     * @return
-     * @author wxd-gaming(無心道, 15388152619)
-     * @version 2025-03-08 20:48
      */
     public SqlQueryBuilder pushWhere(String where, Object param) {
+        return pushWhere(where, param, "AND");
+    }
+
+    /**
+     * 添加 where 条件
+     *
+     * @param where  例如： a=?
+     * @param param  1
+     * @param append 例如：AND OR
+     */
+    public SqlQueryBuilder pushWhere(String where, Object param, String append) {
         if (Objects.nullEmpty(param)) throw new IllegalArgumentException("param null or empty");
         if (StringUtils.isNotBlank(where)) {
             if (StringUtils.isNotBlank(this.where)) {
-                this.where += " and ";
+                this.where += " " + append + " ";
             }
             this.where += where;
             pushParameter(param);
