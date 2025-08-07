@@ -6,5 +6,4 @@ db:
       url: jdbc:postgresql://10.28.0.26:5432/game_1
       username: postgres
       password: test
-      batchThreadSize: 5
       scanPackage: "wxdgaming.spring.logcenter.entity"

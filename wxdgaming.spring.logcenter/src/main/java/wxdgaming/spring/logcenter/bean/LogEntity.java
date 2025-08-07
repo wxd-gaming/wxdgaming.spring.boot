@@ -32,14 +32,14 @@ public class LogEntity extends EntityLongUID implements Serializable, EntityName
     /** 归属于那一天 */
     @Partition
     @JSONField(ordinal = 1)
-    @DbColumn(key = true)
+    @DbColumn(key = true, comment = "分区信息")
     private int dayKey;
     /** 具体的日期 */
     @JSONField(ordinal = 2)
     @DbColumn(index = true)
     private long createTime;
     @JSONField(ordinal = -1)
-    @DbColumn(index = true, columnType = ColumnType.String, length = 128)
+    @DbColumn(ignore = true)
     private String logType;
 
     @JSONField(ordinal = 99)

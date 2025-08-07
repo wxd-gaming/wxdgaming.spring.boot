@@ -5,6 +5,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +13,8 @@ import wxdgaming.spring.boot.core.chatset.StringUtils;
 import wxdgaming.spring.boot.core.lang.RunResult;
 import wxdgaming.spring.logcenter.bean.LogEntity;
 import wxdgaming.spring.logcenter.module.logs.LogService;
+
+import java.util.List;
 
 /**
  * 日志接口
@@ -22,14 +25,32 @@ import wxdgaming.spring.logcenter.module.logs.LogService;
 @Slf4j
 @RestController
 @RequestMapping("/api/log")
-public class LogController {
+public class LogPushController {
 
     final LogService logService;
 
-    public LogController(LogService logService) {
+    @Autowired
+    public LogPushController(LogService logService) {
         this.logService = logService;
     }
 
+    @RequestMapping("/pushList")
+    public RunResult pushList(HttpServletRequest request, @RequestBody List<LogEntity> logEntityList) {
+        if (logEntityList == null || logEntityList.isEmpty()) {
+            return RunResult.fail("logEntityList 不能为空");
+        }
+
+        String authorization = request.getHeader(HttpHeaderNames.AUTHORIZATION.toString());
+        String jsonString = JSON.toJSONString(logEntityList, SerializerFeature.SortField, SerializerFeature.MapSortField);
+
+        for (LogEntity logEntity : logEntityList) {
+            if (StringUtils.isBlank(logEntity.getLogType())) {
+                return RunResult.fail("logType 不能为空");
+            }
+            logService.submitLog(logEntity);
+        }
+        return RunResult.ok();
+    }
 
     @RequestMapping("/push")
     public RunResult push(HttpServletRequest request, @RequestBody LogEntity logEntity) {

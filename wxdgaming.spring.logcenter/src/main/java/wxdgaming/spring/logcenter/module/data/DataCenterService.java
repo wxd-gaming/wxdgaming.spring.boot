@@ -8,16 +8,17 @@ import wxdgaming.spring.boot.batis.TableMapping;
 import wxdgaming.spring.boot.batis.sql.pgsql.PgsqlDataHelper;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ann.Start;
-import wxdgaming.spring.boot.core.collection.MapOf;
+import wxdgaming.spring.boot.core.chatset.json.FastJsonUtil;
+import wxdgaming.spring.boot.core.io.FileReadUtil;
 import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.logcenter.bean.LogEntity;
-import wxdgaming.spring.logcenter.entity.GlobalEntity;
-import wxdgaming.spring.logcenter.bean.GlobalEntityConst;
+import wxdgaming.spring.logcenter.bean.LogMappingInfo;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 数据中心
@@ -45,19 +46,14 @@ public class DataCenterService implements InitPrint {
     public void initDataHelper() {
         Map<String, String> dbTableMap = sqlDataHelper.findTableMap();
         Map<String, LinkedHashMap<String, JSONObject>> tableStructMap = sqlDataHelper.findTableStructMap();
-        GlobalEntity globalEntity = GlobalEntityConst.LogTable.queryEntity(sqlDataHelper);
 
-        ConcurrentHashMap<String, Object> logTableMap = globalEntity.getJsonMap();
-        if (MapOf.isEmpty(logTableMap)) {
-            logTableMap = new ConcurrentHashMap<>();
-            logTableMap.put("login", "登录日志");
-            sqlDataHelper.save(globalEntity);
-        }
-        for (Map.Entry<String, Object> entry : logTableMap.entrySet()) {
-            String tableName = entry.getKey();
-            String tableComment = entry.getValue().toString();
+        String json = FileReadUtil.readString("log-init.json", StandardCharsets.UTF_8);
+        List<LogMappingInfo> logMappingInfoList = FastJsonUtil.parseArray(json, LogMappingInfo.class);
+        for (LogMappingInfo logMappingInfo : logMappingInfoList) {
+            String tableName = logMappingInfo.getLogName();
+            String tableComment = logMappingInfo.getLogComment();
             TableMapping tableMapping = sqlDataHelper.tableMapping(LogEntity.class);
-            checkSLogTable(sqlDataHelper, dbTableMap, tableStructMap, tableMapping, true, tableName, tableComment);
+            checkSLogTable(sqlDataHelper, dbTableMap, tableStructMap, tableMapping, logMappingInfo.isPartition(), tableName, tableComment);
         }
 
     }

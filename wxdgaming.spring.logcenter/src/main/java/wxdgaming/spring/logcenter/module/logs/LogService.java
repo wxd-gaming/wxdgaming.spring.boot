@@ -5,12 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.batis.sql.pgsql.PgsqlDataHelper;
 import wxdgaming.spring.boot.core.InitPrint;
-import wxdgaming.spring.boot.core.cache2.CASCache;
 import wxdgaming.spring.boot.core.collection.MapOf;
 import wxdgaming.spring.logcenter.bean.LogEntity;
+import wxdgaming.spring.logcenter.bean.LogTableContext;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 日志服务
@@ -23,34 +22,30 @@ import java.util.concurrent.TimeUnit;
 public class LogService implements InitPrint {
 
     final PgsqlDataHelper pgsqlDataHelper;
-
-    final Map<String, CASCache<Long, Boolean>> logIdFilterMap = MapOf.newConcurrentHashMap();
+    final Map<String, LogTableContext> logTableContextMap = MapOf.newConcurrentHashMap();
 
     @Autowired
     public LogService(PgsqlDataHelper pgsqlDataHelper) {
         this.pgsqlDataHelper = pgsqlDataHelper;
     }
 
-    public CASCache<Long, Boolean> logFilter(String logName) {
-        return logIdFilterMap.computeIfAbsent(logName, l -> {
-            CASCache<Long, Boolean> build = CASCache.<Long, Boolean>builder()
-                    .area(10)
-                    .expireAfterWriteMs(TimeUnit.HOURS.toMillis(24))
-                    .build();
-            build.start();
-            return build;
-        });
+    public LogTableContext logTableContext(String logName) {
+        return logTableContextMap.computeIfAbsent(logName, LogTableContext::new);
     }
 
     public void submitLog(LogEntity logEntity) {
-        CASCache<Long, Boolean> longBooleanCASCache = logFilter(logEntity.getLogType());
-        if (longBooleanCASCache.has(logEntity.getUid())) {
+        LogTableContext logTableContext = logTableContext(logEntity.getLogType());
+        if (logEntity.getUid() == 0) {
+            log.debug("uid 为0 {}", logEntity);
+            logEntity.setUid(logTableContext.newId());
+        }
+        if (logTableContext.filter(logEntity.getUid())) {
             log.debug("uid 已存在丢弃 {}", logEntity);
             return;
         }
         logEntity.checkDataKey();
-        longBooleanCASCache.put(logEntity.getUid(), true);
-        log.debug("保存 {}", logEntity);
+        logTableContext.addFilter(logEntity.getUid());
+        log.debug("保存 uid={}, logType={}, entity={}", logEntity.getUid(), logEntity.getLogType(), logEntity);
         pgsqlDataHelper.getDataBatch().insert(logEntity);
     }
 
