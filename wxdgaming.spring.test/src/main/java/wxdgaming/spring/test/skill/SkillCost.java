@@ -9,8 +9,8 @@ import wxdgaming.spring.test.map.MapObject;
 /**
  * 技能消耗
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-07-31 10:48
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-07-31 10:48
  **/
 @Slf4j
 @Getter

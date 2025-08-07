@@ -16,8 +16,8 @@ import wxdgaming.spring.boot.core.executor.QueuePolicyConst;
 /**
  * 定时器注入器
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-07-30 10:48
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-07-30 10:48
  */
 @Slf4j
 @Getter

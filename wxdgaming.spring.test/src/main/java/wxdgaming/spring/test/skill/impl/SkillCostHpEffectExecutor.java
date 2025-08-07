@@ -15,8 +15,8 @@ import wxdgaming.spring.test.skill.SkillEffectType;
 /**
  * 技能回血效果
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-08-01 14:03
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-08-01 14:03
  **/
 @Slf4j
 @Getter

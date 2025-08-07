@@ -6,8 +6,8 @@ import wxdgaming.spring.boot.core.chatset.json.FastJsonUtil;
 /**
  * 序列化处理
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2021-06-16 16:55
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2021-06-16 16:55
  **/
 public interface Data2Json {
 

@@ -13,8 +13,8 @@ import wxdgaming.spring.boot.core.InitPrint;
 /**
  * MapDBConfiguration
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-27 10:13
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-27 10:13
  **/
 @Getter
 @Setter

@@ -10,8 +10,8 @@ import java.util.concurrent.locks.LockSupport;
 /**
  * 执行器监视
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-05-15 14:46
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-05-15 14:46
  **/
 @Slf4j
 class ExecutorMonitor extends Thread {

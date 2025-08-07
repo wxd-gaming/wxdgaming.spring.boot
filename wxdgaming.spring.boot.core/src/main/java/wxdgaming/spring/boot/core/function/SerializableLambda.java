@@ -13,8 +13,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2022-10-20 19:27
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2022-10-20 19:27
  **/
 public interface SerializableLambda extends Serializable {
     static final Pattern RETURN_TYPE_PATTERN = Pattern.compile("\\(.*\\)L(.*);");

@@ -8,8 +8,8 @@ import org.springframework.core.annotation.Order;
 /**
  * 添加初始化打印
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-22 09:59
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-22 09:59
  */
 public interface InitPrint {
 

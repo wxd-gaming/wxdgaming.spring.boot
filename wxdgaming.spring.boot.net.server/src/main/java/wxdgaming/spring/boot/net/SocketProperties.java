@@ -11,8 +11,8 @@ import wxdgaming.spring.boot.net.server.SocketServerConfig;
 /**
  * socket 模块
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-02-13 09:45
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-02-13 09:45
  **/
 @Getter
 @Setter

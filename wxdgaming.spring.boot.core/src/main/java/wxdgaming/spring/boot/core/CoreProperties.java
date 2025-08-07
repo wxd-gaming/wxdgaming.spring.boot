@@ -8,8 +8,8 @@ import wxdgaming.spring.boot.core.executor.ExecutorConfig;
 /**
  * 核心配置
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-07-30 15:13
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-07-30 15:13
  **/
 @Getter
 @Setter

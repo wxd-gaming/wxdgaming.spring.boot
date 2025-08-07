@@ -7,8 +7,8 @@ import wxdgaming.spring.boot.core.lang.ObjectBase;
 /**
  * protobuf 映射 基类
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-05-28 21:24
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2024-05-28 21:24
  **/
 public abstract class PojoBase extends ObjectBase {
 

@@ -25,8 +25,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * rpc 服务
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-02-17 19:25
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-02-17 19:25
  **/
 @Slf4j
 @Getter

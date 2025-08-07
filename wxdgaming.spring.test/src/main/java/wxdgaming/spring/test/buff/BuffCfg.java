@@ -6,8 +6,8 @@ import lombok.Getter;
 /**
  * buff配置
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-08-02 21:00
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-08-02 21:00
  **/
 @Getter
 @Builder

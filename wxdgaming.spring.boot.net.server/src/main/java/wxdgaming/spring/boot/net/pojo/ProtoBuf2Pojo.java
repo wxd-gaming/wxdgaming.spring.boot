@@ -35,8 +35,8 @@ import java.util.stream.Stream;
 /**
  * pojo生成
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-05-27 16:39
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2024-05-27 16:39
  **/
 public class ProtoBuf2Pojo {
 
@@ -363,8 +363,8 @@ public class ProtoBuf2Pojo {
      * @param packageName     输出包名
      * @param readPackageName 读取包名
      * @param spi             要处理的接口 例如Req or Res
-     * @author: wxd-gaming(無心道, 15388152619)
-     * @version: 2025-01-15 14:58
+     * @author wxd-gaming(無心道, 15388152619)
+     * @version 2025-01-15 14:58
      */
     public static void createMapping(String outPath, String packageName, String spi,
                                      String readPackageName,
@@ -430,8 +430,8 @@ public class ProtoBuf2Pojo {
                 /**
                  * %s
                  *
-                 * @author: wxd-gaming(無心道, 15388152619)
-                 * @version: v1.1
+                 * @author wxd-gaming(無心道, 15388152619)
+                 * @version v1.1
                  **/
                 @Slf4j
                 @Component

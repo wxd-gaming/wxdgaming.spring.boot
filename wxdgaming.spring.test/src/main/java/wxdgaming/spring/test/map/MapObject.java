@@ -15,8 +15,8 @@ import java.util.List;
 /**
  * 地图对象
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-08-02 21:37
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-08-02 21:37
  **/
 @Getter
 @Setter

@@ -19,8 +19,8 @@ import java.util.stream.Stream;
 /**
  * 技能服务
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-08-02 21:29
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-08-02 21:29
  */
 @Slf4j
 @Getter

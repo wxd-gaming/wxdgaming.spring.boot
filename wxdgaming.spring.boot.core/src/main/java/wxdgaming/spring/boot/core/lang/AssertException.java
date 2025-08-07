@@ -6,8 +6,8 @@ import wxdgaming.spring.boot.core.Throw;
 /**
  * 断言异常， 此异常不包含堆栈的
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-07-28 14:38
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-07-28 14:38
  */
 public class AssertException extends RuntimeException {
 

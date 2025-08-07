@@ -10,8 +10,8 @@ import java.util.List;
 /**
  * buff执行器
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-08-03 09:52
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-08-03 09:52
  **/
 @Getter
 public abstract class AbstractBuffEffectExecutor {

@@ -9,8 +9,8 @@ import wxdgaming.spring.boot.core.reflect.AnnUtil;
 /**
  * pgsql
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-02-15 17:51
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-02-15 17:51
  **/
 public class MySqlDDLBuilder extends SqlDDLBuilder {
 

@@ -8,8 +8,8 @@ import wxdgaming.spring.test.TargetGroup;
 /**
  * buff效果
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-08-02 20:59
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-08-02 20:59
  **/
 @Slf4j
 @Getter

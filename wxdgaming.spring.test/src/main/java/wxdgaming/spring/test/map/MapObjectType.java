@@ -8,8 +8,8 @@ import java.util.Map;
 /**
  * 场景对象
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-08-02 21:45
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-08-02 21:45
  **/
 @Getter
 public enum MapObjectType {

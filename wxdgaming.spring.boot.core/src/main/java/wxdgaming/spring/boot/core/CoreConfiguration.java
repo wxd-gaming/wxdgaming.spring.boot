@@ -13,8 +13,8 @@ import wxdgaming.spring.boot.core.executor.ExecutorFactory;
 /**
  * 扫描器
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-07-28 20:11
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-07-28 20:11
  **/
 @Getter
 @Order(Ordered.HIGHEST_PRECEDENCE)

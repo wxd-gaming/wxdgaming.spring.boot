@@ -19,8 +19,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 消息编码
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-08-20 09:09
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2024-08-20 09:09
  **/
 @Slf4j
 @Getter

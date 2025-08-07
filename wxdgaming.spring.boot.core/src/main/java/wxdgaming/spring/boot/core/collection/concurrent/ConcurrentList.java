@@ -11,8 +11,8 @@ import java.util.function.Consumer;
 /**
  * 线程安全的List
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2022-05-27 12:12
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2022-05-27 12:12
  **/
 public class ConcurrentList<E> extends CopyOnWriteArrayList<E> implements Serializable, List<E>, Collection<E>, Data2Json {
 

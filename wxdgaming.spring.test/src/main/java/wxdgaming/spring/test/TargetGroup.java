@@ -8,8 +8,8 @@ import java.util.Map;
 /**
  * 目标
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-08-01 15:31
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-08-01 15:31
  **/
 @Getter
 public enum TargetGroup {

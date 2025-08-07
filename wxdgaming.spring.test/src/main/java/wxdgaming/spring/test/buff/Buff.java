@@ -8,8 +8,8 @@ import wxdgaming.spring.test.map.MapObject;
 import java.util.List;
 
 /**
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-08-02 20:56
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-08-02 20:56
  **/
 @Getter
 @Builder

@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 /**
  * 管理器
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-08-02 21:13
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-08-02 21:13
  **/
 @Slf4j
 @Getter

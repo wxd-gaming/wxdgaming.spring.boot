@@ -8,8 +8,8 @@ import java.util.Map;
 /**
  * 效果类型
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-08-04 15:44
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-08-04 15:44
  **/
 @Getter
 public enum SkillEffectType {

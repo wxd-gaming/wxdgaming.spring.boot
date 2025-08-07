@@ -9,8 +9,8 @@ import wxdgaming.spring.boot.batis.ann.DbColumn;
 /**
  * long
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-02-15 13:02
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-02-15 13:02
  **/
 @Getter
 @Setter

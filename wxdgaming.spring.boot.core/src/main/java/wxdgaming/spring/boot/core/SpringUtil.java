@@ -35,8 +35,8 @@ import java.util.Collection;
 /**
  * spring 工具
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-07-30 14:52
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2024-07-30 14:52
  */
 @Slf4j
 public class SpringUtil implements InitPrint {
@@ -191,8 +191,8 @@ public class SpringUtil implements InitPrint {
      * 注册一个bean
      *
      * @param beanClass bean 类
-     * @author: wxd-gaming(無心道, 15388152619)
-     * @version: 2024-07-26 17:30
+     * @author wxd-gaming(無心道, 15388152619)
+     * @version 2024-07-26 17:30
      */
     public static void registerBean(ConfigurableApplicationContext context, Class<?> beanClass) {
         registerBean(context, beanClass.getName(), beanClass);
@@ -202,8 +202,8 @@ public class SpringUtil implements InitPrint {
      * 注册一个bean
      *
      * @param beanClass bean 类
-     * @author: wxd-gaming(無心道, 15388152619)
-     * @version: 2024-07-26 17:30
+     * @author wxd-gaming(無心道, 15388152619)
+     * @version 2024-07-26 17:30
      */
     public static void registerBean(ConfigurableApplicationContext context, String name, Class<?> beanClass) {
         registerBean(context, name, beanClass, true);
@@ -215,8 +215,8 @@ public class SpringUtil implements InitPrint {
      * @param name      bean name
      * @param beanClass bean class
      * @param removeOld 是否删除旧的bean
-     * @author: wxd-gaming(無心道, 15388152619)
-     * @version: 2024-08-12 13:40
+     * @author wxd-gaming(無心道, 15388152619)
+     * @version 2024-08-12 13:40
      */
     public static void registerBean(ConfigurableApplicationContext context, String name, Class<?> beanClass, boolean removeOld) {
         // 获取bean工厂并转换为DefaultListableBeanFactory
@@ -241,8 +241,8 @@ public class SpringUtil implements InitPrint {
      * 注册一个实例对象
      *
      * @param instance 对象
-     * @author: wxd-gaming(無心道, 15388152619)
-     * @version: 2024-07-26 17:30
+     * @author wxd-gaming(無心道, 15388152619)
+     * @version 2024-07-26 17:30
      */
     public static void registerInstance(ConfigurableApplicationContext context, Object instance) {
         registerInstance(context, instance.getClass().getName(), instance);
@@ -253,8 +253,8 @@ public class SpringUtil implements InitPrint {
      *
      * @param name     对象名，beanName
      * @param instance 对象实例
-     * @author: wxd-gaming(無心道, 15388152619)
-     * @version: 2024-07-26 17:30
+     * @author wxd-gaming(無心道, 15388152619)
+     * @version 2024-07-26 17:30
      */
     public static <T> void registerInstance(ConfigurableApplicationContext context, String name, T instance) {
         registerInstance(context, name, instance, true);

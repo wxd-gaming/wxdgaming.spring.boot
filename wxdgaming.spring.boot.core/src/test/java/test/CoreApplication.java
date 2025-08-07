@@ -9,8 +9,8 @@ import wxdgaming.spring.boot.core.executor.ExecutorConfig;
 /**
  * 核心
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-07-28 20:21
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-07-28 20:21
  **/
 @SpringBootApplication(
         scanBasePackageClasses = {

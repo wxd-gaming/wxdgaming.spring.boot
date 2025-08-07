@@ -8,8 +8,8 @@ import java.util.Map;
 /**
  * buff类型
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-08-03 09:56
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-08-03 09:56
  **/
 @Getter
 public enum BuffEffectType {

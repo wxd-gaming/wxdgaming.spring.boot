@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 /**
  * ApplicationContext 持有者
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-07-29 14:37
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-07-29 14:37
  **/
 @Slf4j
 @Getter

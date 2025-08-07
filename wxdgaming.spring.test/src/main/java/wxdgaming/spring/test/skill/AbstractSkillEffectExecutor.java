@@ -12,8 +12,8 @@ import java.util.List;
 /**
  * 技能效果
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-07-31 10:46
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-07-31 10:46
  **/
 @Getter
 @Setter
