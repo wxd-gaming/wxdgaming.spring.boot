@@ -21,7 +21,6 @@ public class CoreProperties {
     private ExecutorConfig logic;
     private ExecutorConfig virtual;
 
-
     public ExecutorConfig getBasic() {
         if (basic == null) {
             basic = ExecutorConfig.BASIC_INSTANCE.get();
