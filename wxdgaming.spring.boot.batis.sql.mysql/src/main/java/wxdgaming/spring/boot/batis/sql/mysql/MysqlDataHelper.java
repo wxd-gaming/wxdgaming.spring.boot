@@ -36,6 +36,10 @@ public class MysqlDataHelper extends SqlDataHelper {
         return new MysqlQueryBuilder(this);
     }
 
+    @Override public MySqlDDLBuilder ddlBuilder() {
+        return (MySqlDDLBuilder) super.ddlBuilder();
+    }
+
     @Override public void checkTable(Map<String, LinkedHashMap<String, JSONObject>> databseTableMap, TableMapping tableMapping, String tableName, String tableComment) {
         super.checkTable(databseTableMap, tableMapping, tableName, tableComment);
 

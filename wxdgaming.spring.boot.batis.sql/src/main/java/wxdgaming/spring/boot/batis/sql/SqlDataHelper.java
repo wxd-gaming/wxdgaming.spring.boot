@@ -79,7 +79,7 @@ public abstract class SqlDataHelper extends DataHelper {
 
     @Shutdown
     @Order(100/*优先清空缓存*/)
-    public void shutdownCache() {
+    public void closeCache() {
         log.info("关闭数据库缓存：{}", this.getSqlConfig().getUrl());
         if (this.cacheService != null)
             this.cacheService.shutdown();
@@ -90,7 +90,7 @@ public abstract class SqlDataHelper extends DataHelper {
     @Override public void close() {
         log.info("准备关闭数据库服务：{}", this.getSqlConfig().getUrl());
         if (this.dataBatch != null)
-            this.dataBatch.shutdown();
+            this.dataBatch.close();
         this.hikariDataSource.close();
     }
 
@@ -98,9 +98,8 @@ public abstract class SqlDataHelper extends DataHelper {
 
     public abstract SqlQueryBuilder queryBuilder();
 
-    @SuppressWarnings("unchecked")
-    public <SDB extends SqlDataBatch> SDB dataBatch() {
-        return (SDB) dataBatch;
+    public SqlDataBatch dataBatch() {
+        return dataBatch;
     }
 
     public String getDbName() {

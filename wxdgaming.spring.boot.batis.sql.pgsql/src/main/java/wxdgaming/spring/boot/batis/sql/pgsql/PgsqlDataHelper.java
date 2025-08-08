@@ -40,6 +40,10 @@ public class PgsqlDataHelper extends SqlDataHelper {
         return new PgsqlQueryBuilder(this);
     }
 
+    @Override public PgSqlDDLBuilder ddlBuilder() {
+        return (PgSqlDDLBuilder) super.ddlBuilder();
+    }
+
     /** 查询当前数据库所有的表 key: 表名字, value: 表备注 */
     @Override public Map<String, String> findTableMap() {
         Map<String, String> dbTableMap = new LinkedHashMap<>();

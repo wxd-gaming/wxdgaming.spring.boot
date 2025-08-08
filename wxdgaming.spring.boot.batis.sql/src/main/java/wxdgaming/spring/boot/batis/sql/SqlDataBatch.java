@@ -51,7 +51,7 @@ public abstract class SqlDataBatch extends DataBatch {
     }
 
     @Shutdown
-    public void shutdown() {
+    public void close() {
         for (BatchThread batchThread : batchThreads) {
             log.info("准备关闭线程 {}", batchThread);
             batchThread.closed.set(true);
