@@ -5,10 +5,13 @@ import com.alibaba.fastjson.JSONObject;
 import org.junit.jupiter.api.RepeatedTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import wxdgaming.spring.boot.core.CoreConfiguration;
+import wxdgaming.spring.boot.core.chatset.StringUtils;
 import wxdgaming.spring.boot.core.collection.MapOf;
+import wxdgaming.spring.boot.core.format.HexId;
 import wxdgaming.spring.boot.net.httpclient.HttpClientConfiguration;
 import wxdgaming.spring.boot.net.httpclient.HttpRequestPost;
 import wxdgaming.spring.boot.net.httpclient.HttpResponse;
+import wxdgaming.spring.logcenter.bean.LogEntity;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -26,31 +29,31 @@ import java.util.concurrent.locks.LockSupport;
 )
 public class PostLoginLogTest {
 
+    static final HexId hexId = new HexId(1);
 
     @RepeatedTest(10)
     public void login() {
-        JSONObject jsonObject = MapOf.newJSONObject();
-        jsonObject.put("uid", System.nanoTime());
-        jsonObject.put("createTime", System.currentTimeMillis());
-        jsonObject.put("logType", "login");
-        jsonObject.put("json", MapOf.newJSONObject().fluentPut("account", "wxd-gaming"));
+        LogEntity logEntity = new LogEntity();
+        logEntity.setUid(hexId.newId());
+        logEntity.setCreateTime(System.currentTimeMillis());
+        logEntity.setLogType("login");
+        logEntity.putJson("account", StringUtils.randomString(8));
         HttpRequestPost httpRequestPost = HttpRequestPost.of("http://localhost:8888/api/log/push");
-        httpRequestPost.setJson(jsonObject);
+        httpRequestPost.setJson(logEntity.toJSONString());
         HttpResponse execute = httpRequestPost.execute();
         System.out.println(execute.bodyString());
     }
 
-    @RepeatedTest(10000)
+    @RepeatedTest(1000)
     public void loginList() {
-        ArrayList<JSONObject> list = new ArrayList<>();
+        ArrayList<LogEntity> list = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
-            JSONObject jsonObject = MapOf.newJSONObject();
-            jsonObject.put("uid", System.nanoTime());
-            jsonObject.put("createTime", System.currentTimeMillis());
-            jsonObject.put("logType", "login");
-            jsonObject.put("json", MapOf.newJSONObject().fluentPut("account", "wxd-gaming"));
-
-            list.add(jsonObject);
+            LogEntity logEntity = new LogEntity();
+            logEntity.setUid(hexId.newId());
+            logEntity.setCreateTime(System.currentTimeMillis());
+            logEntity.setLogType("login");
+            logEntity.putJson("account", StringUtils.randomString(8));
+            list.add(logEntity);
         }
         HttpRequestPost httpRequestPost = HttpRequestPost.of("http://localhost:8888/api/log/pushlist");
         httpRequestPost.setJson(JSON.toJSONString(list));
@@ -62,13 +65,13 @@ public class PostLoginLogTest {
 
     @RepeatedTest(10)
     public void logout() {
-        JSONObject jsonObject = MapOf.newJSONObject();
-        jsonObject.put("uid", System.nanoTime());
-        jsonObject.put("createTime", System.currentTimeMillis());
-        jsonObject.put("logType", "logout");
-        jsonObject.put("json", MapOf.newJSONObject().fluentPut("account", "wxd-gaming"));
+        LogEntity logEntity = new LogEntity();
+        logEntity.setUid(hexId.newId());
+        logEntity.setCreateTime(System.currentTimeMillis());
+        logEntity.setLogType("logout");
+        logEntity.putJson("account", StringUtils.randomString(8));
         HttpRequestPost httpRequestPost = HttpRequestPost.of("http://localhost:8888/api/log/push");
-        httpRequestPost.setJson(jsonObject);
+        httpRequestPost.setJson(logEntity.toJSONString());
         HttpResponse execute = httpRequestPost.execute();
         System.out.println(execute.bodyString());
     }
