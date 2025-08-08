@@ -26,9 +26,10 @@ public class LogQueryTest {
         SqlQueryBuilder sqlQueryBuilder = pgsqlDataHelper.queryBuilder();
         sqlQueryBuilder.sqlByEntity(LogEntity.class)
                 .setTableName("login")
-                .pushWhere("createtime >= ?", 1754569211194L)
-                .pushWhere("createtime <= ?", 1754569211194L)
-                .pushWhere("json_extract_path_text(json,'account') = ?", "wxd-gaming");
+                .pushWhere("""
+                        json::jsonb @> jsonb_build_object('account',?)""", "056HQM4b")
+        .pushWhere("""
+                        json::jsonb @> jsonb_build_object('account',?)""", "056HQM4b");
         System.out.println(sqlQueryBuilder.buildSelectSql());
         List<LogEntity> x = sqlQueryBuilder.findList2Entity(LogEntity.class);
         for (LogEntity logEntity : x) {

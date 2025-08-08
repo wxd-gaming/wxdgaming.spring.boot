@@ -5,10 +5,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import wxdgaming.spring.boot.batis.sql.pgsql.PgsqlConfiguration;
-import wxdgaming.spring.boot.core.ApplicationContextProvider;
 import wxdgaming.spring.boot.core.CoreConfiguration;
-import wxdgaming.spring.boot.core.ann.Init;
-import wxdgaming.spring.boot.core.ann.Start;
+import wxdgaming.spring.boot.core.MainApplicationContextProvider;
 import wxdgaming.spring.boot.scheduled.ScheduledConfiguration;
 
 /**
@@ -33,9 +31,8 @@ public class LogCenterApplication {
         log.info("日志中心启动中...");
         try {
             ConfigurableApplicationContext applicationContext = SpringApplication.run(LogCenterApplication.class, args);
-            ApplicationContextProvider bean = applicationContext.getBean(ApplicationContextProvider.class);
-            bean.executorWithMethodAnnotated(Init.class);
-            bean.executorWithMethodAnnotated(Start.class);
+            MainApplicationContextProvider bean = applicationContext.getBean(MainApplicationContextProvider.class);
+            bean.start();
             log.info("日志中心启动完成...");
         } catch (Exception e) {
             log.debug("日志中心启动异常...", e);

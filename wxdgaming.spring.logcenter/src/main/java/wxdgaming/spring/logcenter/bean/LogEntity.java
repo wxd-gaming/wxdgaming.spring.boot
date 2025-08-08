@@ -7,6 +7,7 @@ import lombok.Setter;
 import wxdgaming.spring.boot.batis.ColumnType;
 import wxdgaming.spring.boot.batis.Entity;
 import wxdgaming.spring.boot.batis.EntityName;
+import wxdgaming.spring.boot.batis.ann.Convert;
 import wxdgaming.spring.boot.batis.ann.DbColumn;
 import wxdgaming.spring.boot.batis.ann.DbTable;
 import wxdgaming.spring.boot.batis.sql.ann.Partition;
@@ -47,6 +48,7 @@ public class LogEntity extends Entity implements Serializable, EntityName {
 
     @JSONField(ordinal = 99)
     @DbColumn(columnType = ColumnType.Jsonb, index = true)
+    @Convert(JsonbConvert.class)
     private final JSONObject json = MapOf.newJSONObject();
 
     @Override public String tableName() {
