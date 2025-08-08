@@ -1,10 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="LogCenterApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-    <module name="wxdgaming.spring.logcenter" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="wxdgaming.spring.logcenter.LogCenterApplication" />
+  <configuration default="false" name="LogServerApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <module name="wxdgaming.spring.logserver" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="wxdgaming.spring.logserver.LogServerApplication" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="wxdgaming.spring.logcenter.*" />
+        <option name="PATTERN" value="wxdgaming.spring.logserver.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

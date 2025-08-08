@@ -27,8 +27,9 @@
         <module>wxdgaming.spring.boot.net.httpclient</module>
         <module>wxdgaming.spring.boot.net.server</module>
         <module>wxdgaming.spring.boot.scheduled</module>
+        <module>wxdgaming.spring.logbus</module>
+        <module>wxdgaming.spring.logserver</module>
         <module>wxdgaming.spring.test</module>
-        <module>wxdgaming.spring.logcenter</module>
     </modules>
 
     <properties>
@@ -216,23 +217,23 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <!-- 移除Tomcat的依赖 -->
             <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
+<!--                <exclusion>-->
+<!--                    <groupId>org.springframework.boot</groupId>-->
+<!--                    <artifactId>spring-boot-starter-tomcat</artifactId>-->
+<!--                </exclusion>-->
             </exclusions>
         </dependency>
         <!--   采用Undertow依赖 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-undertow</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.undertow</groupId>
-                    <artifactId>undertow-websockets-jsr</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-undertow</artifactId>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>io.undertow</groupId>-->
+<!--                    <artifactId>undertow-websockets-jsr</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

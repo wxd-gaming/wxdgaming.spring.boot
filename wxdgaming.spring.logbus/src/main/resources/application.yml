@@ -1,0 +1,16 @@
+core:
+  executor:
+    basic:
+      coreSize: 2
+      maxQueueSize: 5000
+      queuePolicy: AbortPolicy
+
+server:
+  port: 0
+
+logbus:
+  filePath: "target/logbus"
+  token: "dwe"
+  split-org: 200
+  gzip: true
+  post-url: "http://localhost:8888/api/log/pushList"

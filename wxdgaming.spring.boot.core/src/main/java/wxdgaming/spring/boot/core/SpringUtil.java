@@ -271,24 +271,6 @@ public class SpringUtil implements InitPrint {
         log.debug("register instance {}, {}", name, instance.getClass().getName());
     }
 
-    public static void initHandlerMethods(ApplicationContext context) {
-        final RequestMappingHandlerMapping requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
-        try {
-            // 注册Controller
-            Method method = requestMappingHandlerMapping
-                    .getClass()
-                    .getSuperclass()
-                    .getSuperclass().
-                    getDeclaredMethod("initHandlerMethods");
-            // 将private改为可使用
-            method.setAccessible(true);
-            method.invoke(requestMappingHandlerMapping);
-            log.debug("initHandlerMethods");
-        } catch (Throwable e) {
-            log.debug("initHandlerMethods", e);
-        }
-    }
-
     public static void registerController(ApplicationContext context, String controllerBeanName) {
         final RequestMappingHandlerMapping requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
         try {

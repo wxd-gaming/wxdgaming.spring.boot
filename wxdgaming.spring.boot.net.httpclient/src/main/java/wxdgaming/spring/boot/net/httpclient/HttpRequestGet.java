@@ -40,4 +40,7 @@ public class HttpRequestGet extends AbstractHttpRequest {
         return new HttpGet(this.getUriPath());
     }
 
+    @Override public String toString() {
+        return "GET " + this.getUriPath();
+    }
 }

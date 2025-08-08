@@ -1,0 +1,24 @@
+core:
+  executor:
+    basic:
+      coreSize: 2
+      maxQueueSize: 5000
+      queuePolicy: AbortPolicy
+
+
+server:
+  port: 8888
+  tomcat:
+    initial-size: 32 #初始化内存
+    min-free-size: 32 #最小内存
+    max-size: 256     #最小内存
+    max-threads: 100
+    min-spare-threads: 10
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,text/javascript,text/css,image/png
+    min-response-size: 8096
+
+spring:
+  profiles:
+    active: pgsql10

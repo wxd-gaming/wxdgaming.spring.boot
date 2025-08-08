@@ -96,4 +96,9 @@ public class HttpRequestPostMulti extends AbstractHttpRequest {
         }
         return httpRequest;
     }
+
+    @Override public String toString() {
+        return "POSTMulti " + this.getUriPath();
+    }
+
 }

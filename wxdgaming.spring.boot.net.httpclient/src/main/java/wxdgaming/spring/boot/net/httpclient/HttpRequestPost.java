@@ -112,4 +112,7 @@ public class HttpRequestPost extends AbstractHttpRequest {
         return httpPost;
     }
 
+    @Override public String toString() {
+        return "POST " + this.getUriPath();
+    }
 }

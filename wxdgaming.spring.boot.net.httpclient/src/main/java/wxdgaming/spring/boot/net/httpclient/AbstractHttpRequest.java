@@ -104,4 +104,7 @@ public abstract class AbstractHttpRequest {
         return this;
     }
 
+    @Override public String toString() {
+        return uriPath;
+    }
 }
