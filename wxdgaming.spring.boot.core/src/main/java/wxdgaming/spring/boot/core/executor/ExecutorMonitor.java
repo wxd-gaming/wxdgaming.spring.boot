@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 
 /**
@@ -35,6 +36,7 @@ class ExecutorMonitor extends Thread {
         }
     }
 
+    AtomicBoolean exit = new AtomicBoolean(false);
 
     public ExecutorMonitor() {
         super("executor-monitor");
@@ -42,7 +44,7 @@ class ExecutorMonitor extends Thread {
     }
 
     @Override public void run() {
-        while (!Thread.interrupted()) {
+        while (!exit.get()) {
             try {
                 LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(30));
                 for (Map.Entry<Thread, JobContent> entry : executorJobConcurrentHashMap.entrySet()) {
@@ -61,6 +63,11 @@ class ExecutorMonitor extends Thread {
                 log.error("线程执行器监视", throwable);
             }
         }
+    }
+
+    @Override public void interrupt() {
+        exit.set(true);
+        super.interrupt();
     }
 
     public record JobContent(ExecutorJob executorJob, long start) {

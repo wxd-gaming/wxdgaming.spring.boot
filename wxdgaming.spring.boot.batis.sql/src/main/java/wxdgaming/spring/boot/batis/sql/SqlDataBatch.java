@@ -11,6 +11,7 @@ import wxdgaming.spring.boot.core.chatset.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.collection.ConvertCollection;
 import wxdgaming.spring.boot.core.collection.SplitCollection;
 import wxdgaming.spring.boot.core.collection.Table;
+import wxdgaming.spring.boot.core.executor.ExecutorEvent;
 import wxdgaming.spring.boot.core.io.FileWriteUtil;
 import wxdgaming.spring.boot.core.lang.DiffTime;
 import wxdgaming.spring.boot.core.lang.Tick;
@@ -152,24 +153,28 @@ public abstract class SqlDataBatch extends DataBatch {
         }
 
         @Override public void run() {
-
+            BatchJob batchJob = new BatchJob();
             while (true) {
-                try {
-                    if (!closed.get() && !GlobalUtil.Exiting.get()) {
-                        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(200));
-                    }
-                    insertBach();
-                    updateBach();
-                    if (closed.get()) {
-                        if (batchInsertMap.isEmpty() && batchUpdateMap.isEmpty())
-                            break;
-                        log.info("停服等待数据落地 sql batch {}", Thread.currentThread());
-                    }
-                } catch (Throwable throwable) {
-                    log.error("sqlDataBatch error", throwable);
+                if (!closed.get() && !GlobalUtil.Exiting.get()) {
+                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(200));
+                }
+                batchJob.run();
+                if (closed.get()) {
+                    if (batchInsertMap.isEmpty() && batchUpdateMap.isEmpty())
+                        break;
+                    log.info("停服等待数据落地 sql batch {}", Thread.currentThread());
                 }
             }
             log.info("线程 {} 退出", Thread.currentThread());
+        }
+
+        private class BatchJob extends ExecutorEvent {
+
+            @Override public void onEvent() throws Exception {
+                BatchThread.this.insertBach();
+                BatchThread.this.updateBach();
+            }
+
         }
 
         protected void insertBach() {
