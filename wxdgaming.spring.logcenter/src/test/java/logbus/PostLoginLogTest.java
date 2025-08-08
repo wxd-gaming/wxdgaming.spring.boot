@@ -1,12 +1,10 @@
 package logbus;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.junit.jupiter.api.RepeatedTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import wxdgaming.spring.boot.core.CoreConfiguration;
 import wxdgaming.spring.boot.core.chatset.StringUtils;
-import wxdgaming.spring.boot.core.collection.MapOf;
 import wxdgaming.spring.boot.core.format.HexId;
 import wxdgaming.spring.boot.net.httpclient.HttpClientConfiguration;
 import wxdgaming.spring.boot.net.httpclient.HttpRequestPost;
@@ -37,7 +35,7 @@ public class PostLoginLogTest {
         logEntity.setUid(hexId.newId());
         logEntity.setCreateTime(System.currentTimeMillis());
         logEntity.setLogType("login");
-        logEntity.putJson("account", StringUtils.randomString(8));
+        logEntity.putLogData("account", StringUtils.randomString(8));
         HttpRequestPost httpRequestPost = HttpRequestPost.of("http://localhost:8888/api/log/push");
         httpRequestPost.setJson(logEntity.toJSONString());
         HttpResponse execute = httpRequestPost.execute();
@@ -52,7 +50,7 @@ public class PostLoginLogTest {
             logEntity.setUid(hexId.newId());
             logEntity.setCreateTime(System.currentTimeMillis());
             logEntity.setLogType("login");
-            logEntity.putJson("account", StringUtils.randomString(8));
+            logEntity.putLogData("account", StringUtils.randomString(8));
             list.add(logEntity);
         }
         HttpRequestPost httpRequestPost = HttpRequestPost.of("http://localhost:8888/api/log/pushlist");
@@ -69,7 +67,7 @@ public class PostLoginLogTest {
         logEntity.setUid(hexId.newId());
         logEntity.setCreateTime(System.currentTimeMillis());
         logEntity.setLogType("logout");
-        logEntity.putJson("account", StringUtils.randomString(8));
+        logEntity.putLogData("account", StringUtils.randomString(8));
         HttpRequestPost httpRequestPost = HttpRequestPost.of("http://localhost:8888/api/log/push");
         httpRequestPost.setJson(logEntity.toJSONString());
         HttpResponse execute = httpRequestPost.execute();

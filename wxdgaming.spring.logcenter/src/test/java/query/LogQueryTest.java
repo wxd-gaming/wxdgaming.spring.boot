@@ -27,9 +27,9 @@ public class LogQueryTest {
         sqlQueryBuilder.sqlByEntity(LogEntity.class)
                 .setTableName("login")
                 .pushWhere("""
-                        json::jsonb @> jsonb_build_object('account',?)""", "056HQM4b")
+                        logdata::jsonb @> jsonb_build_object('account',?)""", "kQj2JQ9N")
         .pushWhere("""
-                        json::jsonb @> jsonb_build_object('account',?)""", "056HQM4b");
+                        logdata::jsonb @> jsonb_build_object('account',?)""", "kQj2JQ9N");
         System.out.println(sqlQueryBuilder.buildSelectSql());
         List<LogEntity> x = sqlQueryBuilder.findList2Entity(LogEntity.class);
         for (LogEntity logEntity : x) {

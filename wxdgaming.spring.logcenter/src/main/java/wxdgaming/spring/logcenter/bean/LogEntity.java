@@ -49,7 +49,7 @@ public class LogEntity extends Entity implements Serializable, EntityName {
     @JSONField(ordinal = 99)
     @DbColumn(columnType = ColumnType.Jsonb, index = true)
     @Convert(JsonbConvert.class)
-    private final JSONObject json = MapOf.newJSONObject();
+    private final JSONObject logData = MapOf.newJSONObject();
 
     @Override public String tableName() {
         return logType;
@@ -76,8 +76,8 @@ public class LogEntity extends Entity implements Serializable, EntityName {
         return result;
     }
 
-    public LogEntity putJson(String key, Object value) {
-        json.put(key, value);
+    public LogEntity putLogData(String key, Object value) {
+        logData.put(key, value);
         return this;
     }
 
