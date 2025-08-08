@@ -15,7 +15,7 @@ import java.util.concurrent.ScheduledExecutorService;
  **/
 public class ExecutorFactory {
 
-    private static ExecutorMonitor EXECUTOR_MONITOR;
+    @Getter private static ExecutorMonitor EXECUTOR_MONITOR;
     @Getter private static ScheduledExecutorService scheduledExecutorService;
     @Getter private static ConcurrentHashMap<String, ExecutorService> EXECUTOR_MAP;
 

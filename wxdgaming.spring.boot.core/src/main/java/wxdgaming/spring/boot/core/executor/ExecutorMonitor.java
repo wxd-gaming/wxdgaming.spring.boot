@@ -1,5 +1,6 @@
 package wxdgaming.spring.boot.core.executor;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.concurrent.locks.LockSupport;
  * @version 2025-05-15 14:46
  **/
 @Slf4j
-class ExecutorMonitor extends Thread {
+public final class ExecutorMonitor extends Thread {
 
     public static ConcurrentHashMap<Thread, JobContent> executorJobConcurrentHashMap = new ConcurrentHashMap<>();
 
@@ -36,7 +37,7 @@ class ExecutorMonitor extends Thread {
         }
     }
 
-    AtomicBoolean exit = new AtomicBoolean(false);
+    @Getter AtomicBoolean exit = new AtomicBoolean(false);
 
     public ExecutorMonitor() {
         super("executor-monitor");
