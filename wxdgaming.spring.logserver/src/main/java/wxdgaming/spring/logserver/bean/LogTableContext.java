@@ -23,6 +23,7 @@ public class LogTableContext {
         this.logType = logType;
         logFilter = CASCache.<Long, Boolean>builder()
                 .area(10)
+                .heartTimeMs(TimeUnit.HOURS.toMillis(1))
                 .expireAfterWriteMs(TimeUnit.HOURS.toMillis(24))
                 .build();
         logFilter.start();

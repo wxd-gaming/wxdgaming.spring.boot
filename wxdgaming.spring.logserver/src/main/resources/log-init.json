@@ -1,6 +1,7 @@
 [
   {
     "logName": "login",
+    "logComment": "登录日志",
     "partition": true,
     "fieldList": [
       {
@@ -12,11 +13,22 @@
         "fieldName": "account",
         "fieldComment": "账号",
         "fieldType": "string"
+      },
+      {
+        "fieldName": "platform",
+        "fieldComment": "平台",
+        "fieldType": "string"
+      },
+      {
+        "fieldName": "channel",
+        "fieldComment": "渠道",
+        "fieldType": "string"
       }
     ]
   },
   {
     "logName": "logout",
+    "logComment": "登出日志",
     "partition": true,
     "fieldList": [
       {

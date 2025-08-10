@@ -1,6 +1,7 @@
 package wxdgaming.spring.logserver.module.data;
 
 import com.alibaba.fastjson.JSONObject;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,10 +28,12 @@ import java.util.Map;
  * @version 2025-08-07 15:53
  **/
 @Slf4j
+@Getter
 @Service
 public class DataCenterService implements InitPrint {
 
     final PgsqlDataHelper sqlDataHelper;
+    List<LogMappingInfo> logMappingInfoList;
 
     @Autowired
     public DataCenterService(PgsqlDataHelper sqlDataHelper) {
@@ -48,7 +51,7 @@ public class DataCenterService implements InitPrint {
         Map<String, LinkedHashMap<String, JSONObject>> tableStructMap = sqlDataHelper.findTableStructMap();
 
         String json = FileReadUtil.readString("log-init.json", StandardCharsets.UTF_8);
-        List<LogMappingInfo> logMappingInfoList = FastJsonUtil.parseArray(json, LogMappingInfo.class);
+        logMappingInfoList = FastJsonUtil.parseArray(json, LogMappingInfo.class);
         for (LogMappingInfo logMappingInfo : logMappingInfoList) {
             String tableName = logMappingInfo.getLogName();
             String tableComment = logMappingInfo.getLogComment();
