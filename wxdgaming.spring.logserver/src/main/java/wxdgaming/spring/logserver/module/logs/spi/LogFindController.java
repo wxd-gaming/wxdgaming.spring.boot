@@ -49,10 +49,11 @@ public class LogFindController implements InitPrint {
     public ResponseEntity<RunResult> logPage(
             @RequestParam("tableName") String tableName,
             @RequestParam("pageIndex") int pageIndex,
-            @RequestParam("pageSize") int pageSize
+            @RequestParam("pageSize") int pageSize,
+            @RequestParam("minDay") String minDay,
+            @RequestParam("maxDay") String maxDay
     ) {
-        List<JSONObject> list = logService.logTitle(tableName);
-        return ResponseEntity.ok(RunResult.ok().data(list));
+        return ResponseEntity.ok(logService.logPage(tableName, pageIndex, pageSize, minDay, maxDay, null));
     }
 
 }

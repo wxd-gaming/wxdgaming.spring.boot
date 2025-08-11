@@ -2,7 +2,6 @@ package run;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import wxdgaming.spring.boot.core.InitPrint;
@@ -46,6 +45,9 @@ public class PostLogService implements InitPrint {
         logEntity.setLogType("recharge");
         logEntity.putLogData("openId", StringUtils.randomString(8));
         logEntity.putLogData("account", StringUtils.randomString(8));
+        logEntity.putLogData("spOrderId", StringUtils.randomString(8));
+        logEntity.putLogData("cpOrderId", StringUtils.randomString(8));
+
         logEntity.putLogData("money", 6);
         logBusService.addLog(logEntity);
     }

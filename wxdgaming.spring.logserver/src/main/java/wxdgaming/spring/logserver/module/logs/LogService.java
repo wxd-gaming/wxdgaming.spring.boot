@@ -4,15 +4,21 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import wxdgaming.spring.boot.batis.sql.SqlQueryBuilder;
 import wxdgaming.spring.boot.batis.sql.pgsql.PgsqlDataHelper;
 import wxdgaming.spring.boot.core.InitPrint;
+import wxdgaming.spring.boot.core.chatset.StringUtils;
 import wxdgaming.spring.boot.core.collection.MapOf;
+import wxdgaming.spring.boot.core.lang.RunResult;
+import wxdgaming.spring.boot.core.timer.MyClock;
+import wxdgaming.spring.boot.core.util.NumberUtil;
 import wxdgaming.spring.logserver.bean.LogEntity;
 import wxdgaming.spring.logserver.bean.LogField;
 import wxdgaming.spring.logserver.bean.LogMappingInfo;
 import wxdgaming.spring.logserver.bean.LogTableContext;
 import wxdgaming.spring.logserver.module.data.DataCenterService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -96,6 +102,47 @@ public class LogService implements InitPrint {
                     }
                 })
                 .toList();
+    }
+
+    public RunResult logPage(String tableName,
+                             int pageIndex, int pageSize,
+                             String minDay, String maxDay, String where) {
+        SqlQueryBuilder queryBuilder = pgsqlDataHelper.queryBuilder();
+        queryBuilder.setTableName(tableName);
+
+        if (StringUtils.isNotBlank(minDay)) {
+            queryBuilder.pushWhereByValueNotNull("daykey>=?", NumberUtil.retainNumber(minDay));
+        }
+
+        if (StringUtils.isNotBlank(maxDay)) {
+            queryBuilder.pushWhereByValueNotNull("daykey<=?", NumberUtil.retainNumber(maxDay));
+        }
+
+        if (StringUtils.isNotBlank(where)) {
+            String[] split = where.split(",");
+            for (String s : split) {
+                String[] strings = s.split("=");
+                queryBuilder.pushWhere(
+                        """
+                                logdata::jsonb @> jsonb_build_object('%s',?)""".formatted(strings[0]),
+                        strings[1]
+                );
+            }
+        }
+
+        queryBuilder.page(pageIndex, pageSize, 1, 1000);
+        queryBuilder.setOrderBy("createtime desc");
+        System.out.println(queryBuilder.buildSelectSql());
+        long rowCount = queryBuilder.findCount();
+        List<LogEntity> logEntities = queryBuilder.findList2Entity(LogEntity.class);
+        List<JSONObject> list = new ArrayList<>();
+        for (LogEntity logEntity : logEntities) {
+            JSONObject jsonObject = new JSONObject(logEntity.getLogData());
+            jsonObject.put("uid", logEntity.getUid());
+            jsonObject.put("createTime", MyClock.formatDate("yyyy-MM-dd HH:mm:ss.SSS", logEntity.getCreateTime()));
+            list.add(jsonObject);
+        }
+        return RunResult.ok().fluentPut("rowCount", rowCount).data(list);
     }
 
 }

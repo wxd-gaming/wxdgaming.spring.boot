@@ -59,13 +59,13 @@ public abstract class SqlQueryBuilder {
         this.limit = limit;
     }
 
-    public void limit(int skip, int limit, int minLimit, int maxLimit) {
-        setSkip(skip);
-        if (limit < minLimit)
-            limit = minLimit;
-        if (limit > maxLimit)
-            limit = maxLimit;
-        setLimit(limit);
+    public void page(int pageIndex, int pageSize, int minPageSize, int maxPageSize) {
+        setSkip((pageIndex - 1) * pageSize);
+        if (pageSize < minPageSize)
+            pageSize = minPageSize;
+        if (pageSize > maxPageSize)
+            pageSize = maxPageSize;
+        setLimit(pageSize);
     }
 
     public SqlQueryBuilder sqlByEntity(Class<? extends Entity> clazz) {
