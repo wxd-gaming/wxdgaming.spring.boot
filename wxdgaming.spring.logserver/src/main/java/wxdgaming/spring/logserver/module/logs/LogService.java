@@ -1,5 +1,6 @@
 package wxdgaming.spring.logserver.module.logs;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * 日志服务
@@ -65,7 +67,7 @@ public class LogService implements InitPrint {
     }
 
     public List<JSONObject> nav() {
-        return dataCenterService.getLogMappingInfoList().stream()
+        return dataCenterService.getLogMappingInfoMap().values().stream()
                 .map(li -> {
                     JSONObject jsonObject = MapOf.newJSONObject();
                     jsonObject.put("name", li.getLogName());
@@ -76,22 +78,10 @@ public class LogService implements InitPrint {
     }
 
     public List<JSONObject> logTitle(String tableName) {
-        return dataCenterService.getLogMappingInfoList().stream()
+        return dataCenterService.getLogMappingInfoMap().values().stream()
                 .filter(li -> li.getLogName().equals(tableName))
                 .mapMulti(new BiConsumer<LogMappingInfo, Consumer<JSONObject>>() {
                     @Override public void accept(LogMappingInfo li, Consumer<JSONObject> consumer) {
-                        {
-                            JSONObject jsonObject = MapOf.newJSONObject();
-                            jsonObject.put("name", "createTime");
-                            jsonObject.put("comment", "时间");
-                            consumer.accept(jsonObject);
-                        }
-                        {
-                            JSONObject jsonObject = MapOf.newJSONObject();
-                            jsonObject.put("name", "uid");
-                            jsonObject.put("comment", "UID");
-                            consumer.accept(jsonObject);
-                        }
                         List<LogField> fieldList = li.getFieldList();
                         for (LogField logField : fieldList) {
                             JSONObject jsonObject = MapOf.newJSONObject();
@@ -106,7 +96,7 @@ public class LogService implements InitPrint {
 
     public RunResult logPage(String tableName,
                              int pageIndex, int pageSize,
-                             String minDay, String maxDay, String where) {
+                             String minDay, String maxDay, String whereJson) {
         SqlQueryBuilder queryBuilder = pgsqlDataHelper.queryBuilder();
         queryBuilder.setTableName(tableName);
 
@@ -118,15 +108,29 @@ public class LogService implements InitPrint {
             queryBuilder.pushWhereByValueNotNull("daykey<=?", NumberUtil.retainNumber(maxDay));
         }
 
-        if (StringUtils.isNotBlank(where)) {
-            String[] split = where.split(",");
-            for (String s : split) {
-                String[] strings = s.split("=");
-                queryBuilder.pushWhere(
-                        """
-                                logdata::jsonb @> jsonb_build_object('%s',?)""".formatted(strings[0]),
-                        strings[1]
-                );
+        LogMappingInfo logMappingInfo = dataCenterService.getLogMappingInfoMap().get(tableName);
+        if (StringUtils.isNotBlank(whereJson)) {
+            List<JSONObject> jsonObjects = JSON.parseArray(whereJson, JSONObject.class);
+            for (JSONObject jsonObject : jsonObjects) {
+                String where = jsonObject.getString("where");
+                Function<String, Object> stringObjectFunction = logMappingInfo.fieldValueFunction(where);
+                String and = jsonObject.getString("and");
+                String format;
+                if ("uid".equals(where) || "createTime".equals(where)) {
+                    format = "%s " + and + " ?";
+                } else if ("<=".equals(and)) {
+                    format = "CAST(logdata::jsonb->>'%s' AS numeric) <= ?";
+                } else if ("<".equals(and)) {
+                    format = "CAST(logdata::jsonb->>'%s' AS numeric) < ?";
+                } else if (">=".equals(and)) {
+                    format = "CAST(logdata::jsonb->>'%s' AS numeric) >= ?";
+                } else if (">".equals(and)) {
+                    format = "CAST(logdata::jsonb->>'%s' AS numeric) > ?";
+                } else {
+                    format = "logdata::jsonb @> jsonb_build_object('%s',?)";
+                }
+                Object whereValue = stringObjectFunction.apply(jsonObject.getString("whereValue"));
+                queryBuilder.pushWhere(format.formatted(where), whereValue);
             }
         }
 

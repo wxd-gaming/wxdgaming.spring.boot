@@ -4,6 +4,16 @@
   "partition": true,
   "fieldList": [
     {
+      "fieldName": "uid",
+      "fieldComment": "UID",
+      "fieldType": "long"
+    },
+    {
+      "fieldName": "createTime",
+      "fieldComment": "日期",
+      "fieldType": "long"
+    },
+    {
       "fieldName": "openId",
       "fieldComment": "账号Id",
       "fieldType": "string"
@@ -26,7 +36,7 @@
     {
       "fieldName": "money",
       "fieldComment": "金额",
-      "fieldType": "number"
+      "fieldType": "int"
     }
   ]
 }

@@ -116,4 +116,6 @@ a:hover, a:active { color: #33be85; }
 
 .btn_box input, .btn_box select {margin-top: 5px;margin-left: 10px;width: 160px;height: 22px;line-height: 22px;border: #4c4c4c 1px solid;border-radius: 5px;}
 
+.btn_box input[type=button] {width: auto;padding-left: 5px;padding-right: 5px;}
+
 .btn_box button {margin-top: 5px;color: rgb(255, 253, 253); background-color: rgb(241, 52, 10); border: none;padding: 8px 15px;}

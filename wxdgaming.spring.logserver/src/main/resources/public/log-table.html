@@ -33,6 +33,7 @@
             let urlQuery = new wxd.Map().loadSearch();
             urlQuery.put("minDay", $("#minDay").val());
             urlQuery.put("maxDay", $("#maxDay").val());
+            urlQuery.put("where", $("#labWhere").text());
             pageView.remoteGetData(urlQuery);
         }
 
@@ -65,6 +66,7 @@
                         let item = data[i];
                         pageView.columnNames[i] = item.name;
                         pageView.columnComments[i] = item.comment;
+                        $("#where").append(`<option value="${item.name}">${item.comment}</option>`);
                         let l = `<th class="${item.name}">${item.comment}</th>`;
                         $(".table_head").append(l);
                     }
@@ -73,14 +75,54 @@
             });
 
         });
+
+        let whereJsonArray = [];
+
+        function addWhere() {
+            let whereJson = {};
+            whereJson["where"] = $("#where").val();
+            whereJson["and"] = $("#and").val();
+            whereJson["whereValue"] = $("#whereValue").val();
+            whereJsonArray[whereJsonArray.length] = whereJson;
+            $("#labWhere").text(JSON.stringify(whereJsonArray));
+            $("#whereValue").val("")
+            $("#and").val("=");
+        }
+
+        function clearWhere() {
+            whereJsonArray = [];
+            $("#labWhere").text("");
+        }
+
     </script>
 </head>
 <body>
 <div class="btn_box" style="width: 100%;height: 180px;padding-left: 10px; padding-top: 8px; text-align: left;vertical-align: center;">
-    <button onclick="search();">查询</button>
-    <label for="minDay">范围日期-开始日期: </label><input id="minDay" type="date"/>
-    <label for="maxDay">范围日期-结束日期: </label><input id="maxDay" type="date"/>
+    <label for="minDay">开始日期: </label><input id="minDay" type="date"/>
+    <label for="maxDay">结束日期: </label><input id="maxDay" type="date"/>
     <br>
+    <label for="where">查询条件:</label>
+
+    <select id="where">
+
+    </select>
+
+    <select id="and" style="width: 40px;">
+        <option value="=">=</option>
+        <option value="<="><=</option>
+        <option value="<"><</option>
+        <option value=">=">>=</option>
+        <option value=">">></option>
+    </select>
+
+    <input id="whereValue" type="text"/>
+    <input type="button" onclick="addWhere();" value="添加"/>
+    <input type="button" onclick="clearWhere();" value="清理"/>
+    <br>
+    <label id="labWhere"></label>
+    <br>
+    <br>
+    <button onclick="search();">查询</button>
 </div>
 <div class="tableDom" style="position: absolute;left: 20px;top: 200px;right: 20px;bottom: 40px;padding-right: 10px;border-radius: 0;">
     <table>

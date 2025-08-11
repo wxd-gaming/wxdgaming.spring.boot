@@ -21,9 +21,7 @@ import wxdgaming.spring.logserver.bean.LogMappingInfo;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -39,7 +37,7 @@ import java.util.stream.Stream;
 public class DataCenterService implements InitPrint {
 
     final PgsqlDataHelper sqlDataHelper;
-    List<LogMappingInfo> logMappingInfoList = List.of();
+    Map<String, LogMappingInfo> logMappingInfoMap = Map.of();
 
     @Autowired
     public DataCenterService(PgsqlDataHelper sqlDataHelper) {
@@ -58,7 +56,7 @@ public class DataCenterService implements InitPrint {
         Map<String, String> dbTableMap = sqlDataHelper.findTableMap();
         Map<String, LinkedHashMap<String, JSONObject>> tableStructMap = sqlDataHelper.findTableStructMap();
 
-        List<LogMappingInfo> tmp = new ArrayList<>();
+        Map<String, LogMappingInfo> tmp = new LinkedHashMap<>();
         Stream<Tuple2<Path, byte[]>> tuple2Stream = FileUtil.resourceStreams(this.getClass().getClassLoader(), "log-init", ".json");
         tuple2Stream.forEach(tuple2 -> {
             String json = new String(tuple2.getRight(), StandardCharsets.UTF_8);
@@ -67,9 +65,9 @@ public class DataCenterService implements InitPrint {
             String tableComment = logMappingInfo.getLogComment();
             TableMapping tableMapping = sqlDataHelper.tableMapping(LogEntity.class);
             checkSLogTable(sqlDataHelper, dbTableMap, tableStructMap, tableMapping, logMappingInfo.isPartition(), tableName, tableComment);
-            tmp.add(logMappingInfo);
+            tmp.put(logMappingInfo.getLogName(), logMappingInfo);
         });
-        logMappingInfoList = tmp;
+        logMappingInfoMap = tmp;
     }
 
     public void checkSLogTable(PgsqlDataHelper dataHelper,
