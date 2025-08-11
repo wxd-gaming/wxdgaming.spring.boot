@@ -1,0 +1,16 @@
+{
+  "logName": "login",
+  "partition": true,
+  "fieldList": [
+    {
+      "fieldName": "openId",
+      "fieldComment": "账号Id",
+      "fieldType": "string"
+    },
+    {
+      "fieldName": "account",
+      "fieldComment": "账号",
+      "fieldType": "string"
+    }
+  ]
+}

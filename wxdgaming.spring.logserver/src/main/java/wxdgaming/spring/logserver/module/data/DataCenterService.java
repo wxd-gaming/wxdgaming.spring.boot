@@ -9,16 +9,18 @@ import wxdgaming.spring.boot.batis.sql.pgsql.PgsqlDataHelper;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.chatset.json.FastJsonUtil;
-import wxdgaming.spring.boot.core.io.FileReadUtil;
+import wxdgaming.spring.boot.core.io.FileUtil;
+import wxdgaming.spring.boot.core.lang.Tuple2;
 import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.logserver.bean.LogEntity;
 import wxdgaming.spring.logserver.bean.LogMappingInfo;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * 数据中心
@@ -47,14 +49,15 @@ public class DataCenterService implements InitPrint {
         Map<String, String> dbTableMap = sqlDataHelper.findTableMap();
         Map<String, LinkedHashMap<String, JSONObject>> tableStructMap = sqlDataHelper.findTableStructMap();
 
-        String json = FileReadUtil.readString("log-init.json", StandardCharsets.UTF_8);
-        List<LogMappingInfo> logMappingInfoList = FastJsonUtil.parseArray(json, LogMappingInfo.class);
-        for (LogMappingInfo logMappingInfo : logMappingInfoList) {
+        Stream<Tuple2<Path, byte[]>> tuple2Stream = FileUtil.resourceStreams(this.getClass().getClassLoader(), "log-init", ".json");
+        tuple2Stream.forEach(tuple2 -> {
+            String json = new String(tuple2.getRight(), StandardCharsets.UTF_8);
+            LogMappingInfo logMappingInfo = FastJsonUtil.parse(json, LogMappingInfo.class);
             String tableName = logMappingInfo.getLogName();
             String tableComment = logMappingInfo.getLogComment();
             TableMapping tableMapping = sqlDataHelper.tableMapping(LogEntity.class);
             checkSLogTable(sqlDataHelper, dbTableMap, tableStructMap, tableMapping, logMappingInfo.isPartition(), tableName, tableComment);
-        }
+        });
 
     }
 

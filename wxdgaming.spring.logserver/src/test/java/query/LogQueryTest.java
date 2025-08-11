@@ -28,13 +28,26 @@ public class LogQueryTest {
                 .setTableName("login")
                 .pushWhere("""
                         logdata::jsonb @> jsonb_build_object('account',?)""", "kQj2JQ9N")
-        .pushWhere("""
+                .pushWhere("""
                         logdata::jsonb @> jsonb_build_object('account',?)""", "kQj2JQ9N");
         System.out.println(sqlQueryBuilder.buildSelectSql());
         List<LogEntity> x = sqlQueryBuilder.findList2Entity(LogEntity.class);
         for (LogEntity logEntity : x) {
             System.out.println(logEntity.toJSONString());
         }
+    }
+
+    @Test
+    public void sumRecharge() {
+        SqlQueryBuilder sqlQueryBuilder = pgsqlDataHelper.queryBuilder();
+        sqlQueryBuilder
+                .setSelectField("sum((logdata::jsonb ->> 'money')::numeric) as money")
+                .setTableName("recharge")
+                .pushWhere("""
+                        logdata::jsonb @> jsonb_build_object('account',?)""", "Zkk9zRv9");
+        System.out.println(sqlQueryBuilder.buildSelectSql());
+        Long executeScalar = sqlQueryBuilder.executeScalar(Long.class);
+        System.out.println(executeScalar);
     }
 
 }

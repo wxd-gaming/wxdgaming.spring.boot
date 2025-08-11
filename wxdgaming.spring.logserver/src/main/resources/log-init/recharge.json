@@ -1,0 +1,31 @@
+{
+  "logName": "recharge",
+  "partition": true,
+  "fieldList": [
+    {
+      "fieldName": "openId",
+      "fieldComment": "账号Id",
+      "fieldType": "string"
+    },
+    {
+      "fieldName": "account",
+      "fieldComment": "账号",
+      "fieldType": "string"
+    },
+    {
+      "fieldName": "spOrderId",
+      "fieldComment": "平台订单",
+      "fieldType": "string"
+    },
+    {
+      "fieldName": "cpOrderId",
+      "fieldComment": "研发订单",
+      "fieldType": "string"
+    },
+    {
+      "fieldName": "money",
+      "fieldComment": "金额",
+      "fieldType": "number"
+    }
+  ]
+}
