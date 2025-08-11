@@ -10,16 +10,20 @@ import wxdgaming.spring.boot.batis.sql.pgsql.PgsqlDataHelper;
 import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.chatset.json.FastJsonUtil;
+import wxdgaming.spring.boot.core.executor.ExecutorWith;
 import wxdgaming.spring.boot.core.io.FileUtil;
 import wxdgaming.spring.boot.core.lang.Tuple2;
 import wxdgaming.spring.boot.core.timer.MyClock;
+import wxdgaming.spring.boot.scheduled.ann.Scheduled;
 import wxdgaming.spring.logserver.bean.LogEntity;
 import wxdgaming.spring.logserver.bean.LogMappingInfo;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -35,7 +39,7 @@ import java.util.stream.Stream;
 public class DataCenterService implements InitPrint {
 
     final PgsqlDataHelper sqlDataHelper;
-    List<LogMappingInfo> logMappingInfoList;
+    List<LogMappingInfo> logMappingInfoList = List.of();
 
     @Autowired
     public DataCenterService(PgsqlDataHelper sqlDataHelper) {
@@ -45,13 +49,16 @@ public class DataCenterService implements InitPrint {
     @Start
     public void start() {
         log.info("DataCenterService start");
-        initDataHelper();
+        initLogTable();
     }
 
-    public void initDataHelper() {
+    @ExecutorWith(useVirtualThread = true)
+    @Scheduled(value = "0 0 0 * * ?", async = true)
+    public void initLogTable() {
         Map<String, String> dbTableMap = sqlDataHelper.findTableMap();
         Map<String, LinkedHashMap<String, JSONObject>> tableStructMap = sqlDataHelper.findTableStructMap();
 
+        List<LogMappingInfo> tmp = new ArrayList<>();
         Stream<Tuple2<Path, byte[]>> tuple2Stream = FileUtil.resourceStreams(this.getClass().getClassLoader(), "log-init", ".json");
         tuple2Stream.forEach(tuple2 -> {
             String json = new String(tuple2.getRight(), StandardCharsets.UTF_8);
@@ -60,8 +67,9 @@ public class DataCenterService implements InitPrint {
             String tableComment = logMappingInfo.getLogComment();
             TableMapping tableMapping = sqlDataHelper.tableMapping(LogEntity.class);
             checkSLogTable(sqlDataHelper, dbTableMap, tableStructMap, tableMapping, logMappingInfo.isPartition(), tableName, tableComment);
+            tmp.add(logMappingInfo);
         });
-
+        logMappingInfoList = tmp;
     }
 
     public void checkSLogTable(PgsqlDataHelper dataHelper,

@@ -38,7 +38,7 @@
                     for (let i = 0; i < data.length; i++) {
                         let item = data[i];
                         itemTime[i] = item.name;
-                        let l = `<th>${item.comment}</th>`;
+                        let l = `<th class="${item.name}">${item.comment}</th>`;
 
                         $(".table_head").append(l);
                     }

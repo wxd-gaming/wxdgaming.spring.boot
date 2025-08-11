@@ -1,5 +1,6 @@
 {
   "logName": "recharge",
+  "logComment": "充值日志",
   "partition": true,
   "fieldList": [
     {

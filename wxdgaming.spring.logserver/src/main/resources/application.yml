@@ -21,4 +21,4 @@ server:
 
 spring:
   profiles:
-    active: pgsql192
+    active: pgsql10

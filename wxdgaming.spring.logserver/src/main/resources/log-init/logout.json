@@ -1,5 +1,6 @@
 {
   "logName": "logout",
+  "logComment": "登出日志",
   "partition": true,
   "fieldList": [
     {

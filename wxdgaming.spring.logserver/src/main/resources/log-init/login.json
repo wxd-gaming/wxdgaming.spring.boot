@@ -1,5 +1,6 @@
 {
   "logName": "login",
+  "logComment": "登录日志",
   "partition": true,
   "fieldList": [
     {
