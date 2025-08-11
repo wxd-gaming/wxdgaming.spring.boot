@@ -39,6 +39,11 @@
         </dependency>
         <dependency>
             <groupId>wxdgaming.spring.boot</groupId>
+            <artifactId>wxdgaming.spring.boot.net.server</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>wxdgaming.spring.boot</groupId>
             <artifactId>wxdgaming.spring.boot.scheduled</artifactId>
             <version>1.0.1</version>
         </dependency>

@@ -2,12 +2,12 @@ package wxdgaming.spring.boot.net.module.inner;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RequestMapping;
 import wxdgaming.spring.boot.core.ApplicationContextProvider;
 import wxdgaming.spring.boot.core.assist.JavassistProxy;
 import wxdgaming.spring.boot.core.chatset.StringUtils;
 import wxdgaming.spring.boot.core.io.Objects;
 import wxdgaming.spring.boot.core.reflect.AnnUtil;
-import wxdgaming.spring.boot.net.ann.RequestMapping;
 import wxdgaming.spring.boot.net.ann.RpcRequest;
 
 import java.lang.reflect.Method;

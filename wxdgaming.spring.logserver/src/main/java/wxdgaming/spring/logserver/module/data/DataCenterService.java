@@ -1,6 +1,7 @@
 package wxdgaming.spring.logserver.module.data;
 
 import com.alibaba.fastjson.JSONObject;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,10 +30,12 @@ import java.util.stream.Stream;
  * @version 2025-08-07 15:53
  **/
 @Slf4j
+@Getter
 @Service
 public class DataCenterService implements InitPrint {
 
     final PgsqlDataHelper sqlDataHelper;
+    List<LogMappingInfo> logMappingInfoList;
 
     @Autowired
     public DataCenterService(PgsqlDataHelper sqlDataHelper) {
