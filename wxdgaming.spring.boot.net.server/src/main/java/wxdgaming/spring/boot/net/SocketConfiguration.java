@@ -47,6 +47,7 @@ public class SocketConfiguration implements InitPrint {
     }
 
     @Bean
+    @ConditionalOnProperty(name = "socket.server.port")
     public SocketServer socketServer() {
         if (socketProperties.getServer().isEnabledWebSocket()) {
             if (StringUtils.isBlank(socketProperties.getServer().getWebSocketPrefix())) {

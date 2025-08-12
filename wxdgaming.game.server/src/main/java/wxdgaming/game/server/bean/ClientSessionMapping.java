@@ -4,12 +4,15 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import wxdgaming.game.message.global.MapBean;
+import wxdgaming.game.message.inner.InnerForwardMessage;
+import wxdgaming.game.server.bean.role.Player;
 import wxdgaming.spring.boot.core.lang.ObjectBase;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.pojo.PojoBase;
-import wxdgaming.game.message.inner.InnerForwardMessage;
-import wxdgaming.game.server.bean.role.Player;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -31,8 +34,10 @@ public class ClientSessionMapping extends ObjectBase {
     private int sid;
     private String account;
     private int appId;
+    private String clientIp;
     private String platform;
     private String platformUserId;
+    private ArrayList<MapBean> clientParams = new ArrayList<>();
     private long rid;
 
     public void forwardMessage(Player player, PojoBase message) {

@@ -6,6 +6,7 @@ import wxdgaming.game.message.inner.InnerRegisterServer;
 import wxdgaming.game.message.inner.ServiceType;
 import wxdgaming.game.server.GameServiceBootstrapConfig;
 import wxdgaming.game.server.module.data.ClientSessionService;
+import wxdgaming.spring.boot.core.InitPrint;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.ann.ProtoRequest;
 import wxdgaming.spring.boot.net.pojo.ProtoListenerFactory;
@@ -21,7 +22,7 @@ import java.util.Objects;
  **/
 @Slf4j
 @Component
-public class InnerRegisterServerHandler {
+public class InnerRegisterServerHandler implements InitPrint {
 
     final GameServiceBootstrapConfig gameServiceBootstrapConfig;
     final ProtoListenerFactory protoListenerFactory;

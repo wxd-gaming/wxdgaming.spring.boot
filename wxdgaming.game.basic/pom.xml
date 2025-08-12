@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>wxdgaming.spring.boot</groupId>
+        <groupId>wxdgaming.spring</groupId>
         <artifactId>wxdgaming.spring.boot</artifactId>
         <version>1.0.1</version>
     </parent>
@@ -13,32 +13,32 @@
 
     <dependencies>
         <dependency>
-            <groupId>wxdgaming.spring.boot</groupId>
+            <groupId>wxdgaming.spring</groupId>
             <artifactId>wxdgaming.spring.boot.core</artifactId>
             <version>1.0.1</version>
         </dependency>
         <dependency>
-            <groupId>wxdgaming.spring.boot</groupId>
+            <groupId>wxdgaming.spring</groupId>
             <artifactId>wxdgaming.spring.boot.batis.sql</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>wxdgaming.spring.boot</groupId>
+            <groupId>wxdgaming.spring</groupId>
             <artifactId>wxdgaming.spring.boot.batis.sql.mysql</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>wxdgaming.spring.boot</groupId>
+            <groupId>wxdgaming.spring</groupId>
             <artifactId>wxdgaming.spring.boot.batis.sql.pgsql</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>wxdgaming.spring.boot</groupId>
+            <groupId>wxdgaming.spring</groupId>
             <artifactId>wxdgaming.spring.boot.net.server</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>wxdgaming.spring.boot</groupId>
+            <groupId>wxdgaming.spring</groupId>
             <artifactId>wxdgaming.spring.boot.excel</artifactId>
             <version>${project.version}</version>
         </dependency>

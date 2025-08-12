@@ -4,10 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import wxdgaming.game.gateway.bean.ServerMapping;
 import wxdgaming.game.gateway.module.data.DataCenterService;
+import wxdgaming.game.message.inner.InnerForwardMessage;
 import wxdgaming.game.message.role.ReqLogin;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.ann.ProtoRequest;
 import wxdgaming.spring.boot.net.pojo.ProtoListenerFactory;
+
+import java.util.function.Consumer;
 
 /**
  * 登录请求
@@ -39,7 +42,11 @@ public class ReqLoginHandler {
             return;
         }
         socketSession.bindData("gameServerId", sid);
-        serverMapping.forwardMessage(socketSession.getUid(), req.msgId(), req.encode());
+        serverMapping.forwardMessage(socketSession.getUid(), req.msgId(), req.encode(), new Consumer<InnerForwardMessage>() {
+            @Override public void accept(InnerForwardMessage innerForwardMessage) {
+                innerForwardMessage.getKvBeansMap().put("clientIp", socketSession.getIP());
+            }
+        });
 
     }
 

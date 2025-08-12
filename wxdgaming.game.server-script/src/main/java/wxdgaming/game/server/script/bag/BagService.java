@@ -18,7 +18,9 @@ import wxdgaming.game.server.event.OnLoginBefore;
 import wxdgaming.game.server.module.data.DataCenterService;
 import wxdgaming.game.server.script.bag.cost.CostScript;
 import wxdgaming.game.server.script.bag.gain.GainScript;
+import wxdgaming.game.server.script.bag.log.ItemLog;
 import wxdgaming.game.server.script.bag.use.UseItemAction;
+import wxdgaming.game.server.script.log.LogService;
 import wxdgaming.game.server.script.mail.MailService;
 import wxdgaming.game.server.script.tips.TipsService;
 import wxdgaming.spring.boot.core.HoldRunApplication;
@@ -47,12 +49,14 @@ public class BagService extends HoldRunApplication implements InitPrint {
     final TipsService tipsService;
     final DataRepository dataRepository;
     final MailService mailService;
+    final LogService logService;
 
-    public BagService(DataCenterService dataCenterService, TipsService tipsService, DataRepository dataRepository, MailService mailService) {
+    public BagService(DataCenterService dataCenterService, TipsService tipsService, DataRepository dataRepository, MailService mailService, LogService logService) {
         this.dataCenterService = dataCenterService;
         this.tipsService = tipsService;
         this.dataRepository = dataRepository;
         this.mailService = mailService;
+        this.logService = logService;
     }
 
     @Init
@@ -162,25 +166,29 @@ public class BagService extends HoldRunApplication implements InitPrint {
 
             if (itemBag.checkFull()) break; /* TODO 背包已满 不要去关心能不能叠加 只要没有空格子就不操作 */
 
-            QItem qItem = dataRepository.dataTable(QItemTable.class, newItem.getCfgId());
+            int cfgId = newItem.getCfgId();
+            QItem qItem = dataRepository.dataTable(QItemTable.class, cfgId);
             int type = qItem.getItemType();
             int subtype = qItem.getItemSubType();
 
             GainScript gainScript = gainScriptProvider.getScript(type, subtype);
 
-            long oldCount = gainScript.getCount(player, itemBag, newItem.getCfgId());
+            final long oldCount = gainScript.getCount(player, itemBag, cfgId);
             long change = newItem.getCount();
             AssertUtil.assertTrue(change >= 0, "添加数量不能是负数");
 
             boolean gain = gainScript.gain(bagChangesCourse, newItem);
 
             if (gain || newItem.getCount() != change) {
-                long newCount = gainScript.getCount(player, itemBag, newItem.getCfgId());
+                long newCount = gainScript.getCount(player, itemBag, cfgId);
                 if (!gain) {
                     /*表示叠加之后，剩余的东西没办法入包，需要发邮件*/
                     change -= newItem.getCount();
                 }
                 log.info("获得道具：{}, {}, {} {}+{}={}, {}", player, bagType, qItem.getToName(), oldCount, change, newCount, bagChangeDTO);
+
+                ItemLog itemLog = new ItemLog(player, bagType.name(), "获得", cfgId, qItem.getName(), oldCount, change, newCount, bagChangeDTO.getReasonArgs().getReasonText());
+                logService.addLog(itemLog);
             }
 
             if (gain) {
@@ -230,14 +238,14 @@ public class BagService extends HoldRunApplication implements InitPrint {
     }
 
     /** 调用之前请使用 {@link BagService#checkCost(Player, BagChangeDTO4ItemCfg)} 函数 是否够消耗 */
-    public void cost(Player player, BagChangeDTO4ItemCfg bagChangeArgs4ItemCfg) {
-        BagType bagType = bagChangeArgs4ItemCfg.getBagType();
+    public void cost(Player player, BagChangeDTO4ItemCfg bagChangeDTO4ItemCfg) {
+        BagType bagType = bagChangeDTO4ItemCfg.getBagType();
         ItemBag itemBag = player.getBagPack().itemBag(bagType);
-        BagChangesCourse bagChangesCourse = new BagChangesCourse(player, bagType, itemBag, bagChangeArgs4ItemCfg.getReasonArgs());
+        BagChangesCourse bagChangesCourse = new BagChangesCourse(player, bagType, itemBag, bagChangeDTO4ItemCfg.getReasonArgs());
 
-        for (ItemCfg itemCfg : bagChangeArgs4ItemCfg.getItemCfgList()) {
+        for (ItemCfg itemCfg : bagChangeDTO4ItemCfg.getItemCfgList()) {
             int cfgId = itemCfg.getCfgId();
-            long change = itemCfg.getNum();
+            final long change = itemCfg.getNum();
 
             AssertUtil.assertTrue(change >= 0, "扣除数量不能是负数");
 
@@ -251,8 +259,10 @@ public class BagService extends HoldRunApplication implements InitPrint {
 
             costScript.cost(player, bagChangesCourse, qItem, change);
             long newCount = gainScript.getCount(player, itemBag, cfgId);
+            log.info("消耗道具：{}, {}, {} {}-{}={}, {}", player, bagType, qItem.getToName(), oldCount, change, newCount, bagChangeDTO4ItemCfg.getReasonArgs());
 
-            log.info("消耗道具：{}, {}, {} {}-{}={}, {}", player, bagType, qItem.getToName(), oldCount, change, newCount, bagChangeArgs4ItemCfg.getReasonArgs());
+            ItemLog itemLog = new ItemLog(player, bagType.name(), "消耗", cfgId, qItem.getName(), oldCount, change, newCount, bagChangeDTO4ItemCfg.getReasonArgs().getReasonText());
+            logService.addLog(itemLog);
         }
         player.write(bagChangesCourse.toResUpdateBagInfo());
 

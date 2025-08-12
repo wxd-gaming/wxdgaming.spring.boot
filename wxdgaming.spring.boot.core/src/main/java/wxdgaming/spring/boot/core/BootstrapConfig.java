@@ -2,7 +2,6 @@ package wxdgaming.spring.boot.core;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * 配置
@@ -12,7 +11,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  **/
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "boot")
 public class BootstrapConfig {
 
     private boolean debug = true;

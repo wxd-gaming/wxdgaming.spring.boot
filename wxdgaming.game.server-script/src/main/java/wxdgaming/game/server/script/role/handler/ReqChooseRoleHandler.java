@@ -1,5 +1,6 @@
 package wxdgaming.game.server.script.role.handler;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import wxdgaming.game.global.bean.role.PlayerSnap;
@@ -13,6 +14,8 @@ import wxdgaming.game.server.event.OnLogout;
 import wxdgaming.game.server.module.data.DataCenterService;
 import wxdgaming.game.server.module.data.GlobalDbDataCenterService;
 import wxdgaming.game.server.module.drive.PlayerDriveService;
+import wxdgaming.game.server.script.log.LogService;
+import wxdgaming.game.server.script.role.log.RoleLoginLog;
 import wxdgaming.spring.boot.core.HoldRunApplication;
 import wxdgaming.spring.boot.core.ann.ThreadParam;
 import wxdgaming.spring.boot.net.SocketSession;
@@ -33,11 +36,15 @@ public class ReqChooseRoleHandler extends HoldRunApplication {
     final DataCenterService dataCenterService;
     final GlobalDbDataCenterService globalDbDataCenterService;
     final PlayerDriveService playerDriveService;
+    final LogService logService;
 
-    public ReqChooseRoleHandler(DataCenterService dataCenterService, GlobalDbDataCenterService globalDbDataCenterService, PlayerDriveService playerDriveService) {
+    public ReqChooseRoleHandler(DataCenterService dataCenterService,
+                                GlobalDbDataCenterService globalDbDataCenterService,
+                                PlayerDriveService playerDriveService, LogService logService) {
         this.dataCenterService = dataCenterService;
         this.globalDbDataCenterService = globalDbDataCenterService;
         this.playerDriveService = playerDriveService;
+        this.logService = logService;
     }
 
     /** 选择角色 */
@@ -55,12 +62,15 @@ public class ReqChooseRoleHandler extends HoldRunApplication {
         }
 
         Player player = dataCenterService.getPlayer(rid);
+
         playerDriveService.executor(player, () -> {
             if (clientSessionMapping.getRid() > 0 && clientSessionMapping.getRid() != player.getUid()) {
                 /*角色切换*/
                 log.info("sid={}, account={} 角色切换 rid={} -> {}", sid, account, clientSessionMapping.getRid(), player.getUid());
                 runApplication.executorWithMethodAnnotatedIgnoreException(OnLogout.class, player);
             }
+
+            player.setClientData(clientSessionMapping.getClientParams());
 
             PlayerSnap playerSnap = globalDbDataCenterService.playerSnap(player.getUid());
             player.buildPlayerSnap(playerSnap);
@@ -79,6 +89,10 @@ public class ReqChooseRoleHandler extends HoldRunApplication {
             log.info("sid={}, {} 触发登录事件", sid, player);
             runApplication.executorWithMethodAnnotatedIgnoreException(OnLogin.class, player, 1, 1);
             log.info("sid={}, {} 选择角色成功", sid, player);
+
+            RoleLoginLog roleLoginLog = new RoleLoginLog(player, clientSessionMapping.getClientIp(), JSON.toJSONString(clientSessionMapping.getClientParams()));
+            logService.addLog(roleLoginLog);
+
         });
     }
 

@@ -3,6 +3,7 @@ package wxdgaming.game.robot;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import wxdgaming.spring.boot.core.BootstrapConfig;
 
 /**
  * 配置
@@ -13,13 +14,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "boot")
-public class BootstrapConfig {
+public class RobotBootstrapConfig extends BootstrapConfig {
 
-    private boolean debug = true;
-    private int gid = 1;
-    private int sid = 1;
-    private String name;
-    private String jwtKey;
     private String loginUrl;
 
 }

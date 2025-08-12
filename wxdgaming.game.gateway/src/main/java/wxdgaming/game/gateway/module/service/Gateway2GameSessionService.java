@@ -5,6 +5,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Service;
 import wxdgaming.game.gateway.GatewayBootstrapConfig;
 import wxdgaming.game.login.bean.info.InnerServerInfoBean;
@@ -39,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 @Slf4j
 @Getter
+@ConfigurationPropertiesScan(basePackageClasses = {ClientForwardConfig.class})
 @Service
 public class Gateway2GameSessionService extends HoldRunApplication {
 
@@ -47,17 +49,19 @@ public class Gateway2GameSessionService extends HoldRunApplication {
     final ConcurrentHashMap<Integer, Gateway2GameSocketClientImpl> gameSessionMap = new ConcurrentHashMap<>();
 
     private final ProtoListenerFactory protoListenerFactory;
+    private final SocketClientConfig socketClientConfig;
 
     public Gateway2GameSessionService(GatewayBootstrapConfig gatewayBootstrapConfig, SocketServer socketServer,
-                                      ProtoListenerFactory protoListenerFactory) {
+                                      ProtoListenerFactory protoListenerFactory, ClientForwardConfig clientForwardConfig) {
         this.gatewayBootstrapConfig = gatewayBootstrapConfig;
         this.socketServer = socketServer;
         this.protoListenerFactory = protoListenerFactory;
+        this.socketClientConfig = clientForwardConfig;
     }
 
     @Start
     public void start() {
-        // checkGatewaySession();
+        Object o = runApplication.configValue("${socket.clientForward}", String.class);
     }
 
     /** 向登陆服务器注册 */
@@ -122,13 +126,12 @@ public class Gateway2GameSessionService extends HoldRunApplication {
     /** 网关主动连游戏服 */
     public void checkGatewaySession(int sid, final String inetHost, final int inetPort, InnerRegisterServer registerServer) {
         Gateway2GameSocketClientImpl gatewaySocketClient = getGameSessionMap().computeIfAbsent(sid, l -> {
-            SocketClientConfig socketClientConfig = (SocketClientConfig) runApplication.configValue("socket.client-forward", SocketClientConfig.class);
-            socketClientConfig = (SocketClientConfig) socketClientConfig.clone();
-            socketClientConfig.setHost(inetHost);
-            socketClientConfig.setPort(inetPort);
-            socketClientConfig.setMaxConnectionCount(1);
-            socketClientConfig.setEnabledReconnection(false);
-            Gateway2GameSocketClientImpl socketClient = new Gateway2GameSocketClientImpl(socketClientConfig);
+            SocketClientConfig newSocketClientConfig = (SocketClientConfig) socketClientConfig.clone();
+            newSocketClientConfig.setHost(inetHost);
+            newSocketClientConfig.setPort(inetPort);
+            newSocketClientConfig.setMaxConnectionCount(1);
+            newSocketClientConfig.setEnabledReconnection(false);
+            Gateway2GameSocketClientImpl socketClient = new Gateway2GameSocketClientImpl(newSocketClientConfig);
             socketClient.init(protoListenerFactory);
             return socketClient;
         });

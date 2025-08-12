@@ -29,8 +29,7 @@ public class MainApplicationContextProvider extends ApplicationContextProvider {
         SpringUtil.mainApplicationContextProvider = this;
     }
 
-    public void start() {
-        executorWithMethodAnnotated(Init.class);
+    public void startBootstrap() {
         executorWithMethodAnnotated(Start.class);
         JvmUtil.addShutdownHook(() -> {
             executorWithMethodAnnotatedIgnoreException(Shutdown.class);
@@ -46,6 +45,11 @@ public class MainApplicationContextProvider extends ApplicationContextProvider {
             ExecutorFactory.getEXECUTOR_MONITOR().getExit().set(true);
             JvmUtil.halt(0);
         });
+    }
+
+    public void start() {
+        executorInitWithMethodAnnotated();
+        startBootstrap();
     }
 
 }

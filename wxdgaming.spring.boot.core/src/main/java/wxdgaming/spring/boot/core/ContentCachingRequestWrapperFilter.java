@@ -1,9 +1,6 @@
 package wxdgaming.spring.boot.core;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
+import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.boot.web.servlet.filter.OrderedFilter;
 import org.springframework.stereotype.Component;
@@ -16,7 +13,6 @@ import java.io.IOException;
  * @author wxd-gaming(無心道, 15388152619)
  * @version 2025-08-12 16:19
  */
-@Component
 public class ContentCachingRequestWrapperFilter implements OrderedFilter {
 
     @Override
@@ -35,8 +31,9 @@ public class ContentCachingRequestWrapperFilter implements OrderedFilter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         //传递包装类下去。这样后面的servlet等可以拿到这个包装后的request
         ContentCachingRequestWrapperNew requestWrapperNew = new ContentCachingRequestWrapperNew((HttpServletRequest) request);
+        ServletInputStream inputStream = requestWrapperNew.getInputStream();
         /*TODO 这个代码不能删除，必须强制读取一次才行*/
-        String string = requestWrapperNew.getReader().readLine();
+//        String string = requestWrapperNew.getReader().readLine();
         chain.doFilter(requestWrapperNew, response);
     }
 

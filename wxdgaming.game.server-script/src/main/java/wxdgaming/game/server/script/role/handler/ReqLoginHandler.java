@@ -2,6 +2,7 @@ package wxdgaming.game.server.script.role.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import wxdgaming.game.message.global.MapBean;
 import wxdgaming.game.message.role.ReqLogin;
 import wxdgaming.game.server.GameServiceBootstrapConfig;
 import wxdgaming.game.server.bean.ClientSessionMapping;
@@ -15,6 +16,8 @@ import wxdgaming.spring.boot.core.token.JsonToken;
 import wxdgaming.spring.boot.core.token.JsonTokenParse;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.ann.ProtoRequest;
+
+import java.util.ArrayList;
 
 /**
  * @author wxd-gaming(無心道, 15388152619)
@@ -45,6 +48,7 @@ public class ReqLoginHandler extends HoldRunApplication {
     @ProtoRequest
     public void reqLogin(SocketSession socketSession, ReqLogin req) {
         long clientSessionId = ThreadContext.context().getLongValue("clientSessionId");
+        String clientIp = ThreadContext.context().getString("clientIp");
         log.info("登录请求:{}, clientSessionId={}", req, clientSessionId);
         try {
             int sid = req.getSid();
@@ -63,11 +67,13 @@ public class ReqLoginHandler extends HoldRunApplication {
             clientSessionMapping.setSid(sid);
             clientSessionMapping.setAccount(account);
             clientSessionMapping.setAppId(appId);
+            clientSessionMapping.setClientIp(clientIp);
             clientSessionMapping.setPlatform(platform);
             clientSessionMapping.setPlatformUserId(platformUserId);
             clientSessionMapping.setSession(socketSession);
             clientSessionMapping.setGatewayId(gatewayId);
             clientSessionMapping.setClientSessionId(clientSessionId);
+            clientSessionMapping.setClientParams((ArrayList<MapBean>) req.getClientParams());
 
             playerService.sendPlayerList(socketSession, clientSessionId, sid, account);
 

@@ -37,13 +37,13 @@ public class YunyingScript extends HoldRunApplication {
         return RunResult.ok();
     }
 
-    @RequestMapping
+    @RequestMapping(path = "/banLogin")
     public Object banLogin(HttpServletRequest httpContext) {
 
         return RunResult.ok();
     }
 
-    @RequestMapping
+    @RequestMapping(path = "/banChat")
     public Object banChat(HttpServletRequest httpContext) {
 
         return RunResult.ok();

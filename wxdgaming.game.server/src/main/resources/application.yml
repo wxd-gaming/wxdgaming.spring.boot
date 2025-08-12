@@ -110,3 +110,10 @@ db:
 chat:
   host: 127.0.0.1
   port: 19800
+
+logbus:
+  filePath: "target/logbus"
+  token: "dwe"
+  split-org: 200
+  gzip: true
+  post-url: "http://localhost:18888/api/log/pushList"

@@ -14,7 +14,7 @@ import wxdgaming.game.message.task.ReqAcceptTask;
 import wxdgaming.game.message.task.ReqSubmitTask;
 import wxdgaming.game.message.task.TaskBean;
 import wxdgaming.game.message.task.TaskType;
-import wxdgaming.game.robot.BootstrapConfig;
+import wxdgaming.game.robot.RobotBootstrapConfig;
 import wxdgaming.game.robot.bean.Robot;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.chatset.StringUtils;
@@ -40,12 +40,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class RobotMainService {
 
-    final BootstrapConfig bootstrapConfig;
+    final RobotBootstrapConfig robotBootstrapConfig;
     final SocketClient socketClient;
     final ConcurrentHashMap<String, Robot> robotMap = new ConcurrentHashMap<>();
 
-    public RobotMainService(BootstrapConfig bootstrapConfig, SocketClient socketClient) {
-        this.bootstrapConfig = bootstrapConfig;
+    public RobotMainService(RobotBootstrapConfig robotBootstrapConfig, SocketClient socketClient) {
+        this.robotBootstrapConfig = robotBootstrapConfig;
         this.socketClient = socketClient;
     }
 
@@ -59,12 +59,13 @@ public class RobotMainService {
 
     public RunResult httpLogin(Robot robot) {
         JSONObject jsonObject = MapOf.newJSONObject();
+        jsonObject.put("appId", 1);
         jsonObject.put("platform", 1);
         jsonObject.put("account", robot.getAccount());
         jsonObject.put("token", robot.getAccount());
 
-        String uriPath = bootstrapConfig.getLoginUrl() + "/login/check";
-        HttpResponse httpResponse = HttpRequestPost.ofJson(uriPath, jsonObject.toJSONString()).execute();
+        String uriPath = robotBootstrapConfig.getLoginUrl() + "/login/check";
+        HttpResponse httpResponse = HttpRequestPost.of(uriPath, jsonObject).execute();
         RunResult runResult = httpResponse.bodyRunResult();
         if (runResult.isFail()) {
             log.error("登录失败：{}", runResult.msg());

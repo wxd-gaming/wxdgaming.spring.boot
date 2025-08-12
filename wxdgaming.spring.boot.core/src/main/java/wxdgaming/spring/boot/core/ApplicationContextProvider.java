@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.Order;
+import wxdgaming.spring.boot.core.ann.Init;
 import wxdgaming.spring.boot.core.chatset.StringUtils;
 import wxdgaming.spring.boot.core.chatset.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.reflect.AnnUtil;
@@ -50,6 +51,10 @@ public class ApplicationContextProvider implements InitPrint, ApplicationContext
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    public void executorInitWithMethodAnnotated() {
+        executorWithMethodAnnotated(Init.class);
     }
 
     public List<Content<Object>> getBeans() {

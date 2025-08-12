@@ -51,6 +51,8 @@ public class InnerForwardMessageHandler extends HoldRunApplication {
 
         ThreadContext.cleanup();
         ThreadContext.putContent("forwardMessage", req);
+        String clientIp = req.getKvBeansMap().get("clientIp");
+        ThreadContext.putContent("clientIp", Long.parseLong(clientIp));
         String clientSessionId = req.getKvBeansMap().get("clientSessionId");
         ThreadContext.putContent("clientSessionId", Long.parseLong(clientSessionId));
         String account = req.getKvBeansMap().get("account");

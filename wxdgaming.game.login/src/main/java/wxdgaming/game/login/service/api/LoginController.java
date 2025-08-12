@@ -42,8 +42,8 @@ public class LoginController {
         sdkMap = Collections.unmodifiableMap(map);
     }
 
-    @RequestMapping(path = "check")
-    public RunResult check(HttpServletRequest request, @RequestParam("appId") int appId) {
+    @RequestMapping(path = "/check")
+    public RunResult check(HttpServletRequest request, @RequestParam(value = "appId", required = false) Integer appId) {
         AppPlatformParams appPlatformParams = AppPlatformParams.getAppPlatformParams(appId);
         if (appPlatformParams == null) {
             return RunResult.fail("not support appId: " + appId + " not exist");

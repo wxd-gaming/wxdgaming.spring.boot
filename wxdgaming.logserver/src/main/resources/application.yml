@@ -7,7 +7,7 @@ core:
 
 
 server:
-  port: 8888
+  port: 18888
   tomcat:
     initial-size: 32 #初始化内存
     min-free-size: 32 #最小内存

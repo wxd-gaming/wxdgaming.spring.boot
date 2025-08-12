@@ -12,14 +12,15 @@ import wxdgaming.spring.boot.batis.sql.mysql.MysqlConfiguration;
 import wxdgaming.spring.boot.core.CoreConfiguration;
 import wxdgaming.spring.boot.core.MainApplicationContextProvider;
 import wxdgaming.spring.boot.core.SpringUtil;
-import wxdgaming.spring.boot.core.ann.Init;
 import wxdgaming.spring.boot.core.executor.ExecutorFactory;
 import wxdgaming.spring.boot.core.loader.ClassDirLoader;
 import wxdgaming.spring.boot.core.loader.JavaCoderCompile;
 import wxdgaming.spring.boot.excel.DataConfiguration;
 import wxdgaming.spring.boot.excel.store.DataRepository;
 import wxdgaming.spring.boot.net.SocketConfiguration;
+import wxdgaming.spring.boot.net.httpclient.HttpClientConfiguration;
 import wxdgaming.spring.boot.scheduled.ScheduledConfiguration;
+import wxdgaming.spring.logbus.LogBusService;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,8 @@ import java.util.concurrent.TimeUnit;
         SocketConfiguration.class,
         MysqlConfiguration.class,
         ScheduledConfiguration.class,
+        HttpClientConfiguration.class,
+        LogBusService.class,
         GameServiceApplication.class
 })
 public class GameServiceApplication {
@@ -41,7 +44,7 @@ public class GameServiceApplication {
             ConfigurableApplicationContext run = new SpringApplication(GameServiceApplication.class).run(args);
             MainApplicationContextProvider runApplication = run.getBean(MainApplicationContextProvider.class);
             loadScript();
-            runApplication.start();
+            runApplication.startBootstrap();
 
             QPlayerTable qPlayerTable = DataRepository.getIns().dataTable(QPlayerTable.class);
             QPlayer qPlayer = qPlayerTable.get(1);
@@ -128,7 +131,7 @@ public class GameServiceApplication {
         }
 
         SpringUtil.scriptApplicationContext = SpringUtil.newChild((ConfigurableApplicationContext) SpringUtil.mainApplicationContextProvider.getApplicationContext(), ScriptScan.class, classDirLoader);
-        SpringUtil.scriptApplicationContext.executorWithMethodAnnotated(Init.class);
+        SpringUtil.scriptApplicationContext.executorInitWithMethodAnnotated();
         log.info("加载脚本模块完成");
     }
 

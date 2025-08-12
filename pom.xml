@@ -10,7 +10,7 @@
     </parent>
 
     <name>wxdgaming.spring.boot</name>
-    <groupId>wxdgaming.spring.boot</groupId>
+    <groupId>wxdgaming.spring</groupId>
     <artifactId>wxdgaming.spring.boot</artifactId>
     <description>wxdgaming.spring.boot</description>
     <version>1.0.1</version>
