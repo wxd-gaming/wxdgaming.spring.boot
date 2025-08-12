@@ -319,16 +319,20 @@ public class ApplicationContextProvider implements InitPrint, ApplicationContext
     public Object configValue(Value value, Type parameterizedType) {
         if (value != null) {
             String valueKey = value.value();
-            Object o;
-            if (valueKey.startsWith("${")) {
-                String v2 = applicationContext.getEnvironment().resolvePlaceholders(valueKey);
-                o = FastJsonUtil.parse(v2, parameterizedType);
-            } else {
-                String property = applicationContext.getEnvironment().getProperty(valueKey);
-                o = FastJsonUtil.parse(property, parameterizedType);
-            }
-            return o;
+            return configValue(valueKey, parameterizedType);
         }
         return null;
+    }
+
+    public Object configValue(String valueKey, Type parameterizedType) {
+        Object o;
+        if (valueKey.startsWith("${")) {
+            String v2 = applicationContext.getEnvironment().resolvePlaceholders(valueKey);
+            o = FastJsonUtil.parse(v2, parameterizedType);
+        } else {
+            String property = applicationContext.getEnvironment().getProperty(valueKey);
+            o = FastJsonUtil.parse(property, parameterizedType);
+        }
+        return o;
     }
 }

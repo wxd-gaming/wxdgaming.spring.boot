@@ -20,9 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import wxdgaming.spring.boot.core.loader.ClassDirLoader;
@@ -40,7 +37,7 @@ import java.util.Collection;
  */
 @Slf4j
 public class SpringUtil implements InitPrint {
-    
+
     /** sd */
     public static MainApplicationContextProvider mainApplicationContextProvider;
     public static ScriptApplicationContextProvider scriptApplicationContext;
@@ -105,15 +102,7 @@ public class SpringUtil implements InitPrint {
         return url.toString();
     }
 
-    public static String getClientIp() {
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        if (requestAttributes == null) {
-            return null;
-        }
-        if (!(requestAttributes instanceof ServletRequestAttributes servletRequestAttributes)) {
-            return null;
-        }
-        HttpServletRequest request = servletRequestAttributes.getRequest();
+    public static String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
@@ -133,12 +122,12 @@ public class SpringUtil implements InitPrint {
         return ip;
     }
 
-    public static ConfigurableApplicationContext newChild4Jar(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String... jarPaths) {
+    public static ScriptApplicationContextProvider newChild4Jar(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String... jarPaths) {
         ClassDirLoader classLoader = ClassDirLoader.bootLib(parentClassLoad, jarPaths);
         return newChild(parent, scan, classLoader);
     }
 
-    public static ConfigurableApplicationContext newChild4JavaCode(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String javaCodePath, String... resourceUrls) throws Exception {
+    public static ScriptApplicationContextProvider newChild4JavaCode(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String javaCodePath, String... resourceUrls) throws Exception {
         ClassDirLoader classLoader = new JavaCoderCompile()
                 .parentClassLoader(parentClassLoad)
                 .compilerJava(javaCodePath)
@@ -148,12 +137,12 @@ public class SpringUtil implements InitPrint {
         return newChild(parent, scan, classLoader);
     }
 
-    public static ConfigurableApplicationContext newChild4Classes(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String... urls) throws Exception {
+    public static ScriptApplicationContextProvider newChild4Classes(ConfigurableApplicationContext parent, ClassLoader parentClassLoad, Class<?> scan, String... urls) throws Exception {
         ClassDirLoader classLoader = new ClassDirLoader(parentClassLoad, urls);
         return newChild(parent, scan, classLoader);
     }
 
-    public static ConfigurableApplicationContext newChild(ConfigurableApplicationContext parent, Class<?> scan, ClassDirLoader classLoader) {
+    public static ScriptApplicationContextProvider newChild(ConfigurableApplicationContext parent, Class<?> scan, ClassDirLoader classLoader) {
         Collection<Class<?>> values = classLoader.getLoadClassMap().values();
         // 创建子容器
         AnnotationConfigServletWebApplicationContext childContext = new AnnotationConfigServletWebApplicationContext();
@@ -183,7 +172,7 @@ public class SpringUtil implements InitPrint {
                 SpringUtil.registerController(parent, beanDefinitionName);
             }
         }
-        return childContext;
+        return scriptApplicationContextProvider;
     }
 
 

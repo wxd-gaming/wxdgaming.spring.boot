@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.core.chatset.json;//package wxdgaming.boot2.core.chatset.json;
+package wxdgaming.spring.boot.core.chatset.json;//package wxdgaming.spring.boot.core.chatset.json;
 //
 //import com.fasterxml.jackson.core.type.TypeReference;
 //import com.fasterxml.jackson.databind.*;

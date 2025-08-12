@@ -17,19 +17,27 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>wxdgaming.spring.boot.core</module>
+        <module>wxdgaming.game.basic</module>
+        <module>wxdgaming.game.chat</module>
+        <module>wxdgaming.game.gateway</module>
+        <module>wxdgaming.game.login</module>
+        <module>wxdgaming.game.robot</module>
+        <module>wxdgaming.game.server</module>
+        <module>wxdgaming.game.server-script</module>
         <module>wxdgaming.spring.boot.batis</module>
+        <module>wxdgaming.spring.boot.batis.mapdb</module>
         <module>wxdgaming.spring.boot.batis.sql</module>
         <module>wxdgaming.spring.boot.batis.sql.mysql</module>
         <module>wxdgaming.spring.boot.batis.sql.pgsql</module>
-        <module>wxdgaming.spring.boot.batis.mapdb</module>
+        <module>wxdgaming.spring.boot.core</module>
+        <module>wxdgaming.spring.boot.excel</module>
         <module>wxdgaming.spring.boot.net</module>
         <module>wxdgaming.spring.boot.net.httpclient</module>
         <module>wxdgaming.spring.boot.net.server</module>
         <module>wxdgaming.spring.boot.scheduled</module>
         <module>wxdgaming.spring.logbus</module>
         <module>wxdgaming.spring.logserver</module>
-        <module>wxdgaming.spring.test</module>
+        <module>wxdgaming.test</module>
     </modules>
 
     <properties>
@@ -191,6 +199,11 @@
                 <groupId>it.unimi.dsi</groupId>
                 <artifactId>fastutil</artifactId>
                 <version>8.5.15</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>2.23.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

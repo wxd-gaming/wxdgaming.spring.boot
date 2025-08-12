@@ -1,0 +1,62 @@
+syntax = "proto3";
+//把文件拆分
+option java_multiple_files = true;
+//导出包名
+option java_package = "wxdgaming.game.message";
+
+//任务类型
+enum TaskType {
+  TASK_TYPE_NONE = 0;
+  Main = 1;
+}
+
+//任务列表
+message ReqTaskList {
+  TaskType taskType           = 1;
+}
+
+//任务列表
+message ResTaskList {
+  TaskType taskType           = 1;//可能是空
+  repeated TaskBean tasks     = 2;
+}
+
+//更新任务列表
+message ResUpdateTaskList {
+  repeated TaskBean tasks     = 2;
+}
+
+message TaskBean {
+  int32 taskId                = 2;//任务id
+  bool accept                 = 3;//是否接受
+  bool completed              = 4;//是否完成
+  bool reward                 = 5;//是否领取奖励
+  repeated int64 progresses   = 6;//进度,当任务completed = true,此参数空
+}
+
+//接受任务
+message ReqAcceptTask  {
+  TaskType taskType           = 1;
+  int32 taskId                = 2;
+}
+
+//接受任务
+message ResAcceptTask  {
+  TaskType taskType           = 1;
+  int32 taskId                = 2;
+  TaskBean task               = 3;
+}
+
+//提交任务
+message ReqSubmitTask  {
+  TaskType taskType           = 1;
+  int32 taskId                = 2;
+}
+
+//提交任务
+message ResSubmitTask  {
+  TaskType taskType           = 1;
+  int32 taskId                = 2;
+  bool remove                 = 3;//是否移除
+}
+
