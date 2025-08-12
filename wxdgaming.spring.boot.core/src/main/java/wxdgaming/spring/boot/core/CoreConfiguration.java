@@ -2,7 +2,6 @@ package wxdgaming.spring.boot.core;
 
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.Ordered;
@@ -19,10 +18,10 @@ import wxdgaming.spring.boot.core.executor.ExecutorFactory;
 @Getter
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Component
-@EnableConfigurationProperties(CoreProperties.class)
+@EnableConfigurationProperties({CoreProperties.class})
 public class CoreConfiguration implements InitPrint {
 
-    private final CoreProperties coreProperties;
+    final CoreProperties coreProperties;
 
     @Autowired
     public CoreConfiguration(CoreProperties coreProperties) {

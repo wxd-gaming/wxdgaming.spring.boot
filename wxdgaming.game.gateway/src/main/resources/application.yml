@@ -1,20 +1,26 @@
-debug: true
-gid: 1
-sid: 1
-sname: "网关"
-executor:
-  basic:
-    coreSize: 2                        #默认线程池的核心线程数
-    maxQueueSize: 10000                #队列超过就会打印异常
-  logic:
-    coreSize: 32                       #逻辑线程池
-    maxQueueSize: 50000                #队列超过就会打印异常
-  virtual:
-    coreSize: 100                      #虚拟线程池
-    maxQueueSize: 1500000              #队列超过就会打印异常
-  scheduled:
-    coreSize: 1
-    maxQueueSize: 50000
+boot:
+  debug: true
+  gid: 1
+  sid: 1
+  name: "网关"
+  login-url: "http://127.0.0.1:19800"
+  jwtKey: "123456789012345678901234567890123456789012345678901234567890"
+
+core:
+  executor:
+    basic:
+      coreSize: 2                        #默认线程池的核心线程数
+      maxQueueSize: 10000                #队列超过就会打印异常
+    logic:
+      coreSize: 32                       #逻辑线程池
+      maxQueueSize: 50000                #队列超过就会打印异常
+    virtual:
+      coreSize: 100                      #虚拟线程池
+      maxQueueSize: 1500000              #队列超过就会打印异常
+    scheduled:
+      coreSize: 1
+      maxQueueSize: 50000
+
 http:
   client:
     routeMaxSize: 500                    #连接池的核心连接数
@@ -25,11 +31,11 @@ http:
     connectionRequestTimeout: 1000      #从连接池获取连接超时
     keepAliveTimeout: 30000             #连接有效时间
     readTimeout: 3000                   #读取超时时间
+
 socket:
   server:
     debug: false
     port: 18800
-    enabledHttp: true                                        #是否启用http
     enabledTcp: true                                         #是否启用tcp
     enabledScheduledFlush: true                             # 开启定时器flush
     scheduledFlushMs: 10                                    #定时调用flush的频率单位是ms
@@ -46,9 +52,6 @@ socket:
     readTimeout: 0
     recvByteBufM: 12                                          #接收缓冲区大小 单位MB
     writeByteBufM: 12                                         #发送缓冲区大小 单位MB
-    http:
-      showRequest: true
-      showResponse: true
 
   client-forward:
     debug: false
@@ -73,7 +76,3 @@ socket:
     readTimeout: 0
     recvByteBufM: 12                                           #接收缓冲区大小 单位MB
     writeByteBufM: 12                                          #发送缓冲区大小 单位MB
-
-login:
-  url: http://127.0.0.1:19800
-  jwtKey: "123456789012345678901234567890123456789012345678901234567890"

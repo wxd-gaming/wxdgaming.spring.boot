@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
+import wxdgaming.game.server.GameServiceBootstrapConfig;
 import wxdgaming.game.server.bean.BackendConfig;
 import wxdgaming.game.server.bean.global.DataBase;
 import wxdgaming.game.server.bean.global.GlobalDataEntity;
@@ -11,7 +12,6 @@ import wxdgaming.game.server.bean.global.GlobalDataType;
 import wxdgaming.spring.boot.batis.sql.SqlDataHelper;
 import wxdgaming.spring.boot.batis.sql.mysql.MysqlDataHelper;
 import wxdgaming.spring.boot.core.HoldRunApplication;
-import wxdgaming.spring.boot.core.ann.Named;
 import wxdgaming.spring.boot.core.ann.Shutdown;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.collection.concurrent.ConcurrentTable;
@@ -29,20 +29,18 @@ import java.util.List;
 @Service
 public class GlobalDataService extends HoldRunApplication {
 
-    private final int sid;
+    private final GameServiceBootstrapConfig gameServiceBootstrapConfig;
     private final SqlDataHelper sqlDataHelper;
-    private final BackendConfig backendConfig;
     /** key: sid, key: type, value: 数据 */
     private final ConcurrentTable<Integer, GlobalDataType, GlobalDataEntity> globalDataTable = new ConcurrentTable<>();
 
-    public GlobalDataService(@Named("sid") int sid, MysqlDataHelper mysqlDataHelper, BackendConfig backendConfig) {
-        this.sid = sid;
+    public GlobalDataService(GameServiceBootstrapConfig gameServiceBootstrapConfig, MysqlDataHelper mysqlDataHelper) {
+        this.gameServiceBootstrapConfig = gameServiceBootstrapConfig;
         this.sqlDataHelper = mysqlDataHelper;
-        this.backendConfig = backendConfig;
     }
 
     @Start
-    public void start(@Named("serverType") int serverType) {
+    public void start() {
         List<GlobalDataEntity> list = this.sqlDataHelper.findListByWhere(GlobalDataEntity.class, "merge = ?", false);
         for (GlobalDataEntity entity : list) {
             GlobalDataType globalDataType = GlobalDataType.ofOrException(entity.getId());
@@ -61,12 +59,12 @@ public class GlobalDataService extends HoldRunApplication {
     @SuppressWarnings("unchecked")
     public <T extends DataBase> T get(GlobalDataType type) {
         DataBase data = globalDataTable.computeIfAbsent(
-                sid,
+                gameServiceBootstrapConfig.getSid(),
                 type,
                 l ->
                         new GlobalDataEntity()
                                 .setId(type.getCode())
-                                .setSid(sid)
+                                .setSid(gameServiceBootstrapConfig.getSid())
                                 .setData(type.getFactory().get())
         ).getData();
         return (T) data;

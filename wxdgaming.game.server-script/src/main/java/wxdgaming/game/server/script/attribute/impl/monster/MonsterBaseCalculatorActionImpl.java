@@ -1,4 +1,4 @@
-package wxdgaming.game.server.script.attribute.impl.player;
+package wxdgaming.game.server.script.attribute.impl.monster;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,10 +18,10 @@ import wxdgaming.game.server.script.attribute.CalculatorType;
  **/
 @Slf4j
 @Component
-public class BaseCalculatorActionImpl extends AbstractCalculatorAction {
+public class MonsterBaseCalculatorActionImpl extends AbstractCalculatorAction {
 
     @Override public MapObject.MapObjectType mapObjectType() {
-        return MapObject.MapObjectType.Player;
+        return MapObject.MapObjectType.Monster;
     }
 
     @Override public CalculatorType calculatorType() {

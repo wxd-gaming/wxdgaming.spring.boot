@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import wxdgaming.game.login.bean.info.InnerServerInfoBean;
 import wxdgaming.game.login.inner.InnerService;
 import wxdgaming.spring.boot.core.HoldRunApplication;
@@ -25,7 +26,7 @@ import java.util.List;
  * @version: 2025-06-07 18:41
  **/
 @Slf4j
-@Component
+@RestController
 @RequestMapping(path = "/inner")
 public class InnerController extends HoldRunApplication {
 

@@ -1,5 +1,6 @@
 package wxdgaming.spring.boot.core;
 
+import com.alibaba.fastjson.JSONObject;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -22,12 +23,15 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.util.ContentCachingRequestWrapper;
 import wxdgaming.spring.boot.core.loader.ClassDirLoader;
 import wxdgaming.spring.boot.core.loader.JavaCoderCompile;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Enumeration;
 
 /**
  * spring 工具
@@ -79,6 +83,25 @@ public class SpringUtil implements InitPrint {
             log.error("出现异常：{}", e.getMessage());
         }
         return false;
+    }
+
+    public static JSONObject convertParameter(HttpServletRequest request) throws IOException {
+        Enumeration<String> parameterNames = request.getParameterNames();
+        JSONObject reqParams = new JSONObject();
+        while (parameterNames.hasMoreElements()) {
+            String name = parameterNames.nextElement();
+            reqParams.put(name, request.getParameter(name));
+        }
+
+        // 处理 POST JSON 请求体
+        if ("POST".equalsIgnoreCase(request.getMethod()) && request.getContentType().contains("application/json")) {
+            ContentCachingRequestWrapper wrapper = (ContentCachingRequestWrapper) request;
+            String body = new String(wrapper.getContentAsByteArray(), wrapper.getCharacterEncoding());
+            JSONObject bodyParams = JSONObject.parseObject(body);
+            reqParams.putAll(bodyParams);
+        }
+
+        return reqParams;
     }
 
     public static String getCurrentUrl(HttpServletRequest request) {

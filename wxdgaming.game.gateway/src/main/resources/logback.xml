@@ -58,10 +58,15 @@
         </encoder>
     </appender>
 
-    <logger name="io.netty" level="info" additivity="false"/>
-    <logger name="org.apache.hc" level="info" additivity="false"/>
-    <logger name="com.zaxxer.hikari" level="info" additivity="false"/>
-    <logger name="org.mongodb.driver" level="info" additivity="false"/>
+    <logger name="com.zaxxer.hikari" level="INFO" additivity="true"/>
+    <logger name="io.netty" level="INFO" additivity="true"/>
+    <logger name="io.lettuce" level="INFO" additivity="true"/>
+    <logger name="reactor.util" level="INFO" additivity="true"/>
+    <logger name="org.jboss" level="INFO" additivity="true"/>
+    <logger name="org.hibernate" level="INFO" additivity="true"/>
+    <logger name="org.xnio" level="info" additivity="true"/>
+    <logger name="org.springframework" level="info" additivity="true"/>
+    <logger name="org.apache.hc" level="info" additivity="true"/>
 
     <!-- 生产环境下，将此级别配置为适合的级别，以免日志文件太多或影响程序性能 -->
     <root level="debug"> <!-- ERROR, WARN, INFO, DEBUG -->

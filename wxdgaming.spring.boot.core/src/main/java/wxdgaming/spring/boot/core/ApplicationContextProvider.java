@@ -144,6 +144,7 @@ public class ApplicationContextProvider implements InitPrint, ApplicationContext
         if (predicate != null) {
             methodStream = methodStream.filter(predicate);
         }
+        methodStream = methodStream.sorted();
         return methodStream;
     }
 
@@ -327,12 +328,15 @@ public class ApplicationContextProvider implements InitPrint, ApplicationContext
     public Object configValue(String valueKey, Type parameterizedType) {
         Object o;
         if (valueKey.startsWith("${")) {
-            String v2 = applicationContext.getEnvironment().resolvePlaceholders(valueKey);
-            o = FastJsonUtil.parse(v2, parameterizedType);
+            o = applicationContext.getEnvironment().resolvePlaceholders(valueKey);
+
         } else {
-            String property = applicationContext.getEnvironment().getProperty(valueKey);
-            o = FastJsonUtil.parse(property, parameterizedType);
+            o = applicationContext.getEnvironment().getProperty(valueKey);
         }
-        return o;
+        if (parameterizedType.equals(String.class)) {
+            return o;
+        } else {
+            return FastJsonUtil.parse(String.valueOf(o), parameterizedType);
+        }
     }
 }

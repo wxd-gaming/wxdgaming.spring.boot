@@ -1,10 +1,10 @@
 package wxdgaming.game.server.script.inner.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import wxdgaming.game.message.inner.InnerRegisterServer;
 import wxdgaming.game.message.inner.ServiceType;
+import wxdgaming.game.server.GameServiceBootstrapConfig;
 import wxdgaming.game.server.module.data.ClientSessionService;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.ann.ProtoRequest;
@@ -23,15 +23,13 @@ import java.util.Objects;
 @Component
 public class InnerRegisterServerHandler {
 
-    private final int gid;
-    private final int sid;
-    private final ProtoListenerFactory protoListenerFactory;
-    private final ClientSessionService clientSessionService;
+    final GameServiceBootstrapConfig gameServiceBootstrapConfig;
+    final ProtoListenerFactory protoListenerFactory;
+    final ClientSessionService clientSessionService;
 
-    public InnerRegisterServerHandler(@Value("${gid}") int gid, @Value("${sid}") int sid,
-                                      ProtoListenerFactory protoListenerFactory, ClientSessionService clientSessionService) {
-        this.gid = gid;
-        this.sid = sid;
+    public InnerRegisterServerHandler(
+            GameServiceBootstrapConfig gameServiceBootstrapConfig, ProtoListenerFactory protoListenerFactory, ClientSessionService clientSessionService) {
+        this.gameServiceBootstrapConfig = gameServiceBootstrapConfig;
         this.protoListenerFactory = protoListenerFactory;
         this.clientSessionService = clientSessionService;
     }
@@ -54,10 +52,10 @@ public class InnerRegisterServerHandler {
             /*反向注册，告诉网关我是游戏服，并且告诉网关的基本信息*/
             InnerRegisterServer registerServer = new InnerRegisterServer();
             registerServer.setServiceType(ServiceType.GAME);
-            registerServer.setGameId(gid);
-            registerServer.setMainSid(sid);
+            registerServer.setGameId(gameServiceBootstrapConfig.getSid());
+            registerServer.setMainSid(gameServiceBootstrapConfig.getSid());
             /*当前进程监听的服务器有哪些*/
-            registerServer.getServerIds().add(sid);
+            registerServer.getServerIds().add(gameServiceBootstrapConfig.getSid());
             /*当前监听的消息id集合*/
             Collection<Integer> values = protoListenerFactory.getProtoListenerContent().getMessage2MappingMap().values();
             registerServer.getMessageIds().addAll(values);

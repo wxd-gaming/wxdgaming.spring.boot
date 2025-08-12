@@ -5,9 +5,8 @@ import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import wxdgaming.game.login.LoginConfig;
+import wxdgaming.game.gateway.GatewayBootstrapConfig;
 import wxdgaming.game.login.bean.info.InnerServerInfoBean;
 import wxdgaming.game.message.inner.InnerRegisterServer;
 import wxdgaming.game.message.inner.ServiceType;
@@ -43,23 +42,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class Gateway2GameSessionService extends HoldRunApplication {
 
-    private final int sid;
-    private final String sname;
-    private final SocketClientConfig socketClientConfig;
-    final LoginConfig loginConfig;
+    final GatewayBootstrapConfig gatewayBootstrapConfig;
     final SocketServer socketServer;
     final ConcurrentHashMap<Integer, Gateway2GameSocketClientImpl> gameSessionMap = new ConcurrentHashMap<>();
 
     private final ProtoListenerFactory protoListenerFactory;
 
-    public Gateway2GameSessionService(@Value("${sid}") int sid, @Value("${sname}") String sname,
-                                      @Value("${socket.client-forward}") SocketClientConfig socketClientConfig,
-                                      LoginConfig loginConfig, SocketServer socketServer,
+    public Gateway2GameSessionService(GatewayBootstrapConfig gatewayBootstrapConfig, SocketServer socketServer,
                                       ProtoListenerFactory protoListenerFactory) {
-        this.sid = sid;
-        this.sname = sname;
-        this.socketClientConfig = socketClientConfig;
-        this.loginConfig = loginConfig;
+        this.gatewayBootstrapConfig = gatewayBootstrapConfig;
         this.socketServer = socketServer;
         this.protoListenerFactory = protoListenerFactory;
     }
@@ -75,25 +66,26 @@ public class Gateway2GameSessionService extends HoldRunApplication {
     public void registerLoginServer() {
 
         InnerServerInfoBean serverInfoBean = new InnerServerInfoBean();
-        serverInfoBean.setServerId(sid);
-        serverInfoBean.setMainId(sid);
-        serverInfoBean.setName(sname);
+        serverInfoBean.setGid(gatewayBootstrapConfig.getGid());
+        serverInfoBean.setServerId(gatewayBootstrapConfig.getSid());
+        serverInfoBean.setMainId(gatewayBootstrapConfig.getSid());
+        serverInfoBean.setName(gatewayBootstrapConfig.getName());
         serverInfoBean.setPort(socketServer.getConfig().getPort());
         serverInfoBean.setHttpPort(socketServer.getConfig().getPort());
 
-        serverInfoBean.setMaxOnlineSize(loginConfig.getMaxOnlineSize());
+        serverInfoBean.setMaxOnlineSize(gatewayBootstrapConfig.getMaxOnline());
         serverInfoBean.setOnlineSize(socketServer.getSessionGroup().size());
 
         JSONObject jsonObject = MapOf.newJSONObject();
-        jsonObject.put("sid", sid);
+        jsonObject.put("sid", gatewayBootstrapConfig.getSid());
         jsonObject.put("serverBean", serverInfoBean.toJSONString());
 
         String json = jsonObject.toString(SerializerFeature.MapSortField, SerializerFeature.SortField);
-        String md5DigestEncode = Md5Util.md5DigestEncode0("#", json, loginConfig.getJwtKey());
+        String md5DigestEncode = Md5Util.md5DigestEncode0("#", json, gatewayBootstrapConfig.getJwtKey());
         jsonObject.put("sign", md5DigestEncode);
 
         String string = jsonObject.toString();
-        HttpResponse httpResponse = HttpRequestPost.ofJson(loginConfig.getUrl() + "/inner/registerGateway", string).execute();
+        HttpResponse httpResponse = HttpRequestPost.ofJson(gatewayBootstrapConfig.getLoginUrl() + "/inner/registerGateway", string).execute();
         if (!httpResponse.isSuccess()) {
             log.error("访问登陆服务器失败{}", Throw.ofString(httpResponse.getException(), false));
             return;
@@ -104,7 +96,7 @@ public class Gateway2GameSessionService extends HoldRunApplication {
 
             InnerRegisterServer registerServer = new InnerRegisterServer();
             registerServer.setServiceType(ServiceType.GATEWAY);
-            registerServer.setMainSid(sid);
+            registerServer.setMainSid(gatewayBootstrapConfig.getSid());
 
             List<InnerServerInfoBean> data = runResult.getObject("data", new TypeReference<List<InnerServerInfoBean>>() {});
             HashSet<Integer> hasServerIdSet = new HashSet<>();

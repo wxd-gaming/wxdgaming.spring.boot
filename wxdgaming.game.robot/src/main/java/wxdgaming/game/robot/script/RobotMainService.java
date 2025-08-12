@@ -6,7 +6,6 @@ import io.netty.channel.ChannelFutureListener;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import wxdgaming.game.login.LoginConfig;
 import wxdgaming.game.message.chat.ChatType;
 import wxdgaming.game.message.chat.ReqChatMessage;
 import wxdgaming.game.message.role.ReqHeartbeat;
@@ -15,6 +14,7 @@ import wxdgaming.game.message.task.ReqAcceptTask;
 import wxdgaming.game.message.task.ReqSubmitTask;
 import wxdgaming.game.message.task.TaskBean;
 import wxdgaming.game.message.task.TaskType;
+import wxdgaming.game.robot.BootstrapConfig;
 import wxdgaming.game.robot.bean.Robot;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.chatset.StringUtils;
@@ -40,12 +40,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class RobotMainService {
 
-    final LoginConfig loginConfig;
+    final BootstrapConfig bootstrapConfig;
     final SocketClient socketClient;
     final ConcurrentHashMap<String, Robot> robotMap = new ConcurrentHashMap<>();
 
-    public RobotMainService(LoginConfig loginConfig, SocketClient socketClient) {
-        this.loginConfig = loginConfig;
+    public RobotMainService(BootstrapConfig bootstrapConfig, SocketClient socketClient) {
+        this.bootstrapConfig = bootstrapConfig;
         this.socketClient = socketClient;
     }
 
@@ -63,7 +63,7 @@ public class RobotMainService {
         jsonObject.put("account", robot.getAccount());
         jsonObject.put("token", robot.getAccount());
 
-        String uriPath = getLoginConfig().getUrl() + "/login/check";
+        String uriPath = bootstrapConfig.getLoginUrl() + "/login/check";
         HttpResponse httpResponse = HttpRequestPost.ofJson(uriPath, jsonObject.toJSONString()).execute();
         RunResult runResult = httpResponse.bodyRunResult();
         if (runResult.isFail()) {

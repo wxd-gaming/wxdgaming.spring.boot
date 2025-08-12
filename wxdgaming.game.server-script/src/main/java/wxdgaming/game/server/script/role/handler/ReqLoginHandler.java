@@ -2,8 +2,8 @@ package wxdgaming.game.server.script.role.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import wxdgaming.game.login.LoginConfig;
 import wxdgaming.game.message.role.ReqLogin;
+import wxdgaming.game.server.GameServiceBootstrapConfig;
 import wxdgaming.game.server.bean.ClientSessionMapping;
 import wxdgaming.game.server.module.data.ClientSessionService;
 import wxdgaming.game.server.module.data.DataCenterService;
@@ -24,22 +24,22 @@ import wxdgaming.spring.boot.net.ann.ProtoRequest;
 @Component
 public class ReqLoginHandler extends HoldRunApplication {
 
+    private final GameServiceBootstrapConfig gameServiceBootstrapConfig;
     private final DataCenterService dataCenterService;
     private final ClientSessionService clientSessionService;
     private final PlayerService playerService;
     private final TipsService tipsService;
-    private final LoginConfig loginConfig;
 
     public ReqLoginHandler(DataCenterService dataCenterService,
                            ClientSessionService clientSessionService,
                            PlayerService playerService,
                            TipsService tipsService,
-                           LoginConfig loginConfig) {
+                           GameServiceBootstrapConfig gameServiceBootstrapConfig) {
         this.dataCenterService = dataCenterService;
         this.clientSessionService = clientSessionService;
         this.playerService = playerService;
         this.tipsService = tipsService;
-        this.loginConfig = loginConfig;
+        this.gameServiceBootstrapConfig = gameServiceBootstrapConfig;
     }
 
     @ProtoRequest
@@ -49,7 +49,7 @@ public class ReqLoginHandler extends HoldRunApplication {
         try {
             int sid = req.getSid();
             String token = req.getToken();
-            JsonToken jsonToken = JsonTokenParse.parse(loginConfig.getJwtKey(), token);
+            JsonToken jsonToken = JsonTokenParse.parse(gameServiceBootstrapConfig.getJwtKey(), token);
             int appId = jsonToken.getIntValue("appId");
             String account = jsonToken.getString("account");
             String platform = jsonToken.getString("platform");

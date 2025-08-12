@@ -2,13 +2,12 @@ package wxdgaming.game.server.module.data;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import wxdgaming.game.global.bean.role.PlayerSnap;
 import wxdgaming.game.server.bean.role.Player;
 import wxdgaming.spring.boot.batis.sql.SqlDataHelper;
-import wxdgaming.spring.boot.core.ann.Named;
-import wxdgaming.spring.boot.core.ann.Start;
+import wxdgaming.spring.boot.batis.sql.mysql.MysqlDataHelper;
 import wxdgaming.spring.boot.core.util.SingletonLockUtil;
 
 /**
@@ -25,14 +24,9 @@ public class GlobalDbDataCenterService {
     final SqlDataHelper globalDbHelper;
     final DataCenterService dataCenterService;
 
-    public GlobalDbDataCenterService(@Named("db.mysql-second") SqlDataHelper globalDbHelper, DataCenterService dataCenterService) {
+    public GlobalDbDataCenterService(@Qualifier("db.sql.mysql-second") MysqlDataHelper globalDbHelper, DataCenterService dataCenterService) {
         this.globalDbHelper = globalDbHelper;
         this.dataCenterService = dataCenterService;
-    }
-
-    @Start
-    public void start(@Value("${sid}") int sid) {
-
     }
 
     public PlayerSnap playerSnap(long uid) {

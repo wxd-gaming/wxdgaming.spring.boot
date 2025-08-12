@@ -3,13 +3,9 @@ package wxdgaming.spring.boot.net.module.inner;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-import wxdgaming.spring.boot.core.CoreConfiguration;
+import wxdgaming.spring.boot.core.BootstrapConfig;
 import wxdgaming.spring.boot.core.cache2.CASCache;
 import wxdgaming.spring.boot.core.cache2.Cache;
 import wxdgaming.spring.boot.core.format.HexId;
@@ -30,21 +26,18 @@ import java.util.concurrent.TimeUnit;
  **/
 @Slf4j
 @Getter
-@ComponentScan(basePackageClasses = {CoreConfiguration.class})
-@AutoConfigureAfter(CoreConfiguration.class)
 @Component
 public class RpcService {
 
+    final BootstrapConfig bootstrapConfig;
     final HexId hexId;
     final RpcListenerFactory rpcListenerFactory;
     final Cache<Long, CompletableFuture<JSONObject>> rpcCache;
 
-    String rpcToken = null;
 
-    @Autowired
-    public RpcService(@Value("${sid}") int sid, @Value("${rpc.token}") String rpcToken, RpcListenerFactory rpcListenerFactory) {
-        this.hexId = new HexId(sid);
-        this.rpcToken = rpcToken;
+    public RpcService(BootstrapConfig bootstrapConfig, RpcListenerFactory rpcListenerFactory) {
+        this.hexId = new HexId(bootstrapConfig.getSid());
+        this.bootstrapConfig = bootstrapConfig;
         this.rpcListenerFactory = rpcListenerFactory;
         this.rpcCache = CASCache.<Long, CompletableFuture<JSONObject>>builder()
                 .cacheName("rpc-server")
@@ -60,7 +53,7 @@ public class RpcService {
     }
 
     public String sign(long rpcId) {
-        return Md5Util.md5DigestEncode0("#", String.valueOf(rpcId), rpcToken);
+        return Md5Util.md5DigestEncode0("#", String.valueOf(rpcId), bootstrapConfig.getRpcToken());
     }
 
     public CompletableFuture<JSONObject> responseFuture(long rpcId) {

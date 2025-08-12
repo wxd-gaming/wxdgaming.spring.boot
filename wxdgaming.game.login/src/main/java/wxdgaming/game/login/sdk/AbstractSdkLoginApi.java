@@ -3,12 +3,12 @@ package wxdgaming.game.login.sdk;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import wxdgaming.game.login.AppPlatformParams;
-import wxdgaming.game.login.LoginConfig;
+import wxdgaming.game.login.LoginBootstrapConfig;
 import wxdgaming.game.login.bean.UserData;
 import wxdgaming.game.login.bean.info.InnerServerInfoBean;
 import wxdgaming.game.login.inner.InnerService;
 import wxdgaming.game.login.service.LoginService;
-import wxdgaming.spring.boot.batis.sql.SqlDataHelper;
+import wxdgaming.spring.boot.batis.sql.mysql.MysqlDataHelper;
 import wxdgaming.spring.boot.core.lang.RunResult;
 import wxdgaming.spring.boot.core.token.JsonTokenBuilder;
 import wxdgaming.spring.boot.core.util.SingletonLockUtil;
@@ -25,8 +25,8 @@ import java.util.function.Supplier;
 public abstract class AbstractSdkLoginApi {
 
     @Autowired protected LoginService loginService;
-    @Autowired protected SqlDataHelper sqlDataHelper;
-    @Autowired protected LoginConfig loginConfig;
+    @Autowired protected MysqlDataHelper mysqlDataHelper;
+    @Autowired protected LoginBootstrapConfig loginBootstrapConfig;
     @Autowired protected InnerService innerService;
 
     /** 平台 */
@@ -50,7 +50,7 @@ public abstract class AbstractSdkLoginApi {
             UserData userData = loginService.userData(account);
             if (userData == null) {
                 userData = supplier.get();
-                sqlDataHelper.getCacheService().cache(UserData.class).put(userData.getAccount(), userData);
+                mysqlDataHelper.getCacheService().cache(UserData.class).put(userData.getAccount(), userData);
             }
             return userData;
         } finally {
@@ -59,7 +59,7 @@ public abstract class AbstractSdkLoginApi {
     }
 
     public RunResult buildResult(UserData userData) {
-        JsonTokenBuilder jwtBuilder = JsonTokenBuilder.of(loginConfig.getJwtKey(), TimeUnit.MINUTES, 5);
+        JsonTokenBuilder jwtBuilder = JsonTokenBuilder.of(loginBootstrapConfig.getJwtKey(), TimeUnit.MINUTES, 5);
         jwtBuilder.put("appId", userData.getAppId());
         jwtBuilder.put("platform", userData.getPlatform());
         jwtBuilder.put("account", userData.getAccount());

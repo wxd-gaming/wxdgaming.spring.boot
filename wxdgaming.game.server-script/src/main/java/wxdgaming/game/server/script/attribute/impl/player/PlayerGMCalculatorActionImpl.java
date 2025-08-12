@@ -16,7 +16,7 @@ import wxdgaming.game.server.script.attribute.CalculatorType;
  **/
 @Slf4j
 @Component
-public class GMCalculatorActionImpl extends AbstractCalculatorAction {
+public class PlayerGMCalculatorActionImpl extends AbstractCalculatorAction {
 
     @Override public MapObject.MapObjectType mapObjectType() {
         return MapObject.MapObjectType.Player;

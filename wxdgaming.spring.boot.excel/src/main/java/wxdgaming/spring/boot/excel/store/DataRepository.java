@@ -47,8 +47,8 @@ public class DataRepository {
 
     @Start
     @Order(1)
-    public void start(@Value("data.json.path") String jsonPath,
-                      @Value("data.json.scan") String scanPackageName) {
+    public void start(@Value("${data.json.path:}") String jsonPath,
+                      @Value("${data.json.scan:}") String scanPackageName) {
         this.jsonPath = jsonPath;
         this.scanPackageName = scanPackageName;
         loadAll();

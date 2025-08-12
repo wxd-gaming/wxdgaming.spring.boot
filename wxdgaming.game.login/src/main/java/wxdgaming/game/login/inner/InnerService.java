@@ -6,6 +6,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import wxdgaming.game.login.bean.info.InnerServerInfoBean;
 import wxdgaming.spring.boot.batis.sql.SqlDataHelper;
+import wxdgaming.spring.boot.batis.sql.mysql.MysqlDataHelper;
 import wxdgaming.spring.boot.core.ann.Shutdown;
 import wxdgaming.spring.boot.core.timer.MyClock;
 
@@ -27,8 +28,8 @@ public class InnerService {
     final ConcurrentHashMap<Integer, InnerServerInfoBean> innerGameServerInfoMap = new ConcurrentHashMap<>();
     final ConcurrentHashMap<Integer, InnerServerInfoBean> innerGatewayServerInfoMap = new ConcurrentHashMap<>();
 
-    public InnerService(SqlDataHelper sqlDataHelper) {
-        this.sqlDataHelper = sqlDataHelper;
+    public InnerService(MysqlDataHelper mysqlDataHelper) {
+        this.sqlDataHelper = mysqlDataHelper;
         this.sqlDataHelper.checkTable(InnerServerInfoBean.class);
 
         sqlDataHelper.findList(InnerServerInfoBean.class).forEach(bean -> {

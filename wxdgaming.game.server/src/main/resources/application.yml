@@ -1,21 +1,32 @@
-debug: true
-gid: 1
-sid: 1
-sname: "游戏一服"
-serverType: 1
-executor:
-  basic:
-    coreSize: 2                        #默认线程池的核心线程数
-    maxQueueSize: 10000                #队列超过就会打印异常
-  logic:
-    coreSize: 32                       #逻辑线程池
-    maxQueueSize: 50000                #队列超过就会打印异常
-  virtual:
-    coreSize: 100                      #虚拟线程池
-    maxQueueSize: 1500000              #队列超过就会打印异常
-  scheduled:
-    coreSize: 1
-    maxQueueSize: 500
+boot:
+  debug: true
+  gid: 1
+  sid: 1
+  name: "游戏一服"
+  serverType: 1
+  loginUrl: "http://127.0.0.1:19800"
+  jwtKey: "123456789012345678901234567890123456789012345678901234567890"
+  backends:
+    url: "http://127.0.0.1:8000"
+    gameId: 1
+    appToken: "123456"
+    logToken: "123456"
+
+core:
+  executor:
+    basic:
+      coreSize: 2                        #默认线程池的核心线程数
+      maxQueueSize: 10000                #队列超过就会打印异常
+    logic:
+      coreSize: 32                       #逻辑线程池
+      maxQueueSize: 50000                #队列超过就会打印异常
+    virtual:
+      coreSize: 100                      #虚拟线程池
+      maxQueueSize: 1500000              #队列超过就会打印异常
+    scheduled:
+      coreSize: 1
+      maxQueueSize: 500
+
 http:
   client:
     routeMaxSize: 20                    #连接池的核心连接数
@@ -26,6 +37,7 @@ http:
     connectionRequestTimeout: 1000      #从连接池获取连接超时
     keepAliveTimeout: 30000             #连接有效时间
     readTimeout: 3000                   #读取超时时间
+
 socket:
   server:
     debug: false
@@ -47,41 +59,40 @@ socket:
     readTimeout: 0
     recvByteBufM: 12                                          #接收缓冲区大小 单位MB
     writeByteBufM: 12                                         #发送缓冲区大小 单位MB
-    http:
-      showRequest: true
-      showResponse: true
 
 data:
   json:
     path: "cfg_json"
     scan: "wxdgaming.game.cfg"
+
 db:
-  mysql:
-    debug: false                                                 #调试模式将会显示sql语句
-    driverClassName: "com.mysql.cj.jdbc.Driver"
-    url: "jdbc:mysql://127.0.0.1:3306/test_game"
-    username: "root"
-    password: "test"
-    scanPackage: "wxdgaming.game.server.bean"                   #扫描路径
-    connectionTimeoutMs: 2000                                 #链接超时单位毫秒
-    idleTimeoutM: 10                                          #空闲超时单位分钟
-    minPoolSize: 5                                            #最小连接数
-    maxPoolSize: 20                                           #最大连接数
-    batchSubmitSize: 500                                      #批量提交数量
-    batchThreadSize: 1                                        #批量提交线程数
-  mysql-second:
-    debug: false                                                 #调试模式将会显示sql语句
-    driverClassName: "com.mysql.cj.jdbc.Driver"
-    url: "jdbc:mysql://127.0.0.1:3306/test_game_global"
-    username: "root"
-    password: "test"
-    scanPackage: "wxdgaming.game.global.bean"                 #扫描路径
-    connectionTimeoutMs: 2000                                 #链接超时单位毫秒
-    idleTimeoutM: 10                                          #空闲超时单位分钟
-    minPoolSize: 5                                            #最小连接数
-    maxPoolSize: 20                                           #最大连接数
-    batchSubmitSize: 500                                      #批量提交数量
-    batchThreadSize: 1                                        #批量提交线程数
+  sql:
+    mysql:
+      debug: false                                                 #调试模式将会显示sql语句
+      driverClassName: "com.mysql.cj.jdbc.Driver"
+      url: "jdbc:mysql://10.28.0.26:3306/test_game"
+      username: "root"
+      password: "test"
+      scanPackage: "wxdgaming.game.server.bean"                   #扫描路径
+      connectionTimeoutMs: 2000                                 #链接超时单位毫秒
+      idleTimeoutM: 10                                          #空闲超时单位分钟
+      minPoolSize: 5                                            #最小连接数
+      maxPoolSize: 20                                           #最大连接数
+      batchSubmitSize: 500                                      #批量提交数量
+      batchThreadSize: 1                                        #批量提交线程数
+    mysql-second:
+      debug: false                                                 #调试模式将会显示sql语句
+      driverClassName: "com.mysql.cj.jdbc.Driver"
+      url: "jdbc:mysql://10.28.0.26:3306/test_game_global"
+      username: "root"
+      password: "test"
+      scanPackage: "wxdgaming.game.global.bean"                 #扫描路径
+      connectionTimeoutMs: 2000                                 #链接超时单位毫秒
+      idleTimeoutM: 10                                          #空闲超时单位分钟
+      minPoolSize: 5                                            #最小连接数
+      maxPoolSize: 20                                           #最大连接数
+      batchSubmitSize: 500                                      #批量提交数量
+      batchThreadSize: 1                                        #批量提交线程数
 #  pgsql:
 #    debug: false                                                 #调试模式将会显示sql语句
 #    driverClassName: "org.postgresql.Driver"
@@ -95,16 +106,6 @@ db:
 #    maxPoolSize: 20                                           #最大连接数
 #    batchSubmitSize: 500                                      #批量提交数量
 #    batchThreadSize: 1                                        #批量提交线程数
-
-backends:
-  url: "http://127.0.0.1:8000"
-  gameId: 1
-  appToken: "123456"
-  logToken: "123456"
-
-login:
-  url: http://127.0.0.1:19800
-  jwtKey: "123456789012345678901234567890123456789012345678901234567890"
 
 chat:
   host: 127.0.0.1

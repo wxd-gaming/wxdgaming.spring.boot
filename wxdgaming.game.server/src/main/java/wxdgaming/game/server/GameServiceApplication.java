@@ -3,11 +3,11 @@ package wxdgaming.game.server;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import wxdgaming.game.cfg.QPlayerTable;
 import wxdgaming.game.cfg.bean.QPlayer;
-import wxdgaming.game.login.LoginServiceConfiguration;
 import wxdgaming.spring.boot.batis.sql.mysql.MysqlConfiguration;
 import wxdgaming.spring.boot.core.CoreConfiguration;
 import wxdgaming.spring.boot.core.MainApplicationContextProvider;
@@ -25,20 +25,20 @@ import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@ConfigurationPropertiesScan(basePackageClasses = {GameServiceBootstrapConfig.class})
 @SpringBootApplication(scanBasePackageClasses = {
         CoreConfiguration.class,
         DataConfiguration.class,
         SocketConfiguration.class,
         MysqlConfiguration.class,
         ScheduledConfiguration.class,
-        LoginServiceConfiguration.class,
-        ServerApplication.class
+        GameServiceApplication.class
 })
-public class ServerApplication {
+public class GameServiceApplication {
 
     public static void main(String[] args) throws Exception {
         try {
-            ConfigurableApplicationContext run = new SpringApplication(ServerApplication.class).run(args);
+            ConfigurableApplicationContext run = new SpringApplication(GameServiceApplication.class).run(args);
             MainApplicationContextProvider runApplication = run.getBean(MainApplicationContextProvider.class);
             loadScript();
             runApplication.start();
@@ -118,7 +118,7 @@ public class ServerApplication {
             }
         } else {
             try {
-                new JavaCoderCompile().parentClassLoader(ServerApplication.class.getClassLoader())
+                new JavaCoderCompile().parentClassLoader(GameServiceApplication.class.getClassLoader())
                         .compilerJava("wxdgaming.game.server-script/src/main/java")
                         .outPutFile("target/bin", true);
                 classDirLoader = new ClassDirLoader("target/bin");

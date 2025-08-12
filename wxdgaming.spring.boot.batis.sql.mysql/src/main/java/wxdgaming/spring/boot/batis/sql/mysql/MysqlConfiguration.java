@@ -46,7 +46,7 @@ public class MysqlConfiguration implements InitPrint {
         return new MysqlDataHelper(mysql);
     }
 
-    @Bean
+    @Bean("db.sql.mysql-second")
     @ConditionalOnProperty(name = "db.sql.mysql-second.url")
     public MysqlDataHelper mysqlSecond() {
         return new MysqlDataHelper(mysql);

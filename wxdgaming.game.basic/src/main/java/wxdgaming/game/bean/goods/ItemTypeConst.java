@@ -47,4 +47,7 @@ public abstract class ItemTypeConst {
         this.cfgId = cfgId;
     }
 
+    @Override public String toString() {
+        return "ItemTypeConst{type=%d, subType=%d, cfgId=%d}".formatted(type, subType, cfgId);
+    }
 }

@@ -3,7 +3,6 @@ package wxdgaming.spring.boot.net;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -22,14 +21,17 @@ import wxdgaming.spring.boot.net.server.SocketServer;
  * @version 2025-02-13 09:45
  **/
 @Getter
+@ComponentScan
 @Component
 @EnableConfigurationProperties(SocketProperties.class)
 public class SocketConfiguration implements InitPrint {
 
+    private final CoreConfiguration coreConfiguration;
     private final SocketProperties socketProperties;
 
     @Autowired
     public SocketConfiguration(CoreConfiguration coreConfiguration, SocketProperties socketProperties) {
+        this.coreConfiguration = coreConfiguration;
         this.socketProperties = socketProperties;
     }
 

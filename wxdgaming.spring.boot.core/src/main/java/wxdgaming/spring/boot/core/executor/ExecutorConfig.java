@@ -1,6 +1,5 @@
 package wxdgaming.spring.boot.core.executor;
 
-import com.alibaba.fastjson.annotation.JSONCreator;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,6 +28,6 @@ public class ExecutorConfig extends ObjectBase {
     @JSONField(ordinal = 2)
     private int maxQueueSize;
     @JSONField(ordinal = 3)
-    private QueuePolicyConst queuePolicy;
+    private QueuePolicyConst queuePolicy = QueuePolicyConst.AbortPolicy;
 
 }
