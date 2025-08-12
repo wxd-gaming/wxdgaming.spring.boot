@@ -10,8 +10,8 @@ import wxdgaming.spring.boot.core.lang.ObjectBase;
 /**
  * 原因封装
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-04 09:00
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-04 09:00
  **/
 @Getter
 @Setter

@@ -20,8 +20,8 @@ import java.util.List;
 /**
  * 游戏进程的定时器服务
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-11 20:22
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-11 20:22
  **/
 @Slf4j
 @Service

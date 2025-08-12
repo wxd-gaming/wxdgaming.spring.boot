@@ -8,8 +8,8 @@ import wxdgaming.spring.boot.net.pojo.ProtoBuf2Pojo;
 /**
  * protobuf篡改
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2024-05-27 13:15
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2024-05-27 13:15
  **/
 public class ProtoTest {
 

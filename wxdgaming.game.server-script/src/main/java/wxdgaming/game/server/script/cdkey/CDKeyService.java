@@ -4,7 +4,7 @@ import com.alibaba.fastjson.TypeReference;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import wxdgaming.game.bean.goods.BagChangeArgs4Item;
+import wxdgaming.game.bean.goods.BagChangeDTO4Item;
 import wxdgaming.game.bean.goods.Item;
 import wxdgaming.game.bean.goods.ItemCfg;
 import wxdgaming.game.core.Reason;
@@ -28,8 +28,8 @@ import java.util.List;
 /**
  * cdkey
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-29 11:14
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-29 11:14
  **/
 @Slf4j
 @Getter
@@ -89,7 +89,7 @@ public class CDKeyService {
 
         List<Item> itemList = bagService.newItems(rewards);
 
-        BagChangeArgs4Item rewardItemArgs = BagChangeArgs4Item.builder()
+        BagChangeDTO4Item rewardItemArgs = BagChangeDTO4Item.builder()
                 .setItemList(itemList)
                 .setBagFullSendMail(true)
                 .setBagErrorNoticeClient(false)

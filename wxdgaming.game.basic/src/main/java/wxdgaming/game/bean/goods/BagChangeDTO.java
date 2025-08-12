@@ -10,15 +10,16 @@ import wxdgaming.game.message.bag.BagType;
 /**
  * 背包变更参数变量
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-25 14:12
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-25 14:12
  **/
 @Getter
 @SuperBuilder(setterPrefix = "set")
-public class BagChangeArgs {
+public class BagChangeDTO {
 
     @Builder.Default
     private BagType bagType = BagType.Bag;
+    /** 变更的原因 */
     private ReasonArgs reasonArgs;
     /** 当背包出现异常是否发送提示到客户端，比如背包已满，或者道具不足 ,TODO 当 {@link #bagFullSendMail}为true时，此参数无效 */
     @Builder.Default

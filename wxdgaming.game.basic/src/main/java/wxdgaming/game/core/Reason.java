@@ -3,8 +3,8 @@ package wxdgaming.game.core;
 /**
  * 原因
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-03 20:28
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-03 20:28
  **/
 public enum Reason {
     /** 未知 */

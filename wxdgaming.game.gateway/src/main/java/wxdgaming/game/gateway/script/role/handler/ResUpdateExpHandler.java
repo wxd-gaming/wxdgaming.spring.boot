@@ -8,8 +8,8 @@ import wxdgaming.spring.boot.net.SocketSession;
 /**
  * 更新经验
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: v1.1
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version v1.1
  **/
 @Slf4j
 @Component

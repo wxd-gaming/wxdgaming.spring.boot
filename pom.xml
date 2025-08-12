@@ -24,6 +24,8 @@
         <module>wxdgaming.game.robot</module>
         <module>wxdgaming.game.server</module>
         <module>wxdgaming.game.server-script</module>
+        <module>wxdgaming.logbus</module>
+        <module>wxdgaming.logserver</module>
         <module>wxdgaming.spring.boot.batis</module>
         <module>wxdgaming.spring.boot.batis.mapdb</module>
         <module>wxdgaming.spring.boot.batis.sql</module>
@@ -35,8 +37,6 @@
         <module>wxdgaming.spring.boot.net.httpclient</module>
         <module>wxdgaming.spring.boot.net.server</module>
         <module>wxdgaming.spring.boot.scheduled</module>
-        <module>wxdgaming.spring.logbus</module>
-        <module>wxdgaming.spring.logserver</module>
         <module>wxdgaming.test</module>
     </modules>
 

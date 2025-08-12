@@ -23,8 +23,8 @@ import java.util.TreeMap;
 /**
  * 属性计算器
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-05-09 19:14
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-05-09 19:14
  **/
 @Slf4j
 @Service

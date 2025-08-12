@@ -4,15 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import wxdgaming.game.bean.goods.Item;
 import wxdgaming.game.bean.goods.ItemTypeConst;
-import wxdgaming.game.server.bean.bag.BagChangesContext;
+import wxdgaming.game.server.bean.bag.BagChangesCourse;
 import wxdgaming.game.server.bean.bag.ItemBag;
 import wxdgaming.game.server.bean.role.Player;
 
 /**
  * 公会货币的获得
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-23 17:35
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-23 17:35
  **/
 @Slf4j
 @Component
@@ -26,7 +26,7 @@ public class GuildCurrencyGainScript extends CurrencyGainScript {
         return super.getCount(player, itemBag, cfgId);
     }
 
-    @Override public boolean gain(BagChangesContext bagChangesContext, Item newItem) {
-        return super.gain(bagChangesContext, newItem);
+    @Override public boolean gain(BagChangesCourse bagChangesCourse, Item newItem) {
+        return super.gain(bagChangesCourse, newItem);
     }
 }

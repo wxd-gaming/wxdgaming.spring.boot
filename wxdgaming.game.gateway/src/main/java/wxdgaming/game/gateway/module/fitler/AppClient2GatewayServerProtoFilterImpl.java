@@ -11,8 +11,8 @@ import wxdgaming.spring.boot.net.pojo.ServerProtoFilter;
 /**
  * 客户端传递到网关
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-05-28 15:19
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-05-28 15:19
  **/
 @Slf4j
 @Component

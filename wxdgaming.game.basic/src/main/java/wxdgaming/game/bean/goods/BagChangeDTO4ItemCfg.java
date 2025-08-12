@@ -8,12 +8,12 @@ import java.util.List;
 /**
  * 背包变更参数变量
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-25 14:12
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-25 14:12
  **/
 @Getter
 @SuperBuilder(setterPrefix = "set")
-public class BagChangeArgs4ItemCfg extends BagChangeArgs {
+public class BagChangeDTO4ItemCfg extends BagChangeDTO {
 
     private List<ItemCfg> itemCfgList;
 

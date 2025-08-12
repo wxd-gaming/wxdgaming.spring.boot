@@ -13,8 +13,8 @@ import wxdgaming.spring.boot.scheduled.ScheduledConfiguration;
 /**
  * 启动器
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-27 11:27
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-27 11:27
  **/
 @ConfigurationPropertiesScan(basePackageClasses = {BootstrapConfig.class})
 @SpringBootApplication(

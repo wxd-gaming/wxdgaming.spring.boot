@@ -19,8 +19,8 @@ import wxdgaming.spring.boot.net.SocketSession;
 import java.util.HashSet;
 
 /**
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-22 11:44
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-22 11:44
  **/
 @Slf4j
 @Service

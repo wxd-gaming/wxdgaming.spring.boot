@@ -17,8 +17,8 @@ import java.util.Map;
 /**
  * 登录接口
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-07 18:41
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-07 18:41
  **/
 @Slf4j
 @RestController

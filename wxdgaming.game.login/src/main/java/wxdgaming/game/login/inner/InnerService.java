@@ -16,8 +16,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * 内网服务
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-10 20:52
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-10 20:52
  **/
 @Slf4j
 @Getter

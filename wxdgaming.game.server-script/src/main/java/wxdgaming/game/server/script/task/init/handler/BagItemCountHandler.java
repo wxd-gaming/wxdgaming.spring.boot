@@ -11,8 +11,8 @@ import wxdgaming.spring.boot.core.lang.condition.ConditionUpdatePolicyConst;
 /**
  * 获取背包道具数量
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-21 20:55
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-21 20:55
  **/
 @Component
 public class BagItemCountHandler implements ConditionInitValueHandler {

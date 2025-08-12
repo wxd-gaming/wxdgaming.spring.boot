@@ -10,8 +10,8 @@ import wxdgaming.spring.boot.net.SocketConfiguration;
 import wxdgaming.spring.boot.scheduled.ScheduledConfiguration;
 
 /**
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-05-27 20:56
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-05-27 20:56
  **/
 @ConfigurationPropertiesScan(basePackageClasses = {ChatBootstrapConfig.class})
 @SpringBootApplication(

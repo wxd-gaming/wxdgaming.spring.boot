@@ -12,8 +12,8 @@ import wxdgaming.game.server.script.role.PlayerService;
 /**
  * 角色等级相关
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-30 09:50
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-30 09:50
  **/
 @Slf4j
 @Component

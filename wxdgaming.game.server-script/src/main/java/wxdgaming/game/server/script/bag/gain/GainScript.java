@@ -9,7 +9,7 @@ import wxdgaming.game.cfg.QItemTable;
 import wxdgaming.game.cfg.bean.QItem;
 import wxdgaming.game.core.ReasonArgs;
 import wxdgaming.game.message.bag.BagType;
-import wxdgaming.game.server.bean.bag.BagChangesContext;
+import wxdgaming.game.server.bean.bag.BagChangesCourse;
 import wxdgaming.game.server.bean.bag.ItemBag;
 import wxdgaming.game.server.bean.bag.ItemGrid;
 import wxdgaming.game.server.bean.role.Player;
@@ -25,8 +25,8 @@ import java.util.List;
 /**
  * 获得道具
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-22 19:13
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-22 19:13
  **/
 @Slf4j
 @Component
@@ -71,11 +71,11 @@ public class GainScript extends HoldRunApplication implements IBagScript {
     }
 
     /** 将道具添加进入背包 */
-    public boolean gain(BagChangesContext bagChangesContext, Item newItem) {
-        Player player = bagChangesContext.getPlayer();
-        BagType bagType = bagChangesContext.getBagType();
-        ItemBag itemBag = bagChangesContext.getItemBag();
-        ReasonArgs reasonArgs = bagChangesContext.getReasonArgs();
+    public boolean gain(BagChangesCourse bagChangesCourse, Item newItem) {
+        Player player = bagChangesCourse.getPlayer();
+        BagType bagType = bagChangesCourse.getBagType();
+        ItemBag itemBag = bagChangesCourse.getItemBag();
+        ReasonArgs reasonArgs = bagChangesCourse.getReasonArgs();
         long count = newItem.getCount();
         /* TODO 叠加 */
         QItem qItem = DataRepository.getIns().dataTable(QItemTable.class, newItem.getCfgId());
@@ -106,7 +106,7 @@ public class GainScript extends HoldRunApplication implements IBagScript {
                         );
                         count = 0;
                     }
-                    bagChangesContext.addChange(new ItemGrid(i, value));
+                    bagChangesCourse.addChange(new ItemGrid(i, value));
                 }
                 if (count < 1)
                     break;
@@ -124,7 +124,7 @@ public class GainScript extends HoldRunApplication implements IBagScript {
                     "背包变更：{}, {}, 道具新增, 格子：{}, {}, count={}, {}",
                     player, bagType, itemGrid.getGrid(), newItem.toName(), newItem.getCount(), reasonArgs
             );
-            bagChangesContext.addChange(itemGrid);
+            bagChangesCourse.addChange(itemGrid);
         }
         return true;
     }

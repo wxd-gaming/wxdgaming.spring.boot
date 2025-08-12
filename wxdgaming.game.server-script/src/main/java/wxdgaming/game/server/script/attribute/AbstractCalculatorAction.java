@@ -10,8 +10,8 @@ import wxdgaming.spring.boot.excel.store.DataRepository;
 /**
  * 计算器
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-05-09 19:29
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-05-09 19:29
  **/
 @Slf4j
 public abstract class AbstractCalculatorAction {

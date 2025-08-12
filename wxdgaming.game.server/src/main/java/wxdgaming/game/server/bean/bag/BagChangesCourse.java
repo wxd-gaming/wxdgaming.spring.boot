@@ -2,22 +2,22 @@ package wxdgaming.game.server.bean.bag;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import wxdgaming.spring.boot.core.util.AssertUtil;
 import wxdgaming.game.core.ReasonArgs;
 import wxdgaming.game.message.bag.BagType;
 import wxdgaming.game.message.bag.ResUpdateBagInfo;
 import wxdgaming.game.server.bean.role.Player;
+import wxdgaming.spring.boot.core.util.AssertUtil;
 
 import java.util.HashSet;
 
 /**
- * 背包操作上下文持有
+ * 背包变更操作过程
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-05 19:20
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-05 19:20
  **/
 @Getter
-public class BagChangesContext {
+public class BagChangesCourse {
 
     final Player player;
     final BagType bagType;
@@ -26,7 +26,7 @@ public class BagChangesContext {
     @Getter(AccessLevel.PRIVATE) final ResUpdateBagInfo resUpdateBagInfo;
     final HashSet<ItemGrid> changeItems = new HashSet<>();
 
-    public BagChangesContext(Player player, BagType bagType, ItemBag itemBag, ReasonArgs reasonArgs) {
+    public BagChangesCourse(Player player, BagType bagType, ItemBag itemBag, ReasonArgs reasonArgs) {
         this.player = player;
         this.bagType = bagType;
         this.itemBag = itemBag;

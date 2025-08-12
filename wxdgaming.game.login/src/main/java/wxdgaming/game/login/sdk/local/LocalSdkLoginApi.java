@@ -13,8 +13,8 @@ import wxdgaming.spring.boot.core.util.GlobalUtil;
 /**
  * 本地服
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-07 18:26
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-07 18:26
  **/
 @Slf4j
 @Service

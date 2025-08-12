@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="LogServerApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-    <module name="wxdgaming.spring.logserver" />
+    <module name="wxdgaming.logserver" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="wxdgaming.spring.logserver.LogServerApplication" />
     <extension name="coverage">
       <pattern>

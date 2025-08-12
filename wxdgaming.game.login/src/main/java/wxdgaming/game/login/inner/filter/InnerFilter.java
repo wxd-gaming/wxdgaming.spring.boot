@@ -16,8 +16,8 @@ import wxdgaming.spring.boot.core.util.Md5Util;
 /**
  * 拦截器
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-11 15:20
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-11 15:20
  **/
 @Slf4j
 @Component

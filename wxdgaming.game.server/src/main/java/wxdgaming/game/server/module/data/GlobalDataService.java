@@ -21,8 +21,8 @@ import java.util.List;
 /**
  * 本服的全局数据服务
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-30 11:05
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-30 11:05
  **/
 @Slf4j
 @Getter

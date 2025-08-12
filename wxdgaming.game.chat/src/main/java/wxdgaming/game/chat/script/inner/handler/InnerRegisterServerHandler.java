@@ -11,8 +11,8 @@ import wxdgaming.spring.boot.net.ann.ProtoRequest;
 /**
  * 注册服务
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: v1.1
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version v1.1
  **/
 @Slf4j
 @Component

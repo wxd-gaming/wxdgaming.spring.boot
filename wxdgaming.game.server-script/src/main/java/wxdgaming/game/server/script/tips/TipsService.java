@@ -17,8 +17,8 @@ import java.util.List;
 /**
  * 提示
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-27 11:02
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-27 11:02
  **/
 @Slf4j
 @Service

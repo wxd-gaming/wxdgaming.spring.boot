@@ -9,8 +9,8 @@ import wxdgaming.spring.boot.batis.ann.DbTable;
 /**
  * 登录数据
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-07 18:29
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-07 18:29
  **/
 @Getter
 @Setter

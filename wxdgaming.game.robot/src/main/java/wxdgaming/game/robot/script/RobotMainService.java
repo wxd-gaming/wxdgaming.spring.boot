@@ -32,8 +32,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * socket
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-27 13:20
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-27 13:20
  **/
 @Slf4j
 @Getter

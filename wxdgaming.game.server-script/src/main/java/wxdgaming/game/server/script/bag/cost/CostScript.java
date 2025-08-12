@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import wxdgaming.game.bean.goods.Item;
 import wxdgaming.game.cfg.bean.QItem;
 import wxdgaming.game.message.bag.BagType;
-import wxdgaming.game.server.bean.bag.BagChangesContext;
+import wxdgaming.game.server.bean.bag.BagChangesCourse;
 import wxdgaming.game.server.bean.bag.ItemBag;
 import wxdgaming.game.server.bean.bag.ItemGrid;
 import wxdgaming.game.server.bean.role.Player;
@@ -22,8 +22,8 @@ import java.util.List;
 /**
  * 背包变更
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-22 19:14
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-22 19:14
  **/
 @Slf4j
 @Component
@@ -33,9 +33,9 @@ public class CostScript extends HoldRunApplication implements IBagScript {
     @Autowired protected PlayerService playerService;
     @Autowired protected BagService bagService;
 
-    public void cost(Player player, BagChangesContext bagChangesContext, QItem qItem, long count) {
-        BagType bagType = bagChangesContext.getBagType();
-        ItemBag itemBag = bagChangesContext.getItemBag();
+    public void cost(Player player, BagChangesCourse bagChangesCourse, QItem qItem, long count) {
+        BagType bagType = bagChangesCourse.getBagType();
+        ItemBag itemBag = bagChangesCourse.getItemBag();
         List<ItemGrid> itemGridList = itemBag.itemGridListByCfgId(qItem.getId());
         itemGridList.sort((itemGrid1, itemGrid2) -> {
             Item o1 = itemGrid1.getItem();
@@ -62,18 +62,18 @@ public class CostScript extends HoldRunApplication implements IBagScript {
                 if (hasNum <= count) {
                     log.info(
                             "背包变更：{}, {}, 道具扣除, 格子：{}, {}, {}, 从背包移除, {}",
-                            player, bagType, itemGrid.getGrid(), item.toName(), item.getCount(), bagChangesContext.getReasonArgs()
+                            player, bagType, itemGrid.getGrid(), item.toName(), item.getCount(), bagChangesCourse.getReasonArgs()
                     );
                     itemBag.remove(itemGrid);
-                    bagChangesContext.addDel(itemGrid);
+                    bagChangesCourse.addDel(itemGrid);
                     count -= hasNum;
                 } else {
                     /*正常扣除*/
                     item.setCount(hasNum - count);
-                    bagChangesContext.addChange(itemGrid);
+                    bagChangesCourse.addChange(itemGrid);
                     log.info(
                             "背包变更：{}, {}, 道具扣除, 格子：{}, {}, {}-{}={}, {}",
-                            player, bagType, itemGrid.getGrid(), item.toName(), hasNum, count, item.getCount(), bagChangesContext.getReasonArgs()
+                            player, bagType, itemGrid.getGrid(), item.toName(), hasNum, count, item.getCount(), bagChangesCourse.getReasonArgs()
                     );
                     count = 0;
                 }
@@ -85,24 +85,24 @@ public class CostScript extends HoldRunApplication implements IBagScript {
         AssertUtil.assertTrue(count <= 0, "背包变更：%s, %s, %s, 数量不足", player, bagType, qItem.getToName());
     }
 
-    public void cost(Player player, BagChangesContext bagChangesContext, ItemGrid itemGrid, long count) {
-        ItemBag itemBag = bagChangesContext.getItemBag();
+    public void cost(Player player, BagChangesCourse bagChangesCourse, ItemGrid itemGrid, long count) {
+        ItemBag itemBag = bagChangesCourse.getItemBag();
         Item item = itemGrid.getItem();
         long hasNum = item.getCount();
         if (hasNum <= count) {
             log.info(
                     "背包变更：{}, {}, 道具扣除, 格子：{}, {}, {}, 从背包移除, {}",
-                    player, bagChangesContext.getBagType(), itemGrid.getGrid(), item.toName(), item.getCount(), bagChangesContext.getBagType()
+                    player, bagChangesCourse.getBagType(), itemGrid.getGrid(), item.toName(), item.getCount(), bagChangesCourse.getBagType()
             );
             itemBag.remove(itemGrid);
-            bagChangesContext.addDel(itemGrid);
+            bagChangesCourse.addDel(itemGrid);
         } else {
             /*正常扣除*/
             item.setCount(hasNum - count);
-            bagChangesContext.addChange(itemGrid);
+            bagChangesCourse.addChange(itemGrid);
             log.info(
                     "背包变更：{}, {}, 道具扣除, 格子：{}, {}, {}-{}={}, {}",
-                    player, bagChangesContext.getBagType(), itemGrid.getGrid(), item.toName(), hasNum, count, item.getCount(), bagChangesContext.getBagType()
+                    player, bagChangesCourse.getBagType(), itemGrid.getGrid(), item.toName(), hasNum, count, item.getCount(), bagChangesCourse.getBagType()
             );
         }
     }

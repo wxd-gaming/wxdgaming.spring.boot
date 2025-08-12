@@ -13,8 +13,8 @@ import wxdgaming.spring.boot.core.format.HexId;
 /**
  * 登录服务
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-07 18:37
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-07 18:37
  **/
 @Slf4j
 @Getter

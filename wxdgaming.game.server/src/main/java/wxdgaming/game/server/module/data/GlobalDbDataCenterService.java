@@ -13,8 +13,8 @@ import wxdgaming.spring.boot.core.util.SingletonLockUtil;
 /**
  * 全服的全局数据，公共数据
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-23 16:34
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-23 16:34
  **/
 @Slf4j
 @Getter

@@ -27,8 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 数据中心
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-23 16:34
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-23 16:34
  **/
 @Slf4j
 @Getter

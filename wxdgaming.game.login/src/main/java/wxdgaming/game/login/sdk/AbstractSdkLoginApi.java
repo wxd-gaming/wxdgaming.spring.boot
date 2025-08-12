@@ -19,8 +19,8 @@ import java.util.function.Supplier;
 /**
  * 渠道参数
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-07 18:22
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-07 18:22
  **/
 public abstract class AbstractSdkLoginApi {
 

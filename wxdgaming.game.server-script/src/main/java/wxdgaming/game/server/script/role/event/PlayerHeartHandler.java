@@ -17,8 +17,8 @@ import java.util.concurrent.BlockingQueue;
 /**
  * 角色的心跳执行
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-05-08 13:26
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-05-08 13:26
  **/
 @Slf4j
 @Component

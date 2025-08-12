@@ -25,8 +25,8 @@ import java.util.List;
 /**
  * 任务模块
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-21 20:43
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-21 20:43
  **/
 @Slf4j
 @Service

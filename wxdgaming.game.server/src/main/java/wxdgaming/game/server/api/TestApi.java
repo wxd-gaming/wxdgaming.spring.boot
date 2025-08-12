@@ -14,8 +14,8 @@ import wxdgaming.spring.boot.scheduled.ann.Scheduled;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-02-14 19:22
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-02-14 19:22
  **/
 @Slf4j
 @Component

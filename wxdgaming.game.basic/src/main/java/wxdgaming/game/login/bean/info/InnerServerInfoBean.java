@@ -9,8 +9,8 @@ import wxdgaming.spring.boot.batis.ann.DbTable;
 /**
  * 内置的服务器信息
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-11 15:23
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-11 15:23
  **/
 @Getter
 @Setter

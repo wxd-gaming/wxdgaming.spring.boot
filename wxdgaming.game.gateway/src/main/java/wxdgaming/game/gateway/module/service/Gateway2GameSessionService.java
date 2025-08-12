@@ -34,8 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 网关和游戏服之间的连接管理服务
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-05-28 13:45
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-05-28 13:45
  **/
 @Slf4j
 @Getter

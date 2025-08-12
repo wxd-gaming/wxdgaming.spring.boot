@@ -12,8 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 渠道参数
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-26 09:43
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-26 09:43
  **/
 @Getter
 @Setter(AccessLevel.PRIVATE)

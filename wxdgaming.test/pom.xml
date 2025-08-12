@@ -9,7 +9,7 @@
         <version>1.0.1</version>
     </parent>
 
-    <artifactId>test</artifactId>
+    <artifactId>wxdgaming.test</artifactId>
 
 
     <dependencies>

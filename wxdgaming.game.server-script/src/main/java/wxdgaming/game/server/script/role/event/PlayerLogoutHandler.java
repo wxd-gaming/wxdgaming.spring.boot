@@ -13,8 +13,8 @@ import wxdgaming.spring.boot.core.executor.ThreadContext;
 /**
  * 角色创建事件
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-04-27 19:51
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-04-27 19:51
  **/
 @Slf4j
 @Component

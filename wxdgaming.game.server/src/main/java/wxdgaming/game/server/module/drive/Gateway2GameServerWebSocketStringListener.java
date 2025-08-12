@@ -7,8 +7,8 @@ import wxdgaming.spring.boot.net.server.IServerWebSocketStringListener;
 
 /**
  * 驱动
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-02-17 21:24
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-02-17 21:24
  **/
 @Slf4j
 @Component

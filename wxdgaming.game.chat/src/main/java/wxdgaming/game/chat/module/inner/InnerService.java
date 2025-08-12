@@ -9,8 +9,8 @@ import wxdgaming.spring.boot.net.SocketSession;
 /**
  * 内嵌服务
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-06-09 14:18
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-06-09 14:18
  **/
 @Slf4j
 @Component

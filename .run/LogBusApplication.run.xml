@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="LogBusApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-    <module name="wxdgaming.spring.logbus" />
+    <module name="wxdgaming.logbus" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="wxdgaming.spring.logbus.LogBusApplication" />
     <extension name="coverage">
       <pattern>

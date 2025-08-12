@@ -13,8 +13,8 @@ import wxdgaming.spring.boot.net.httpclient.HttpClientConfiguration;
 import wxdgaming.spring.boot.scheduled.ScheduledConfiguration;
 
 /**
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-05-27 20:56
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-05-27 20:56
  **/
 @Slf4j
 @ConfigurationPropertiesScan(basePackageClasses = {GatewayBootstrapConfig.class})

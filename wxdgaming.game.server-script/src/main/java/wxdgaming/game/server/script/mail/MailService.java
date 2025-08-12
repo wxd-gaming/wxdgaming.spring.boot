@@ -21,8 +21,8 @@ import java.util.List;
 /**
  * 邮件
  *
- * @author: wxd-gaming(無心道, 15388152619)
- * @version: 2025-05-12 16:22
+ * @author wxd-gaming(無心道, 15388152619)
+ * @version 2025-05-12 16:22
  **/
 @Slf4j
 @Component
