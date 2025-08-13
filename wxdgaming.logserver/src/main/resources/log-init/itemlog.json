@@ -30,6 +30,16 @@
       "fieldType": "string"
     },
     {
+      "fieldName": "changeType",
+      "fieldComment": "分组",
+      "fieldType": "string"
+    },
+    {
+      "fieldName": "bagType",
+      "fieldComment": "背包类型",
+      "fieldType": "string"
+    },
+    {
       "fieldName": "itemCfgId",
       "fieldComment": "道具id",
       "fieldType": "int"
@@ -57,6 +67,11 @@
     {
       "fieldName": "reason",
       "fieldComment": "原因",
+      "fieldType": "string"
+    },
+    {
+      "fieldName": "reasonStr",
+      "fieldComment": "详情",
       "fieldType": "string"
     }
   ]

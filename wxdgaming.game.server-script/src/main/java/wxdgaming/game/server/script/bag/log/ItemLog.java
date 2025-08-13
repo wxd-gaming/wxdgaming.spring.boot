@@ -24,9 +24,12 @@ public class ItemLog extends AbstractRoleLog {
     private long oldNum;
     private long change;
     private long newNum;
+    /** 原因 */
     private String reason;
+    /** 详情 */
+    private String reasonStr;
 
-    public ItemLog(Player player, String bagType, String changeType, int itemCfgId, String itemName, long oldNum, long change, long newNum, String reason) {
+    public ItemLog(Player player, String bagType, String changeType, int itemCfgId, String itemName, long oldNum, long change, long newNum, String reason, String reasonStr) {
         super(player);
         this.bagType = bagType;
         this.changeType = changeType;
@@ -36,6 +39,7 @@ public class ItemLog extends AbstractRoleLog {
         this.change = change;
         this.newNum = newNum;
         this.reason = reason;
+        this.reasonStr = reasonStr;
     }
 
     @Override public String logType() {

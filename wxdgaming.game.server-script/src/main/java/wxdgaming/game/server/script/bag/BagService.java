@@ -16,11 +16,11 @@ import wxdgaming.game.server.event.OnCreateRole;
 import wxdgaming.game.server.event.OnLogin;
 import wxdgaming.game.server.event.OnLoginBefore;
 import wxdgaming.game.server.module.data.DataCenterService;
+import wxdgaming.game.server.module.slog.SLogService;
 import wxdgaming.game.server.script.bag.cost.CostScript;
 import wxdgaming.game.server.script.bag.gain.GainScript;
 import wxdgaming.game.server.script.bag.log.ItemLog;
 import wxdgaming.game.server.script.bag.use.UseItemAction;
-import wxdgaming.game.server.module.slog.SLogService;
 import wxdgaming.game.server.script.mail.MailService;
 import wxdgaming.game.server.script.tips.TipsService;
 import wxdgaming.spring.boot.core.HoldRunApplication;
@@ -187,7 +187,13 @@ public class BagService extends HoldRunApplication implements InitPrint {
                 }
                 log.info("获得道具：{}, {}, {} {}+{}={}, {}", player, bagType, qItem.getToName(), oldCount, change, newCount, bagChangeDTO);
 
-                ItemLog itemLog = new ItemLog(player, bagType.name(), "获得", cfgId, qItem.getName(), oldCount, change, newCount, bagChangeDTO.getReasonArgs().getReasonText());
+                ItemLog itemLog = new ItemLog(player, bagType.name(),
+                        "获得",
+                        cfgId, qItem.getName(),
+                        oldCount, change, newCount,
+                        bagChangeDTO.getReasonArgs().getReason().name(),
+                        bagChangeDTO.getReasonArgs().getReasonText()
+                );
                 logService.addLog(itemLog);
             }
 
@@ -238,12 +244,12 @@ public class BagService extends HoldRunApplication implements InitPrint {
     }
 
     /** 调用之前请使用 {@link BagService#checkCost(Player, BagChangeDTO4ItemCfg)} 函数 是否够消耗 */
-    public void cost(Player player, BagChangeDTO4ItemCfg bagChangeDTO4ItemCfg) {
-        BagType bagType = bagChangeDTO4ItemCfg.getBagType();
+    public void cost(Player player, BagChangeDTO4ItemCfg bagChangeDTO) {
+        BagType bagType = bagChangeDTO.getBagType();
         ItemBag itemBag = player.getBagPack().itemBag(bagType);
-        BagChangesCourse bagChangesCourse = new BagChangesCourse(player, bagType, itemBag, bagChangeDTO4ItemCfg.getReasonArgs());
+        BagChangesCourse bagChangesCourse = new BagChangesCourse(player, bagType, itemBag, bagChangeDTO.getReasonArgs());
 
-        for (ItemCfg itemCfg : bagChangeDTO4ItemCfg.getItemCfgList()) {
+        for (ItemCfg itemCfg : bagChangeDTO.getItemCfgList()) {
             int cfgId = itemCfg.getCfgId();
             final long change = itemCfg.getNum();
 
@@ -259,9 +265,15 @@ public class BagService extends HoldRunApplication implements InitPrint {
 
             costScript.cost(player, bagChangesCourse, qItem, change);
             long newCount = gainScript.getCount(player, itemBag, cfgId);
-            log.info("消耗道具：{}, {}, {} {}-{}={}, {}", player, bagType, qItem.getToName(), oldCount, change, newCount, bagChangeDTO4ItemCfg.getReasonArgs());
+            log.info("消耗道具：{}, {}, {} {}-{}={}, {}", player, bagType, qItem.getToName(), oldCount, change, newCount, bagChangeDTO.getReasonArgs());
 
-            ItemLog itemLog = new ItemLog(player, bagType.name(), "消耗", cfgId, qItem.getName(), oldCount, change, newCount, bagChangeDTO4ItemCfg.getReasonArgs().getReasonText());
+            ItemLog itemLog = new ItemLog(player, bagType.name(),
+                    "消耗",
+                    cfgId, qItem.getName(),
+                    oldCount, change, newCount,
+                    bagChangeDTO.getReasonArgs().getReason().name(),
+                    bagChangeDTO.getReasonArgs().getReasonText()
+            );
             logService.addLog(itemLog);
         }
         player.write(bagChangesCourse.toResUpdateBagInfo());

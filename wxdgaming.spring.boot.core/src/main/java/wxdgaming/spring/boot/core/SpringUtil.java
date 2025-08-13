@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -85,6 +86,13 @@ public class SpringUtil implements InitPrint {
         return false;
     }
 
+    public static String readBody(HttpServletRequest request) throws IOException {
+        if (request instanceof ContentCachingRequestWrapper wrapper) {
+            return new String(wrapper.getContentAsByteArray(), wrapper.getCharacterEncoding());
+        }
+        return IOUtils.toString(request.getInputStream(), request.getCharacterEncoding());
+    }
+
     public static JSONObject convertParameter(HttpServletRequest request) throws IOException {
         JSONObject reqParams = new JSONObject();
         // 处理 POST JSON 请求体
@@ -101,9 +109,6 @@ public class SpringUtil implements InitPrint {
             String name = parameterNames.nextElement();
             reqParams.put(name, request.getParameter(name));
         }
-
-
-
         return reqParams;
     }
 

@@ -23,6 +23,16 @@
       "fieldName": "account",
       "fieldComment": "账号",
       "fieldType": "string"
+    },
+    {
+      "fieldName": "ip",
+      "fieldComment": "ip",
+      "fieldType": "string"
+    },
+    {
+      "fieldName": "clientData",
+      "fieldComment": "客户端附加",
+      "fieldType": "string"
     }
   ]
 }
