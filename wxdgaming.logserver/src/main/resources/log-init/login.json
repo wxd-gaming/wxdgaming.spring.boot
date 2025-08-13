@@ -1,6 +1,7 @@
 {
-  "logName": "login",
+  "logName": "accountloginlog",
   "logComment": "登录日志",
+  "sort": "1-1",
   "partition": true,
   "fieldList": [
     {

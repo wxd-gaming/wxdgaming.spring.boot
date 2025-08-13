@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import wxdgaming.spring.boot.batis.sql.SqlConfig;
 import wxdgaming.spring.boot.core.CoreConfiguration;
@@ -23,7 +22,6 @@ import wxdgaming.spring.boot.core.InitPrint;
 
 @Getter
 @Setter
-@ComponentScan(basePackageClasses = {CoreConfiguration.class})
 @Configuration
 @ConfigurationProperties(prefix = "db.sql")
 @EnableConfigurationProperties
@@ -46,10 +44,10 @@ public class MysqlConfiguration implements InitPrint {
         return new MysqlDataHelper(mysql);
     }
 
-    @Bean("db.sql.mysql-second")
+    @Bean("mysqlSecond")
     @ConditionalOnProperty(name = "db.sql.mysql-second.url")
     public MysqlDataHelper mysqlSecond() {
-        return new MysqlDataHelper(mysql);
+        return new MysqlDataHelper(mysqlSecond);
     }
 
 }

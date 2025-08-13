@@ -21,7 +21,9 @@ import wxdgaming.spring.logserver.bean.LogMappingInfo;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -38,6 +40,7 @@ public class DataCenterService implements InitPrint {
 
     final PgsqlDataHelper sqlDataHelper;
     Map<String, LogMappingInfo> logMappingInfoMap = Map.of();
+    List<LogMappingInfo> logMappingInfoList = List.of();
 
     @Autowired
     public DataCenterService(PgsqlDataHelper sqlDataHelper) {
@@ -67,6 +70,7 @@ public class DataCenterService implements InitPrint {
             checkSLogTable(sqlDataHelper, dbTableMap, tableStructMap, tableMapping, logMappingInfo.isPartition(), tableName, tableComment);
             tmp.put(logMappingInfo.getLogName(), logMappingInfo);
         });
+        logMappingInfoList = tmp.values().stream().sorted(Comparator.comparing(LogMappingInfo::getSort)).toList();
         logMappingInfoMap = tmp;
     }
 

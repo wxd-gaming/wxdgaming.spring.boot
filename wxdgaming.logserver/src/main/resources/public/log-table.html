@@ -37,16 +37,52 @@
             pageView.remoteGetData(urlQuery);
         }
 
+        // 用于显示的格式化版本
+        function formatForDisplay(str) {
+            if (typeof str === "string") {
+                return str;
+            }
+            return JSON.stringify(str, null, 2); // 会保留换行和缩进
+        }
+
+        function formatJsonWithNewlines(obj) {
+            if (typeof obj === 'string') {
+                try {
+                    obj = JSON.parse(obj);
+                } catch (e) {
+                    // 如果解析失败，直接格式化字符串
+                    return obj;
+                }
+            }
+            // 使用2个空格进行缩进，自动包含换行符
+            return JSON.stringify(obj, null, 2);
+        }
+
+        function escapeJSString(str) {
+            return formatForDisplay(str).replace(/\\/g, "\\\\")
+                .replace(/'/g, "\\'")
+                .replace(/"/g, "\\\"")
+                .replace(/\n/g, "\\n")
+                .replace(/\r/g, "\\r")
+                .replace(/\t/g, "\\t");
+        }
 
         function createRow(index, row) {
             let tr = `<tr>`;
             for (let i = 0; i < pageView.columnNames.length; i++) {
                 let columnName = pageView.columnNames[i];
                 let columnComment = pageView.columnComments[i];
-                tr += `<td ondblclick="wxd.message.alert('${row[columnName]}', '${columnComment}');">${row[columnName]}</td>`;
+                tr += `<td ondblclick="alertShow(this,'${row[columnComment]}');">${row[columnName]}</td>`;
             }
             tr += `</tr>`;
             return tr;
+        }
+
+        function alertShow(self, title) {
+            let content = $(self).text();
+            content = formatJsonWithNewlines(content);
+            console.log(typeof content, content);
+            wxd.message.alert(`<pre>${content}</pre>`, title);
         }
 
         $(() => {

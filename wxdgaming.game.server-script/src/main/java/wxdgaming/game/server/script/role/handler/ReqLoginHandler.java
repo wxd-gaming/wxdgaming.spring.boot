@@ -8,7 +8,9 @@ import wxdgaming.game.server.GameServiceBootstrapConfig;
 import wxdgaming.game.server.bean.ClientSessionMapping;
 import wxdgaming.game.server.module.data.ClientSessionService;
 import wxdgaming.game.server.module.data.DataCenterService;
+import wxdgaming.game.server.module.slog.SLogService;
 import wxdgaming.game.server.script.role.PlayerService;
+import wxdgaming.game.server.script.role.log.AccountLoginSLog;
 import wxdgaming.game.server.script.tips.TipsService;
 import wxdgaming.spring.boot.core.HoldRunApplication;
 import wxdgaming.spring.boot.core.executor.ThreadContext;
@@ -32,17 +34,19 @@ public class ReqLoginHandler extends HoldRunApplication {
     private final ClientSessionService clientSessionService;
     private final PlayerService playerService;
     private final TipsService tipsService;
+    final SLogService sLogService;
 
     public ReqLoginHandler(DataCenterService dataCenterService,
                            ClientSessionService clientSessionService,
                            PlayerService playerService,
                            TipsService tipsService,
-                           GameServiceBootstrapConfig gameServiceBootstrapConfig) {
+                           GameServiceBootstrapConfig gameServiceBootstrapConfig, SLogService sLogService) {
         this.dataCenterService = dataCenterService;
         this.clientSessionService = clientSessionService;
         this.playerService = playerService;
         this.tipsService = tipsService;
         this.gameServiceBootstrapConfig = gameServiceBootstrapConfig;
+        this.sLogService = sLogService;
     }
 
     @ProtoRequest
@@ -74,10 +78,12 @@ public class ReqLoginHandler extends HoldRunApplication {
             clientSessionMapping.setGatewayId(gatewayId);
             clientSessionMapping.setClientSessionId(clientSessionId);
             clientSessionMapping.setClientParams((ArrayList<MapBean>) req.getClientParams());
-
             playerService.sendPlayerList(socketSession, clientSessionId, sid, account);
 
             log.info("登录完成:{}", clientSessionMapping);
+            AccountLoginSLog accountLoginSLog = new AccountLoginSLog(platformUserId, account, platform, null, clientIp, req.getClientParams().toString());
+            sLogService.addLog(accountLoginSLog);
+
         } catch (Exception e) {
             log.error("登录失败 {}", req, e);
             tipsService.tips(socketSession, clientSessionId, "服务器异常");

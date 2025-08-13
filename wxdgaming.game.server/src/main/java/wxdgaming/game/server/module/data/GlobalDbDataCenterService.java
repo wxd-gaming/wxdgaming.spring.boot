@@ -24,7 +24,7 @@ public class GlobalDbDataCenterService {
     final SqlDataHelper globalDbHelper;
     final DataCenterService dataCenterService;
 
-    public GlobalDbDataCenterService(@Qualifier("db.sql.mysql-second") MysqlDataHelper globalDbHelper, DataCenterService dataCenterService) {
+    public GlobalDbDataCenterService(@Qualifier("mysqlSecond") MysqlDataHelper globalDbHelper, DataCenterService dataCenterService) {
         this.globalDbHelper = globalDbHelper;
         this.dataCenterService = dataCenterService;
     }

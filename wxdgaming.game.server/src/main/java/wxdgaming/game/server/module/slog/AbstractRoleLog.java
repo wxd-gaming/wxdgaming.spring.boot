@@ -1,4 +1,4 @@
-package wxdgaming.game.server.script.log;
+package wxdgaming.game.server.module.slog;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

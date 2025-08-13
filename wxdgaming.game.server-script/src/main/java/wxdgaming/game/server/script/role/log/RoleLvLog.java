@@ -13,19 +13,17 @@ import wxdgaming.game.server.module.slog.AbstractRoleLog;
  **/
 @Getter
 @Setter
-public class RoleLoginLog extends AbstractRoleLog {
+public class RoleLvLog extends AbstractRoleLog {
 
-    private String ip;
-    private String clientData;
+    private String reason;
 
-    public RoleLoginLog(Player player, String ip, String clientData) {
+    public RoleLvLog(Player player, String reason) {
         super(player);
-        this.ip = ip;
-        this.clientData = clientData;
+        this.reason = reason;
     }
 
     @Override public String logType() {
-        return "roleloginlog";
+        return "rolelvlog";
     }
 
 }

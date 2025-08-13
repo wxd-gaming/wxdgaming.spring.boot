@@ -31,7 +31,8 @@
     </style>
     <script>
         function changeContent(url) {
-            $('#content_body').attr('data', url);
+            let obj = `<object id="content_body" data="${url}">loading ...</object>`;
+            $('.content').html(obj);
         }
     </script>
 </head>
@@ -43,7 +44,7 @@
             <object data="nav.html">1</object>
         </td>
         <td class="content">
-            <object id="content_body" data="log-table.html?tableName=login">1</object>
+            <object id="content_body">loading ...</object>
         <td>
     </tr>
     </tbody>

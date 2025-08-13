@@ -1,4 +1,4 @@
-package wxdgaming.game.server.script.log;
+package wxdgaming.game.server.module.slog;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,13 +18,13 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 @Slf4j
 @Service
-public class LogService implements InitPrint {
+public class SLogService implements InitPrint {
 
     final GameServiceBootstrapConfig gameServiceBootstrapConfig;
     final LogBusService logBusService;
     final ConcurrentHashMap<String, HexId> logHexIdMap = new ConcurrentHashMap<>();
 
-    public LogService(GameServiceBootstrapConfig gameServiceBootstrapConfig, LogBusService logBusService) {
+    public SLogService(GameServiceBootstrapConfig gameServiceBootstrapConfig, LogBusService logBusService) {
         this.gameServiceBootstrapConfig = gameServiceBootstrapConfig;
         this.logBusService = logBusService;
     }
@@ -39,6 +39,22 @@ public class LogService implements InitPrint {
         logEntity.setCreateTime(System.currentTimeMillis());
         logEntity.setLogType(abstractRoleLog.logType());
         logEntity.getLogData().putAll(abstractRoleLog.toJSONObject());
+
+        abstractRoleLog.setCurSid(gameServiceBootstrapConfig.getSid());
+
+        logBusService.addLog(logEntity);
+    }
+
+    public void addLog(AbstractSLog abstractSLog) {
+        LogEntity logEntity = new LogEntity();
+        logEntity.setUid(newLogId(abstractSLog.logType()));
+        logEntity.setCreateTime(System.currentTimeMillis());
+        logEntity.setLogType(abstractSLog.logType());
+        logEntity.getLogData().putAll(abstractSLog.toJSONObject());
+
+        abstractSLog.setSid(gameServiceBootstrapConfig.getSid());
+        abstractSLog.setCurSid(gameServiceBootstrapConfig.getSid());
+
         logBusService.addLog(logEntity);
     }
 

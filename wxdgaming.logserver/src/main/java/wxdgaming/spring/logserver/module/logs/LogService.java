@@ -14,7 +14,6 @@ import wxdgaming.spring.boot.core.lang.RunResult;
 import wxdgaming.spring.boot.core.timer.MyClock;
 import wxdgaming.spring.boot.core.util.NumberUtil;
 import wxdgaming.spring.logserver.bean.LogEntity;
-import wxdgaming.spring.logserver.bean.LogField;
 import wxdgaming.spring.logserver.bean.LogMappingInfo;
 import wxdgaming.spring.logserver.bean.LogTableContext;
 import wxdgaming.spring.logserver.module.data.DataCenterService;
@@ -22,8 +21,6 @@ import wxdgaming.spring.logserver.module.data.DataCenterService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -67,7 +64,7 @@ public class LogService implements InitPrint {
     }
 
     public List<JSONObject> nav() {
-        return dataCenterService.getLogMappingInfoMap().values().stream()
+        return dataCenterService.getLogMappingInfoList().stream()
                 .map(li -> {
                     JSONObject jsonObject = MapOf.newJSONObject();
                     jsonObject.put("name", li.getLogName());
@@ -78,18 +75,12 @@ public class LogService implements InitPrint {
     }
 
     public List<JSONObject> logTitle(String tableName) {
-        return dataCenterService.getLogMappingInfoMap().values().stream()
-                .filter(li -> li.getLogName().equals(tableName))
-                .mapMulti(new BiConsumer<LogMappingInfo, Consumer<JSONObject>>() {
-                    @Override public void accept(LogMappingInfo li, Consumer<JSONObject> consumer) {
-                        List<LogField> fieldList = li.getFieldList();
-                        for (LogField logField : fieldList) {
-                            JSONObject jsonObject = MapOf.newJSONObject();
-                            jsonObject.put("name", logField.getFieldName());
-                            jsonObject.put("comment", logField.getFieldComment());
-                            consumer.accept(jsonObject);
-                        }
-                    }
+        return dataCenterService.getLogMappingInfoMap().get(tableName).getFieldList().stream()
+                .map(logField -> {
+                    JSONObject jsonObject = MapOf.newJSONObject();
+                    jsonObject.put("name", logField.getFieldName());
+                    jsonObject.put("comment", logField.getFieldComment());
+                    return jsonObject;
                 })
                 .toList();
     }

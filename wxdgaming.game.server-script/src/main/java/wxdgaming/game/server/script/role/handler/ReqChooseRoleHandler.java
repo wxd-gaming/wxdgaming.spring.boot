@@ -14,7 +14,7 @@ import wxdgaming.game.server.event.OnLogout;
 import wxdgaming.game.server.module.data.DataCenterService;
 import wxdgaming.game.server.module.data.GlobalDbDataCenterService;
 import wxdgaming.game.server.module.drive.PlayerDriveService;
-import wxdgaming.game.server.script.log.LogService;
+import wxdgaming.game.server.module.slog.SLogService;
 import wxdgaming.game.server.script.role.log.RoleLoginLog;
 import wxdgaming.spring.boot.core.HoldRunApplication;
 import wxdgaming.spring.boot.core.ann.ThreadParam;
@@ -36,11 +36,11 @@ public class ReqChooseRoleHandler extends HoldRunApplication {
     final DataCenterService dataCenterService;
     final GlobalDbDataCenterService globalDbDataCenterService;
     final PlayerDriveService playerDriveService;
-    final LogService logService;
+    final SLogService logService;
 
     public ReqChooseRoleHandler(DataCenterService dataCenterService,
                                 GlobalDbDataCenterService globalDbDataCenterService,
-                                PlayerDriveService playerDriveService, LogService logService) {
+                                PlayerDriveService playerDriveService, SLogService logService) {
         this.dataCenterService = dataCenterService;
         this.globalDbDataCenterService = globalDbDataCenterService;
         this.playerDriveService = playerDriveService;

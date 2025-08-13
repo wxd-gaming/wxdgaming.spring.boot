@@ -55,6 +55,7 @@ public class RoleEntity extends EntityLongUID {
         name = player.getName();
         account = player.getAccount();
         del = player.isDel();
+        lv = player.getLevel();
         lastLoginTime = player.getOnlineInfo().getLastLoginTime();
         lastLogoutTime = player.getOnlineInfo().getLastLogoutTime();
         totalOnlineMills = player.getOnlineInfo().getOnlineTotalMills();

@@ -1,7 +1,7 @@
 {
-  "logName": "itemlog",
-  "logComment": "背包日志",
-  "sort": "3-1",
+  "logName": "rolelvlog",
+  "logComment": "角色升级日志",
+  "sort": "4-1",
   "partition": true,
   "fieldList": [
     {
@@ -30,29 +30,9 @@
       "fieldType": "string"
     },
     {
-      "fieldName": "itemCfgId",
-      "fieldComment": "道具id",
+      "fieldName": "lv",
+      "fieldComment": "角色等级",
       "fieldType": "int"
-    },
-    {
-      "fieldName": "itemName",
-      "fieldComment": "道具名字",
-      "fieldType": "int"
-    },
-    {
-      "fieldName": "oldNum",
-      "fieldComment": "变更前",
-      "fieldType": "long"
-    },
-    {
-      "fieldName": "change",
-      "fieldComment": "变更量",
-      "fieldType": "long"
-    },
-    {
-      "fieldName": "newNum",
-      "fieldComment": "变更后",
-      "fieldType": "long"
     },
     {
       "fieldName": "reason",

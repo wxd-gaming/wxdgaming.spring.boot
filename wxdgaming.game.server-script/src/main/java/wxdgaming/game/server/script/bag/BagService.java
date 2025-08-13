@@ -20,7 +20,7 @@ import wxdgaming.game.server.script.bag.cost.CostScript;
 import wxdgaming.game.server.script.bag.gain.GainScript;
 import wxdgaming.game.server.script.bag.log.ItemLog;
 import wxdgaming.game.server.script.bag.use.UseItemAction;
-import wxdgaming.game.server.script.log.LogService;
+import wxdgaming.game.server.module.slog.SLogService;
 import wxdgaming.game.server.script.mail.MailService;
 import wxdgaming.game.server.script.tips.TipsService;
 import wxdgaming.spring.boot.core.HoldRunApplication;
@@ -49,9 +49,9 @@ public class BagService extends HoldRunApplication implements InitPrint {
     final TipsService tipsService;
     final DataRepository dataRepository;
     final MailService mailService;
-    final LogService logService;
+    final SLogService logService;
 
-    public BagService(DataCenterService dataCenterService, TipsService tipsService, DataRepository dataRepository, MailService mailService, LogService logService) {
+    public BagService(DataCenterService dataCenterService, TipsService tipsService, DataRepository dataRepository, MailService mailService, SLogService logService) {
         this.dataCenterService = dataCenterService;
         this.tipsService = tipsService;
         this.dataRepository = dataRepository;

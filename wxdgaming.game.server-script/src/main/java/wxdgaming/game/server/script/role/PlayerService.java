@@ -11,7 +11,9 @@ import wxdgaming.game.server.bean.role.Player;
 import wxdgaming.game.server.event.OnLevelUp;
 import wxdgaming.game.server.event.OnTask;
 import wxdgaming.game.server.module.data.DataCenterService;
+import wxdgaming.game.server.module.slog.SLogService;
 import wxdgaming.game.server.script.inner.InnerService;
+import wxdgaming.game.server.script.role.log.RoleLvLog;
 import wxdgaming.spring.boot.core.HoldRunApplication;
 import wxdgaming.spring.boot.core.lang.condition.Condition;
 import wxdgaming.spring.boot.net.SocketSession;
@@ -28,10 +30,12 @@ public class PlayerService extends HoldRunApplication {
 
     final InnerService innerService;
     final DataCenterService dataCenterService;
+    final SLogService slogService;
 
-    public PlayerService(InnerService innerService, DataCenterService dataCenterService) {
+    public PlayerService(InnerService innerService, DataCenterService dataCenterService, SLogService slogService) {
         this.innerService = innerService;
         this.dataCenterService = dataCenterService;
+        this.slogService = slogService;
     }
 
 
@@ -90,6 +94,10 @@ public class PlayerService extends HoldRunApplication {
         runApplication.executorWithMethodAnnotatedIgnoreException(OnTask.class, player, new Condition("level", player.getLevel()));
         /*触发提升等级*/
         runApplication.executorWithMethodAnnotatedIgnoreException(OnTask.class, player, new Condition("levelup", lv));
+
+        RoleLvLog roleLvLog = new RoleLvLog(player, reasonArgs.getReasonText());
+        slogService.addLog(roleLvLog);
+
     }
 
 }

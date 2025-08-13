@@ -18,6 +18,8 @@ import java.util.function.Function;
 @Setter
 public class LogMappingInfo extends ObjectBase {
 
+    private String group = "";
+    private String sort = "1";
     private String logName;
     /** 表注释 */
     private String logComment;
