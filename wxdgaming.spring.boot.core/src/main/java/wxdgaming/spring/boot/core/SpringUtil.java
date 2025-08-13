@@ -90,7 +90,6 @@ public class SpringUtil implements InitPrint {
         // 处理 POST JSON 请求体
         if ("POST".equalsIgnoreCase(request.getMethod()) && request.getContentType().contains("application/json")) {
             ContentCachingRequestWrapper wrapper = (ContentCachingRequestWrapper) request;
-            wrapper.getReader().readLine();
             String body = new String(wrapper.getContentAsByteArray(), wrapper.getCharacterEncoding());
             JSONObject bodyParams = JSONObject.parseObject(body);
             reqParams.putAll(bodyParams);

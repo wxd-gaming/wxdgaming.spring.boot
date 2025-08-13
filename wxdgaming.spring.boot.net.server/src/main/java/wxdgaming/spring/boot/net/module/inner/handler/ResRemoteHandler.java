@@ -8,8 +8,8 @@ import wxdgaming.spring.boot.core.chatset.json.FastJsonUtil;
 import wxdgaming.spring.boot.core.zip.GzipUtil;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.ann.ProtoRequest;
-import wxdgaming.spring.boot.net.module.inner.RpcService;
-import wxdgaming.spring.boot.net.module.inner.message.ResRemote;
+import wxdgaming.spring.boot.net.message.inner.ResRemote;
+import wxdgaming.spring.boot.net.module.rpc.RpcService;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;

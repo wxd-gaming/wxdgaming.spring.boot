@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.net.module.inner;
+package wxdgaming.spring.boot.net.module.rpc;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

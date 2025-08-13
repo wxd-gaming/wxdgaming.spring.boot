@@ -4,11 +4,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import wxdgaming.game.login.AppPlatformParams;
+import wxdgaming.game.login.LoginBootstrapConfig;
 import wxdgaming.game.login.bean.UserData;
 import wxdgaming.game.login.sdk.AbstractSdkLoginApi;
 import wxdgaming.spring.boot.core.chatset.StringUtils;
 import wxdgaming.spring.boot.core.lang.RunResult;
-import wxdgaming.spring.boot.core.util.GlobalUtil;
 
 /**
  * 本地服
@@ -20,13 +20,20 @@ import wxdgaming.spring.boot.core.util.GlobalUtil;
 @Service
 public class LocalSdkLoginApi extends AbstractSdkLoginApi {
 
+    final LoginBootstrapConfig bootstrapConfig;
+
+    public LocalSdkLoginApi(LoginBootstrapConfig bootstrapConfig) {
+        this.bootstrapConfig = bootstrapConfig;
+    }
+
+
     @Override public AppPlatformParams.Platform platform() {
         return AppPlatformParams.Platform.LOCAL;
     }
 
     @Override public RunResult login(HttpServletRequest request, AppPlatformParams appPlatformParams) {
 
-        if (!GlobalUtil.DEBUG.get()) {
+        if (!bootstrapConfig.isDebug()) {
             return RunResult.fail("not debug ban login");
         }
 

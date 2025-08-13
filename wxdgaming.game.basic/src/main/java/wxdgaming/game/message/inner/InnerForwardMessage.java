@@ -1,16 +1,18 @@
 package  wxdgaming.game.message.inner;
 
 import io.protostuff.Tag;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
-import wxdgaming.spring.boot.core.ann.Comment;
-import wxdgaming.spring.boot.net.pojo.PojoBase;
-
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import wxdgaming.spring.boot.core.ann.Comment;
+import wxdgaming.spring.boot.core.collection.MapOf;
+import wxdgaming.spring.boot.net.pojo.PojoBase;
 
 
 /** 请求转发消息 */
@@ -18,7 +20,9 @@ import java.util.Map;
 @Setter
 @Accessors(chain = true)
 @Comment("请求转发消息")
-public class InnerForwardMessage extends PojoBase {
+public class InnerForwardMessage extends PojoBase implements Serializable {
+
+    @Serial private static final long serialVersionUID = 1L;
 
     /** 消息ID */
     public static int _msgId() {

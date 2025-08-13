@@ -1,4 +1,4 @@
-package  wxdgaming.spring.boot.net.module.inner.message;
+package  wxdgaming.spring.boot.net.message.inner;
 
 import io.protostuff.Tag;
 import java.io.Serial;
@@ -20,13 +20,13 @@ import wxdgaming.spring.boot.net.pojo.PojoBase;
 @Setter
 @Accessors(chain = true)
 @Comment("执行同步等待消息")
-public class ResRemote extends PojoBase implements Serializable {
+public class ReqRemote extends PojoBase implements Serializable {
 
     @Serial private static final long serialVersionUID = 1L;
 
     /** 消息ID */
     public static int _msgId() {
-        return 65602206;
+        return 57643521;
     }
 
     /** 消息ID */
@@ -39,6 +39,8 @@ public class ResRemote extends PojoBase implements Serializable {
     @Tag(1) private long uid;
     /** 用于验证的消息 */
     @Tag(2) private String token;
+    /** 执行的命令 */
+    @Tag(3) private String cmd;
     /** 1表示压缩过 */
     @Tag(4) private int gzip;
     /** 用JsonObject来解析 */

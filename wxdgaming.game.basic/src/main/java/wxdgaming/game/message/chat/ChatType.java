@@ -1,11 +1,18 @@
 package  wxdgaming.game.message.chat;
 
 import io.protostuff.Tag;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import wxdgaming.spring.boot.core.ann.Comment;
 import wxdgaming.spring.boot.core.collection.MapOf;
-
-import java.util.Map;
+import wxdgaming.spring.boot.net.pojo.PojoBase;
 
 
 /** 导出包名 */

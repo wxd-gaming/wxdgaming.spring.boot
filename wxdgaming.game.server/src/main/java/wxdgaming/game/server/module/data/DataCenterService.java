@@ -11,7 +11,6 @@ import wxdgaming.game.server.api.role.impl.DatabaseGetPlayerStrategy;
 import wxdgaming.game.server.api.role.impl.RpcGetPlayerStrategy;
 import wxdgaming.game.server.bean.role.Player;
 import wxdgaming.game.server.bean.role.RoleEntity;
-import wxdgaming.spring.boot.batis.sql.SqlDataHelper;
 import wxdgaming.spring.boot.batis.sql.SqlQueryResult;
 import wxdgaming.spring.boot.batis.sql.mysql.MysqlDataHelper;
 import wxdgaming.spring.boot.core.HoldRunApplication;
@@ -19,7 +18,7 @@ import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.collection.concurrent.ConcurrentTable;
 import wxdgaming.spring.boot.core.format.HexId;
 import wxdgaming.spring.boot.core.keywords.KeywordsMapping;
-import wxdgaming.spring.boot.net.module.inner.RpcService;
+import wxdgaming.spring.boot.net.module.rpc.RpcService;
 
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;

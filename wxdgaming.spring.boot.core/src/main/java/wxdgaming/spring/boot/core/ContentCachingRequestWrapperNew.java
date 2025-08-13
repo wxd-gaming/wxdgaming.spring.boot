@@ -5,9 +5,12 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -41,6 +44,34 @@ public class ContentCachingRequestWrapperNew extends ContentCachingRequestWrappe
 
         //用缓存流构建一个新的输入流
         return new ServletInputStreamNew(super.getContentAsByteArray());
+    }
+
+    @Override public BufferedReader getReader() throws IOException {
+        return super.getReader();
+    }
+
+    @Override public String getParameter(String name) {
+        return super.getParameter(name);
+    }
+
+    @Override public Map<String, String[]> getParameterMap() {
+        return super.getParameterMap();
+    }
+
+    @Override public Enumeration<String> getParameterNames() {
+        return super.getParameterNames();
+    }
+
+    @Override public String[] getParameterValues(String name) {
+        return super.getParameterValues(name);
+    }
+
+    @Override public byte[] getContentAsByteArray() {
+        return super.getContentAsByteArray();
+    }
+
+    @Override public String getContentAsString() {
+        return super.getContentAsString();
     }
 
     //参考自 DelegatingServletInputStream

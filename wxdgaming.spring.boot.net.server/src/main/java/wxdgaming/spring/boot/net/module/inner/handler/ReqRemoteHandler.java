@@ -10,8 +10,8 @@ import wxdgaming.spring.boot.core.lang.RunResult;
 import wxdgaming.spring.boot.core.zip.GzipUtil;
 import wxdgaming.spring.boot.net.SocketSession;
 import wxdgaming.spring.boot.net.ann.ProtoRequest;
-import wxdgaming.spring.boot.net.module.inner.*;
-import wxdgaming.spring.boot.net.module.inner.message.ReqRemote;
+import wxdgaming.spring.boot.net.message.inner.ReqRemote;
+import wxdgaming.spring.boot.net.module.rpc.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;

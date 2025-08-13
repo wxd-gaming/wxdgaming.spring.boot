@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.net.module.inner;
+package wxdgaming.spring.boot.net.module.rpc;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
@@ -12,8 +12,8 @@ import wxdgaming.spring.boot.core.format.HexId;
 import wxdgaming.spring.boot.core.util.Md5Util;
 import wxdgaming.spring.boot.core.zip.GzipUtil;
 import wxdgaming.spring.boot.net.SocketSession;
-import wxdgaming.spring.boot.net.module.inner.message.ReqRemote;
-import wxdgaming.spring.boot.net.module.inner.message.ResRemote;
+import wxdgaming.spring.boot.net.message.inner.ReqRemote;
+import wxdgaming.spring.boot.net.message.inner.ResRemote;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;

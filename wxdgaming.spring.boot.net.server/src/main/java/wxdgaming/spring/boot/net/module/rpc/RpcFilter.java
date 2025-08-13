@@ -1,4 +1,4 @@
-package wxdgaming.spring.boot.net.module.inner;
+package wxdgaming.spring.boot.net.module.rpc;
 
 /**
  * http 请求接口过滤器

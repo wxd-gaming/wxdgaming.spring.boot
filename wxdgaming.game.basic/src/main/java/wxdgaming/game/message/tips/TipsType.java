@@ -1,11 +1,18 @@
-package wxdgaming.game.message.tips;
+package  wxdgaming.game.message.tips;
 
 import io.protostuff.Tag;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import wxdgaming.spring.boot.core.ann.Comment;
 import wxdgaming.spring.boot.core.collection.MapOf;
-
-import java.util.Map;
+import wxdgaming.spring.boot.net.pojo.PojoBase;
 
 
 /** 导出包名 */
@@ -13,16 +20,16 @@ import java.util.Map;
 @Comment("导出包名")
 public enum TipsType {
 
-    /** 普通提示 */
+    /**  普通提示 */
     @Tag(0)
     TIP_TYPE_NONE(0, " 普通提示"),
-    /** 错误提示 */
+    /**  错误提示 */
     @Tag(1)
     TIP_TYPE_ERROR(1, " 错误提示"),
-    /** 成功提示 */
+    /**  成功提示 */
     @Tag(2)
     TIP_TYPE_SUCCESS(2, " 成功提示"),
-    /** 警告提示 */
+    /**  警告提示 */
     @Tag(3)
     TIP_TYPE_WARNING(3, " 警告提示"),
 

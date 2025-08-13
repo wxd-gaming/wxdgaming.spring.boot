@@ -24,7 +24,7 @@ public class ProtoTest {
                 "src/main/java",
                 "wxdgaming.spring.boot.net.module",
                 "Req",
-                "wxdgaming.spring.boot.net.module",
+                "wxdgaming.spring.boot.net.message.inner",
                 null,
                 null,
                 null
@@ -33,7 +33,7 @@ public class ProtoTest {
                 "src/main/java",
                 "wxdgaming.spring.boot.net.module",
                 "Res",
-                "wxdgaming.spring.boot.net.module",
+                "wxdgaming.spring.boot.net.message.inner",
                 null,
                 null,
                 null
