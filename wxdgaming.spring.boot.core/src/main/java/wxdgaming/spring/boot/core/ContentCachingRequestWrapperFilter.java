@@ -34,14 +34,14 @@ public class ContentCachingRequestWrapperFilter implements OrderedFilter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (request instanceof HttpServletRequest httpServletRequest) {
+            //传递包装类下去。这样后面的servlet等可以拿到这个包装后的request
+            ContentCachingRequestWrapperNew requestWrapperNew = new ContentCachingRequestWrapperNew(httpServletRequest);
             if ("POST".equalsIgnoreCase(httpServletRequest.getMethod()) && request.getContentType().contains("application/json")) {
-                //传递包装类下去。这样后面的servlet等可以拿到这个包装后的request
-                ContentCachingRequestWrapperNew requestWrapperNew = new ContentCachingRequestWrapperNew(httpServletRequest);
                 /*TODO 这个代码不能删除，必须强制读取一次才行*/
                 String string = requestWrapperNew.getReader().readLine();
-                chain.doFilter(requestWrapperNew, response);
-                return;
             }
+            chain.doFilter(requestWrapperNew, response);
+            return;
         }
         chain.doFilter(request, response);
     }

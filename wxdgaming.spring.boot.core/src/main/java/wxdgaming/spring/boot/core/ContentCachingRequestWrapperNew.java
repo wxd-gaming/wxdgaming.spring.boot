@@ -1,17 +1,23 @@
 package wxdgaming.spring.boot.core;
 
+import com.alibaba.fastjson.JSONObject;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 /**
  * 阅读器内容包装
@@ -19,8 +25,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author wxd-gaming(無心道, 15388152619)
  * @version 2025-08-12 16:16
  **/
+@Getter
 public class ContentCachingRequestWrapperNew extends ContentCachingRequestWrapper {
 
+    private final JSONObject cacheParameter = new JSONObject();
     //原子变量，用来区分首次读取还是非首次
     private final AtomicBoolean isFirst = new AtomicBoolean(true);
 
@@ -46,11 +54,18 @@ public class ContentCachingRequestWrapperNew extends ContentCachingRequestWrappe
         return new ServletInputStreamNew(super.getContentAsByteArray());
     }
 
+    public String body() {
+        return new String(super.getContentAsByteArray(), Charset.forName(getCharacterEncoding()));
+    }
+
     @Override public BufferedReader getReader() throws IOException {
         return super.getReader();
     }
 
     @Override public String getParameter(String name) {
+        if (cacheParameter.containsKey(name)) {
+            return cacheParameter.getString(name);
+        }
         return super.getParameter(name);
     }
 
@@ -59,7 +74,8 @@ public class ContentCachingRequestWrapperNew extends ContentCachingRequestWrappe
     }
 
     @Override public Enumeration<String> getParameterNames() {
-        return super.getParameterNames();
+        List<String> list = Stream.concat(cacheParameter.keySet().stream(), super.getParameterMap().keySet().stream()).toList();
+        return Collections.enumeration(list);
     }
 
     @Override public String[] getParameterValues(String name) {

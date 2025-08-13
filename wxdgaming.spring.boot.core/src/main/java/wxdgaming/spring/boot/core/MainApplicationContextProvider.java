@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import wxdgaming.spring.boot.core.ann.Init;
 import wxdgaming.spring.boot.core.ann.Shutdown;
 import wxdgaming.spring.boot.core.ann.Start;
 import wxdgaming.spring.boot.core.executor.ExecutorFactory;
@@ -45,6 +44,14 @@ public class MainApplicationContextProvider extends ApplicationContextProvider {
             ExecutorFactory.getEXECUTOR_MONITOR().getExit().set(true);
             JvmUtil.halt(0);
         });
+        log.info("""
+                
+                =========================================================
+                
+                                  启动完成 PID:%s
+                
+                =========================================================
+                """.formatted(JvmUtil.processIDString()));
     }
 
     public void start() {

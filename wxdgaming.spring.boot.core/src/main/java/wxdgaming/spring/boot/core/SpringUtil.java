@@ -24,7 +24,6 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.util.ContentCachingRequestWrapper;
 import wxdgaming.spring.boot.core.loader.ClassDirLoader;
 import wxdgaming.spring.boot.core.loader.JavaCoderCompile;
 
@@ -87,29 +86,10 @@ public class SpringUtil implements InitPrint {
     }
 
     public static String readBody(HttpServletRequest request) throws IOException {
-        if (request instanceof ContentCachingRequestWrapper wrapper) {
-            return new String(wrapper.getContentAsByteArray(), wrapper.getCharacterEncoding());
+        if (request instanceof ContentCachingRequestWrapperNew wrapper) {
+            return wrapper.body();
         }
         return IOUtils.toString(request.getInputStream(), request.getCharacterEncoding());
-    }
-
-    public static JSONObject convertParameter(HttpServletRequest request) throws IOException {
-        JSONObject reqParams = new JSONObject();
-        // 处理 POST JSON 请求体
-        if ("POST".equalsIgnoreCase(request.getMethod()) && request.getContentType().contains("application/json")) {
-            ContentCachingRequestWrapper wrapper = (ContentCachingRequestWrapper) request;
-            String body = new String(wrapper.getContentAsByteArray(), wrapper.getCharacterEncoding());
-            JSONObject bodyParams = JSONObject.parseObject(body);
-            reqParams.putAll(bodyParams);
-        }
-
-        Enumeration<String> parameterNames = request.getParameterNames();
-
-        while (parameterNames.hasMoreElements()) {
-            String name = parameterNames.nextElement();
-            reqParams.put(name, request.getParameter(name));
-        }
-        return reqParams;
     }
 
     public static String getCurrentUrl(HttpServletRequest request) {
