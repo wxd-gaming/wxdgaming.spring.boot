@@ -72,7 +72,7 @@
             for (let i = 0; i < pageView.columnNames.length; i++) {
                 let columnName = pageView.columnNames[i];
                 let columnComment = pageView.columnComments[i];
-                tr += `<td ondblclick="alertShow(this,'${row[columnComment]}');">${row[columnName]}</td>`;
+                tr += `<td ondblclick="alertShow(this,'${columnComment}');">${row[columnName]}</td>`;
             }
             tr += `</tr>`;
             return tr;
