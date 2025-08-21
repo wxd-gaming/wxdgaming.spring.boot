@@ -2,7 +2,7 @@ package wxdgaming.spring.logserver.bean;
 
 import lombok.Getter;
 import lombok.Setter;
-import wxdgaming.spring.boot.core.lang.ObjectBase;
+import wxdgaming.boot2.core.lang.ObjectBase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +23,9 @@ public class LogMappingInfo extends ObjectBase {
     private String logName;
     /** 表注释 */
     private String logComment;
+    /** 路由 */
+    private String routing = "/log-table.html";
+    private String htmlStyle;
     /** 是否开启分区 是按照每天进行区分 */
     private boolean partition;
     private List<LogField> fieldList = new ArrayList<>();
@@ -40,6 +43,11 @@ public class LogMappingInfo extends ObjectBase {
                     default -> (Function<String, Object>) String::valueOf;
                 })
                 .orElse(null);
+    }
+
+    public LogMappingInfo setLogName(String logName) {
+        this.logName = logName.toLowerCase();
+        return this;
     }
 
 }

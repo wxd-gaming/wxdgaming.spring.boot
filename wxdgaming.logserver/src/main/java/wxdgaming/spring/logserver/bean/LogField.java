@@ -3,7 +3,7 @@ package wxdgaming.spring.logserver.bean;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import wxdgaming.spring.boot.core.lang.ObjectBase;
+import wxdgaming.boot2.core.lang.ObjectBase;
 
 /**
  * 日志自动
@@ -19,5 +19,6 @@ public class LogField extends ObjectBase {
     private String fieldName;
     private String fieldComment;
     private String fieldType;
+    private String fieldHtmlStyle;
 
 }

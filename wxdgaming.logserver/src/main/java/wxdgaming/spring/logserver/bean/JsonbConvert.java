@@ -1,8 +1,8 @@
 package wxdgaming.spring.logserver.bean;
 
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import wxdgaming.spring.boot.batis.convert.Converter;
-import wxdgaming.spring.boot.core.chatset.json.FastJsonUtil;
+import wxdgaming.boot2.core.chatset.json.FastJsonUtil;
+import wxdgaming.boot2.starter.batis.convert.Converter;
 
 import java.lang.reflect.Type;
 

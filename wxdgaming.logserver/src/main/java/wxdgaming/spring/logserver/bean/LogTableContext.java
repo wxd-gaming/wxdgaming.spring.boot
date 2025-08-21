@@ -1,8 +1,8 @@
 package wxdgaming.spring.logserver.bean;
 
 import lombok.Getter;
-import wxdgaming.spring.boot.core.cache2.CASCache;
-import wxdgaming.spring.boot.core.format.HexId;
+import wxdgaming.boot2.core.cache2.CASCache;
+import wxdgaming.boot2.core.format.HexId;
 
 import java.util.concurrent.TimeUnit;
 

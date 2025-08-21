@@ -4,15 +4,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Getter;
 import lombok.Setter;
-import wxdgaming.spring.boot.batis.ColumnType;
-import wxdgaming.spring.boot.batis.Entity;
-import wxdgaming.spring.boot.batis.EntityName;
-import wxdgaming.spring.boot.batis.ann.Convert;
-import wxdgaming.spring.boot.batis.ann.DbColumn;
-import wxdgaming.spring.boot.batis.ann.DbTable;
-import wxdgaming.spring.boot.batis.sql.ann.Partition;
-import wxdgaming.spring.boot.core.collection.MapOf;
-import wxdgaming.spring.boot.core.timer.MyClock;
+import wxdgaming.boot2.core.collection.MapOf;
+import wxdgaming.boot2.core.timer.MyClock;
+import wxdgaming.boot2.starter.batis.ColumnType;
+import wxdgaming.boot2.starter.batis.Entity;
+import wxdgaming.boot2.starter.batis.EntityName;
+import wxdgaming.boot2.starter.batis.ann.Convert;
+import wxdgaming.boot2.starter.batis.ann.DbColumn;
+import wxdgaming.boot2.starter.batis.ann.DbTable;
+import wxdgaming.boot2.starter.batis.sql.ann.Partition;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -52,7 +52,7 @@ public class LogEntity extends Entity implements Serializable, EntityName {
     private final JSONObject logData = MapOf.newJSONObject();
 
     @Override public String tableName() {
-        return logType;
+        return logType.toLowerCase();
     }
 
     public void checkDataKey() {

@@ -17,7 +17,6 @@ import wxdgaming.spring.boot.core.lang.ObjectBase;
 @NoArgsConstructor
 public abstract class AbstractRoleLog extends ObjectBase {
 
-    private String openId;
     private String account;
     private String platform;
     private String channel;
